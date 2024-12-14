@@ -19,8 +19,8 @@ import asyncio
 import time
 
 
-# balance, available = getBalance(client)
-# asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
+balance, available = getBalance(client)
+asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
 
 def run_trading_bot():
   while True:
