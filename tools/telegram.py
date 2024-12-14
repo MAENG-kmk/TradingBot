@@ -1,5 +1,4 @@
 import telegram
-from telegram.ext import CommandHandler, Updater
 
 tele_token = "5210226721:AAG95BNFRPXRME5MU_ytI_JIx7wgiW1XASU"
 chat_id = 5135122806
