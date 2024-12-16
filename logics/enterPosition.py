@@ -1,6 +1,13 @@
 import math
 
-def enterPosition(client, side, ticker, total_balance, available_balance, getData, getRsi, setLeverage, createOrder):
+def checkOverlap(positions, symbol):
+  for position in positions:
+    if position['symbol'] == symbol:
+      return True
+  return False
+
+
+def enterPosition(client, side, ticker, total_balance, available_balance, positions, getData, getRsi, setLeverage, createOrder):
   bullet = float(total_balance)/10
   bullets = float(available_balance) // bullet
   enter_list = []
@@ -21,7 +28,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, getDat
           else:
             point = len(lastQty[1])
             amount = math.floor((bullet / float(coin['lastPrice'])) * (10**point)) / (10**point)
-          if amount < 10**(-point):
+          if amount < 10**(-point) or checkOverlap(positions, symbol):
             continue
           else:
             setLeverage(client, symbol, 1)
@@ -41,10 +48,11 @@ def enterPosition(client, side, ticker, total_balance, available_balance, getDat
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
             point = 0
+            amount = math.floor((bullet / float(coin['lastPrice'])) )
           else:
             point = len(lastQty[1])
-          amount = math.floor((bullet / float(coin['lastPrice'])) * (10**point)) / (10**point)
-          if amount < 10**(-point):
+            amount = math.floor((bullet / float(coin['lastPrice'])) * (10**point)) / (10**point)
+          if amount < 10**(-point) or checkOverlap(positions, symbol):
             continue
           else:
             setLeverage(client, symbol, 1)
