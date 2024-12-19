@@ -6,7 +6,8 @@ from tools.getData import getData
 from tools.getRsi import getRsi
 from tools.getData import getData
 from tools.getTicker import getTicker
+from tools.getBalance import getBalance
 import math
 
-ticker = getTicker(client)
-print(ticker.iloc()[0])
+balance, available = getBalance(client)
+print(balance)

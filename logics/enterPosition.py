@@ -7,7 +7,7 @@ def checkOverlap(positions, symbol):
   return False
 
 
-def enterPosition(client, side, ticker, total_balance, available_balance, positions, getData, getRsi, setLeverage, createOrder):
+def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, setLeverage, createOrder):
   bullet = float(total_balance)/10
   bullets = float(available_balance) // bullet
   enter_list = []
@@ -33,6 +33,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
           else:
             setLeverage(client, symbol, 1)
             createOrder(client, symbol, 'BUY', 'MARKET', amount)
+            position_info[symbol] = [side, rsi]
             enter_list.append(symbol)
       if len(enter_list) == bullets:
         break
@@ -58,6 +59,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
             setLeverage(client, symbol, 1)
             print(symbol, rsi, amount)
             createOrder(client, symbol, 'SELL', 'MARKET', amount)
+            position_info[symbol] = [side, rsi]
             enter_list.append(symbol)
       if len(enter_list) == bullets:
         break
