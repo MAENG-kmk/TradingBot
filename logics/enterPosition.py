@@ -8,7 +8,8 @@ def checkOverlap(positions, symbol):
 
 
 def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, setLeverage, createOrder):
-  bullet = float(total_balance)/10
+  revision = 0.99
+  bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
   enter_list = []
   if side == 'long':
@@ -16,7 +17,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getData(client, symbol, '1d', 30)
-      if len(data) < 28:
+      if len(data) < 28 or symbol[-4:] != 'USDT':
         continue
       else:
         rsi = getRsi(data)
@@ -41,7 +42,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getData(client, symbol, '1d', 30)
-      if len(data) < 28:
+      if len(data) < 28 or symbol[-4:] != 'USDT':
         continue
       else:
         rsi = getRsi(data)
@@ -57,7 +58,6 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
             continue
           else:
             setLeverage(client, symbol, 1)
-            print(symbol, rsi, amount)
             createOrder(client, symbol, 'SELL', 'MARKET', amount)
             position_info[symbol] = [side, rsi]
             enter_list.append(symbol)
