@@ -9,5 +9,5 @@ from tools.getTicker import getTicker
 from tools.getBalance import getBalance
 import math
 
-balance, available = getBalance(client)
-print(balance)
+ticker = getTicker(client)
+print(ticker.iloc()[0])
