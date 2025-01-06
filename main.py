@@ -11,6 +11,7 @@ from tools.createOrder import createOrder
 from tools.isPositionFull import isPositionFull
 from tools.setLeverage import setLeverage
 from tools.getRsi import getRsi
+from tools.getMa import getMa
 
 from logics.decidePosition import decidePosition
 from logics.closePosition import closePosition
@@ -39,7 +40,8 @@ def run_trading_bot():
       if not isPositionFull(total_balance, available_balance):
         print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
-        side = decidePosition(ticker)
+        BTC_data = getData(client, 'BTCUSDT', '1d', 30)
+        side = decidePosition(ticker, BTC_data, getMa)
         positions = getPositions(client)
         enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, setLeverage, createOrder)
         
