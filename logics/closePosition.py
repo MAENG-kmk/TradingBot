@@ -3,7 +3,7 @@ import asyncio
 def closePosition(client, createOrder, positions, position_info, getBalance, send_message):
   message = ""
   for position in positions:
-    if position['ror'] > 5 or position['ror'] < -5:
+    if position['ror'] > 7 or position['ror'] < -5:
       if position['side'] == 'long':
         createOrder(client, position['symbol'], 'SELL', 'MARKET', position['amount'])
       else:
