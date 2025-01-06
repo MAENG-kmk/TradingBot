@@ -7,7 +7,7 @@ def checkOverlap(positions, symbol):
   return False
 
 
-def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, setLeverage, createOrder):
+def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, setLeverage, createOrder):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
@@ -21,8 +21,9 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
       if len(data) < 28 or symbol[-4:] != 'USDT' or symbol in black_list:
         continue
       else:
+        ma_diff = getMa_diff(data)
         rsi = getRsi(data)
-        if rsi < 40 and int(rsi) != 99:
+        if ma_diff == 'long' and rsi < 50 and int(rsi) != 99:
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
             point = 0
@@ -49,8 +50,9 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
       if len(data) < 28 or symbol[-4:] != 'USDT' or symbol in black_list:
         continue
       else:
+        ma_diff = getMa_diff(data)
         rsi = getRsi(data)
-        if rsi > 60 and int(rsi) != 99:
+        if ma_diff == 'short' and rsi > 50 and int(rsi) != 99:
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
             point = 0
