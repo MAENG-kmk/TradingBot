@@ -1,546 +1,113 @@
 > Bitcoin:
-symbol: XRPUSDT, ror: 5.16%, profit: 0.45$ balance: 87.06 
+symbol: ATAUSDT, ror: -5.01%, profit: -0.38$ balance: 81.33 
  side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: COWUSDT, ror: -5.20%, profit: -0.41$ balance: 86.65 
- side: long, entered rsi: 37.93
+symbol: COWUSDT, ror: -5.11%, profit: -0.38$ balance: 80.95 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: ZENUSDT, ror: -5.33%, profit: -0.32$ balance: 86.35 
- side: long, entered rsi: 27.43
+symbol: IOTAUSDT, ror: 7.12%, profit: 0.61$ balance: 81.56 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: BANUSDT, ror: 5.81%, profit: 0.47$ balance: 86.81 
- side: short, entered rsi: 71.14
+symbol: CHILLGUYUSDT, ror: -5.07%, profit: -0.39$ balance: 81.17 
+ side: long, entered rsi: 46.11
 
 > Bitcoin:
-symbol: BANUSDT, ror: -5.09%, profit: -0.46$ balance: 86.39 
- side: short, entered rsi: 74.51
+symbol: ACTUSDT, ror: 7.15%, profit: 0.62$ balance: 81.80 
+ side: long, entered rsi: 44.58
 
 > Bitcoin:
-symbol: AGLDUSDT, ror: -5.49%, profit: -0.44$ balance: 85.94 
- side: long, entered rsi: 35.31
+symbol: ADAUSDT, ror: 7.11%, profit: 0.57$ balance: 82.36 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: UXLINKUSDT, ror: -5.26%, profit: -0.37$ balance: 85.55 
- side: long, entered rsi: 29.39
+symbol: STGUSDT, ror: -5.05%, profit: -0.38$ balance: 81.98 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: ZENUSDT, ror: 5.18%, profit: 0.31$ balance: 85.86 
- side: long, entered rsi: 31.35
+symbol: THEUSDT, ror: -5.15%, profit: -0.39$ balance: 81.58 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: BANUSDT, ror: -5.02%, profit: -0.45$ balance: 85.38 
- side: short, entered rsi: 70.73
+symbol: 1000PEPEUSDT, ror: -5.64%, profit: -0.43$ balance: 81.58 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: UXLINKUSDT, ror: -5.51%, profit: -0.37$ balance: 85.04 
- side: long, entered rsi: 32.05
+symbol: CHILLGUYUSDT, ror: -5.09%, profit: -0.39$ balance: 80.78 
+ side: long, entered rsi: 48.37
 
 > Bitcoin:
-symbol: ZENUSDT, ror: -5.03%, profit: -0.29$ balance: 84.75 
- side: long, entered rsi: 28.81
+symbol: DEGENUSDT, ror: -5.37%, profit: -0.41$ balance: 80.78 
+ side: long, entered rsi: 41.83
 
 > Bitcoin:
-symbol: STORJUSDT, ror: -5.07%, profit: -0.43$ balance: 84.38 
- side: short, entered rsi: 60.88
+symbol: ALGOUSDT, ror: -5.14%, profit: -0.39$ balance: 79.95 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: UXLINKUSDT, ror: -5.03%, profit: -0.40$ balance: 84.05 
- side: long, entered rsi: 34.19
+symbol: SPXUSDT, ror: -5.01%, profit: -0.34$ balance: 79.61 
+ side: long, entered rsi: 21.32
 
 > Bitcoin:
-symbol: UXLINKUSDT, ror: 5.21%, profit: 0.44$ balance: 84.47 
- side: long, entered rsi: 36.71
+symbol: AGLDUSDT, ror: -5.71%, profit: -0.43$ balance: 79.61 
+ side: 0, entered rsi: 0.00
 
 > Bitcoin:
-symbol: AGLDUSDT, ror: 5.54%, profit: 0.45$ balance: 84.87 
- side: long, entered rsi: 39.85
+symbol: ENAUSDT, ror: -5.69%, profit: -0.38$ balance: 78.79 
+ side: long, entered rsi: 43.69
 
 > Bitcoin:
-symbol: COWUSDT, ror: 5.48%, profit: 0.45$ balance: 85.31 
- side: long, entered rsi: 39.95
+symbol: MOVEUSDT, ror: -5.12%, profit: -0.35$ balance: 78.44 
+ side: long, entered rsi: 40.12
 
 > Bitcoin:
-symbol: AGLDUSDT, ror: 5.30%, profit: 0.45$ balance: 85.74 
- side: long, entered rsi: 38.42
+symbol: STGUSDT, ror: -5.01%, profit: -0.38$ balance: 78.05 
+ side: long, entered rsi: 34.11
 
 > Bitcoin:
-symbol: COWUSDT, ror: 5.20%, profit: 0.46$ balance: 86.22 
- side: long, entered rsi: 37.58
+symbol: ARKUSDT, ror: -5.48%, profit: -0.38$ balance: 77.82 
+ side: long, entered rsi: 36.39
 
 > Bitcoin:
-symbol: COWUSDT, ror: -5.53%, profit: -0.40$ balance: 85.80 
- side: long, entered rsi: 36.25
+symbol: ONGUSDT, ror: -5.23%, profit: -0.38$ balance: 77.44 
+ side: long, entered rsi: 39.08
 
 > Bitcoin:
-symbol: ZENUSDT, ror: -5.09%, profit: -0.32$ balance: 85.49 
- side: long, entered rsi: 25.85
+symbol: HIFIUSDT, ror: -6.09%, profit: -0.42$ balance: 77.02 
+ side: long, entered rsi: 38.34
 
 > Bitcoin:
-symbol: COWUSDT, ror: -5.10%, profit: -0.40$ balance: 85.08 
- side: long, entered rsi: 37.58
+symbol: GASUSDT, ror: -5.06%, profit: -0.35$ balance: 76.67 
+ side: long, entered rsi: 36.41
 
 > Bitcoin:
-symbol: ZENUSDT, ror: -5.39%, profit: -0.32$ balance: 84.77 
- side: long, entered rsi: 27.04
+symbol: MTLUSDT, ror: -5.06%, profit: -0.33$ balance: 76.39 
+ side: long, entered rsi: 35.79
 
 > Bitcoin:
-symbol: UXLINKUSDT, ror: -5.07%, profit: -0.32$ balance: 84.45 
- side: long, entered rsi: 34.81
+symbol: STMXUSDT, ror: 8.98%, profit: 0.75$ balance: 76.95 
+ side: long, entered rsi: 40.84
 
 > Bitcoin:
-symbol: COWUSDT, ror: -5.09%, profit: -0.38$ balance: 84.06 
- side: long, entered rsi: 38.86
+symbol: STMXUSDT, ror: -5.29%, profit: -0.38$ balance: 76.56 
+ side: long, entered rsi: 36.51
 
 > Bitcoin:
-symbol: ZENUSDT, ror: -5.22%, profit: -0.30$ balance: 83.77 
- side: long, entered rsi: 29.23
+symbol: STMXUSDT, ror: -5.59%, profit: -0.40$ balance: 76.15 
+ side: long, entered rsi: 40.44 
 
-> Bitcoin:
-symbol: UXLINKUSDT, ror: -5.03%, profit: -0.39$ balance: 83.39 
- side: long, entered rsi: 37.28
-
-> Bitcoin:
-symbol: PNUTUSDT, ror: -5.11%, profit: -0.43$ balance: 82.95 
- side: short, entered rsi: 73.10 
-
-symbol: ETHFIUSDT, ror: -5.08%, profit: -0.45$ balance: 82.49 
- side: short, entered rsi: 68.85
-
-> Bitcoin:
-symbol: ACTUSDT, ror: 5.00%, profit: 0.38$ balance: 82.86 
- side: short, entered rsi: 77.29
-
-> Bitcoin:
-symbol: USTCUSDT, ror: 5.37%, profit: 0.44$ balance: 83.29 
- side: short, entered rsi: 65.66
-
-> Bitcoin:
-symbol: TAOUSDT, ror: 5.32%, profit: 0.43$ balance: 83.72 
- side: short, entered rsi: 70.03
-
-> Bitcoin:
-symbol: PNUTUSDT, ror: 5.02%, profit: 0.37$ balance: 84.08 
- side: short, entered rsi: 70.48
-
-> Bitcoin:
-symbol: FTMUSDT, ror: 5.07%, profit: 0.38$ balance: 84.45 
- side: short, entered rsi: 72.11
-
-> Bitcoin:
-symbol: ENAUSDT, ror: 5.13%, profit: 0.39$ balance: 84.83 
- side: short, entered rsi: 62.38
-
-> Bitcoin:
-symbol: PNUTUSDT, ror: -5.27%, profit: -0.45$ balance: 84.37 
- side: short, entered rsi: 73.00
-
-> Bitcoin:
-symbol: CHILLGUYUSDT, ror: -5.09%, profit: -0.44$ balance: 83.92 
- side: short, entered rsi: 79.86
-
-> Bitcoin:
-symbol: GOATUSDT, ror: -5.13%, profit: -0.42$ balance: 83.48 
- side: short, entered rsi: 80.14
-
-> Bitcoin:
-symbol: POPCATUSDT, ror: -5.07%, profit: -0.41$ balance: 83.06 
- side: short, entered rsi: 71.75
-
-> Bitcoin:
-symbol: EIGENUSDT, ror: -5.03%, profit: -0.44$ balance: 82.63 
- side: short, entered rsi: 67.17
-
-> Bitcoin:
-symbol: NEIROUSDT, ror: 5.04%, profit: 0.39$ balance: 83.01 
- side: short, entered rsi: 74.24
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: -6.13%, profit: -0.34$ balance: 82.67 
- side: long, entered rsi: 29.56
-
-> Bitcoin:
-symbol: SYNUSDT, ror: 5.12%, profit: 0.40$ balance: 83.08 
- side: short, entered rsi: 61.69
-
-> Bitcoin:
-symbol: UXLINKUSDT, ror: -5.11%, profit: -0.37$ balance: 82.69 
- side: long, entered rsi: 39.41
-
-> Bitcoin:
-symbol: ZENUSDT, ror: -5.10%, profit: -0.27$ balance: 82.40 
- side: long, entered rsi: 32.77
-
-> Bitcoin:
-symbol: ATAUSDT, ror: 5.06%, profit: 0.43$ balance: 82.78 
- side: long, entered rsi: 39.84
-
-> Bitcoin:
-symbol: GOATUSDT, ror: 5.70%, profit: 0.42$ balance: 83.19 
- side: short, entered rsi: 76.55
-
-> Bitcoin:
-symbol: PNUTUSDT, ror: 5.15%, profit: 0.39$ balance: 83.56 
- side: short, entered rsi: 71.41
-
-> Bitcoin:
-symbol: 1000PEPEUSDT, ror: -5.14%, profit: -0.45$ balance: 83.16 
- side: short, entered rsi: 66.99
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: -5.04%, profit: -0.26$ balance: 82.89 
- side: long, entered rsi: 31.03
-
-> Bitcoin:
-symbol: SYNUSDT, ror: -5.09%, profit: -0.41$ balance: 82.48 
- side: short, entered rsi: 62.75
-
-> Bitcoin:
-symbol: SYNUSDT, ror: -5.92%, profit: -0.51$ balance: 82.07 
- side: short, entered rsi: 60.08
-
-> Bitcoin:
-symbol: ETHFIUSDT, ror: -5.35%, profit: -0.46$ balance: 81.61 
- side: short, entered rsi: 69.88
-
-> Bitcoin:
-symbol: 1000PEPEUSDT, ror: -5.09%, profit: -0.44$ balance: 81.17 
- side: short, entered rsi: 62.26
-
-> Bitcoin:
-symbol: GOATUSDT, ror: -5.15%, profit: -0.43$ balance: 80.76 
- side: short, entered rsi: 73.56
-
-> Bitcoin:
-symbol: EIGENUSDT, ror: -5.15%, profit: -0.43$ balance: 80.32 
- side: short, entered rsi: 74.87
-
-> Bitcoin:
-symbol: ATAUSDT, ror: 5.06%, profit: 0.42$ balance: 80.75 
- side: long, entered rsi: 39.24
-
-> Bitcoin:
-symbol: AERGOUSDT, ror: 5.15%, profit: 0.43$ balance: 81.16 
- side: long, entered rsi: 36.72
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: -5.16%, profit: -0.38$ balance: 80.81 
- side: long, entered rsi: 34.97
-
-> Bitcoin:
-symbol: AERGOUSDT, ror: -5.15%, profit: -0.39$ balance: 80.43 
- side: long, entered rsi: 31.48
-
-> Bitcoin:
-symbol: ATAUSDT, ror: 5.11%, profit: 0.43$ balance: 80.84 
- side: long, entered rsi: 37.49
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: -5.22%, profit: -0.36$ balance: 80.48 
- side: long, entered rsi: 34.91
-
-> Bitcoin:
-symbol: ZENUSDT, ror: -5.02%, profit: -0.28$ balance: 80.20 
- side: long, entered rsi: 31.08
-
-> Bitcoin:
-symbol: STXUSDT, ror: 5.16%, profit: 0.39$ balance: 80.60 
- side: short, entered rsi: 78.00
-
-> Bitcoin:
-symbol: TONUSDT, ror: 5.09%, profit: 0.41$ balance: 81.00 
- side: short, entered rsi: 62.04
-
-> Bitcoin:
-symbol: ETHFIUSDT, ror: 5.01%, profit: 0.38$ balance: 81.38 
- side: short, entered rsi: 66.35
-
-> Bitcoin:
-symbol: DRIFTUSDT, ror: -5.18%, profit: -0.36$ balance: 81.01 
- side: long, entered rsi: 38.43
-
-> Bitcoin:
-symbol: GOATUSDT, ror: -5.28%, profit: -0.43$ balance: 80.56 
- side: short, entered rsi: 65.25
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: -5.13%, profit: -0.33$ balance: 80.22 
- side: long, entered rsi: 37.10
-
-> Bitcoin:
-symbol: ACTUSDT, ror: -5.02%, profit: -0.42$ balance: 79.80 
- side: short, entered rsi: 75.08
-
-> Bitcoin:
-symbol: UXLINKUSDT, ror: -5.06%, profit: -0.36$ balance: 79.43 
- side: long, entered rsi: 38.88
-
-> Bitcoin:
-symbol: XLMUSDT, ror: -5.11%, profit: -0.42$ balance: 79.01 
- side: short, entered rsi: 65.54
-
-> Bitcoin:
-symbol: ZENUSDT, ror: 5.73%, profit: 0.34$ balance: 79.35 
- side: long, entered rsi: 33.28
-
-> Bitcoin:
-symbol: XRPUSDT, ror: -5.08%, profit: -0.41$ balance: 78.93 
- side: short, entered rsi: 71.30
-
-> Bitcoin:
-symbol: MORPHOUSDT, ror: -5.14%, profit: -0.38$ balance: 78.54 
- side: long, entered rsi: 38.95
-
-> Bitcoin:
-symbol: FTMUSDT, ror: -5.07%, profit: -0.41$ balance: 78.13 
- side: short, entered rsi: 80.53
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.02%, profit: 0.34$ balance: 78.45 
- side: long, entered rsi: 39.05
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.45%, profit: 0.40$ balance: 78.82 
- side: long, entered rsi: 37.14
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.38%, profit: 0.41$ balance: 79.17 
- side: long, entered rsi: 34.87
-
-> Bitcoin:
-symbol: XRPUSDT, ror: -5.36%, profit: -0.43$ balance: 78.75 
- side: short, entered rsi: 63.65
-
-> Bitcoin:
-symbol: DOGEUSDT, ror: -5.17%, profit: -0.48$ balance: 78.24 
- side: short, entered rsi: 77.19
+symbol: ARKUSDT, ror: -5.16%, profit: -0.35$ balance: 75.80 
+ side: long, entered rsi: 33.16 
 
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.31%, profit: 0.40$ balance: 78.23 
- side: long, entered rsi: 34.53
-
-> Bitcoin:
-symbol: ACTUSDT, ror: -5.42%, profit: -0.45$ balance: 78.15 
- side: short, entered rsi: 71.87
-
-> Bitcoin:
-symbol: ZENUSDT, ror: 5.04%, profit: 0.31$ balance: 78.43 
- side: long, entered rsi: 31.13
-
-> Bitcoin:
-symbol: MORPHOUSDT, ror: 5.15%, profit: 0.42$ balance: 78.83 
- side: long, entered rsi: 39.16
-
-> Bitcoin:
-symbol: 1000FLOKIUSDT, ror: -5.12%, profit: -0.48$ balance: 78.35 
- side: short, entered rsi: 76.11
-
-> Bitcoin:
-symbol: MORPHOUSDT, ror: -5.11%, profit: -0.36$ balance: 78.01 
- side: long, entered rsi: 38.87
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: -5.06%, profit: -0.37$ balance: 77.63 
- side: long, entered rsi: 31.99
-
-> Bitcoin:
-symbol: PNUTUSDT, ror: -5.36%, profit: -0.43$ balance: 77.20 
- side: short, entered rsi: 68.48
-
-> Bitcoin:
-symbol: ATAUSDT, ror: 5.58%, profit: 0.45$ balance: 77.64 
- side: long, entered rsi: 29.48
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.16%, profit: 0.39$ balance: 78.03 
- side: long, entered rsi: 34.31
-
-> Bitcoin:
-symbol: COWUSDT, ror: 6.06%, profit: 0.47$ balance: 78.48 
- side: long, entered rsi: 39.09
-
-> Bitcoin:
-symbol: ZENUSDT, ror: 5.26%, profit: 0.33$ balance: 78.81 
- side: long, entered rsi: 30.62
-
-> Bitcoin:
-symbol: BANUSDT, ror: -5.24%, profit: -0.44$ balance: 78.35 
- side: short, entered rsi: 60.91
-
-> Bitcoin:
-symbol: COWUSDT, ror: -5.01%, profit: -0.37$ balance: 77.98 
- side: long, entered rsi: 36.92
-
-> Bitcoin:
-symbol: ATAUSDT, ror: 5.33%, profit: 0.43$ balance: 78.42 
- side: long, entered rsi: 27.60
-
-> Bitcoin:
-symbol: SCRTUSDT, ror: 5.19%, profit: 0.42$ balance: 78.84 
- side: long, entered rsi: 37.41
-
-> Bitcoin:
-symbol: ATAUSDT, ror: 5.08%, profit: 0.41$ balance: 79.25 
- side: long, entered rsi: 26.09
-
-> Bitcoin:
-symbol: GRASSUSDT, ror: 5.04%, profit: 0.40$ balance: 79.64 
- side: long, entered rsi: 37.44
-
-> Bitcoin:
-symbol: ATAUSDT, ror: 6.17%, profit: 0.51$ balance: 80.17 
- side: long, entered rsi: 24.39
-
-> Bitcoin:
-symbol: GRASSUSDT, ror: -5.01%, profit: -0.36$ balance: 79.79 
- side: long, entered rsi: 34.49
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.27%, profit: 0.43$ balance: 80.22 
- side: long, entered rsi: 31.87
-
-> Bitcoin:
-symbol: UXLINKUSDT, ror: 5.36%, profit: 0.42$ balance: 80.63 
- side: long, entered rsi: 40.00
-
-> Bitcoin:
-symbol: GRASSUSDT, ror: 5.39%, profit: 0.45$ balance: 81.10 
- side: long, entered rsi: 37.25
-
-> Bitcoin:
-symbol: ATAUSDT, ror: -5.18%, profit: -0.39$ balance: 80.69 
- side: long, entered rsi: 22.85
-
-> Bitcoin:
-symbol: UXLINKUSDT, ror: 5.26%, profit: 0.44$ balance: 81.12 
- side: long, entered rsi: 38.79
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.43%, profit: 0.44$ balance: 81.14 
- side: long, entered rsi: 31.75
-
-> Bitcoin:
-symbol: THEUSDT, ror: -5.26%, profit: -0.38$ balance: 81.20 
- side: long, entered rsi: 39.15
-
-> Bitcoin:
-symbol: UXLINKUSDT, ror: -5.01%, profit: -0.32$ balance: 80.87 
- side: long, entered rsi: 37.59
-
-> Bitcoin:
-symbol: ZENUSDT, ror: -5.14%, profit: -0.30$ balance: 80.56 
- side: long, entered rsi: 29.92
-
-> Bitcoin:
-symbol: XLMUSDT, ror: 5.12%, profit: 0.42$ balance: 80.98 
- side: long, entered rsi: 36.95
-
-> Bitcoin:
-symbol: COWUSDT, ror: -5.03%, profit: -0.35$ balance: 80.61 
- side: long, entered rsi: 38.65
-
-> Bitcoin:
-symbol: ATAUSDT, ror: -5.24%, profit: -0.39$ balance: 80.21 
- side: long, entered rsi: 24.18
-
-> Bitcoin:
-symbol: ZENUSDT, ror: -5.06%, profit: -0.28$ balance: 79.93 
- side: long, entered rsi: 33.97
-
-> Bitcoin:
-symbol: THEUSDT, ror: -6.50%, profit: -0.48$ balance: 79.43 
- side: long, entered rsi: 35.41
-
-> Bitcoin:
-symbol: STGUSDT, ror: 5.13%, profit: 0.41$ balance: 79.86 
- side: long, entered rsi: 36.66
-
-> Bitcoin:
-symbol: XVGUSDT, ror: -6.15%, profit: -0.46$ balance: 79.40 
- side: long, entered rsi: 39.58
-
-> Bitcoin:
-symbol: TAOUSDT, ror: 5.09%, profit: 0.42$ balance: 79.82 
- side: long, entered rsi: 35.28
-
-> Bitcoin:
-symbol: COWUSDT, ror: 5.24%, profit: 0.44$ balance: 80.26 
- side: long, entered rsi: 39.64
-
-> Bitcoin:
-symbol: 1000PEPEUSDT, ror: 5.84%, profit: 0.49$ balance: 80.74 
- side: long, entered rsi: 35.55
-
-> Bitcoin:
-symbol: APTUSDT, ror: -5.08%, profit: -0.39$ balance: 80.33 
- side: short, entered rsi: 70.12
-
-> Bitcoin:
-symbol: THEUSDT, ror: 5.01%, profit: 0.41$ balance: 80.73 
- side: long, entered rsi: 39.61
-
-> Bitcoin:
-symbol: RSRUSDT, ror: 5.00%, profit: 0.41$ balance: 81.13 
- side: long, entered rsi: 37.90
-
-> Bitcoin:
-symbol: ZENUSDT, ror: 5.04%, profit: 0.30$ balance: 81.41 
- side: long, entered rsi: 36.28
-
-> Bitcoin:
-symbol: XVGUSDT, ror: 5.39%, profit: 0.45$ balance: 81.85 
- side: long, entered rsi: 38.23
-
-> Bitcoin:
-symbol: GRASSUSDT, ror: -5.16%, profit: -0.38$ balance: 81.46 
- side: long, entered rsi: 30.44
-
-> Bitcoin:
-symbol: MAGICUSDT, ror: 5.05%, profit: 0.42$ balance: 81.87 
- side: long, entered rsi: 33.62
-
-> Bitcoin:
-symbol: GOATUSDT, ror: -5.17%, profit: -0.37$ balance: 81.48 
- side: long, entered rsi: 38.64
-
-> Bitcoin:
-symbol: MORPHOUSDT, ror: 5.22%, profit: 0.43$ balance: 81.90 
- side: long, entered rsi: 36.81
-
-> Bitcoin:
-symbol: ATAUSDT, ror: -5.01%, profit: -0.37$ balance: 81.51 
- side: long, entered rsi: 28.04
-
-> Bitcoin:
-symbol: TRXUSDT, ror: -5.06%, profit: -0.47$ balance: 81.03 
- side: short, entered rsi: 60.90
-
-> Bitcoin:
-symbol: AIUSDT, ror: 5.43%, profit: 0.43$ balance: 81.46 
- side: long, entered rsi: 30.05
-
-> Bitcoin:
-symbol: COWUSDT, ror: 5.59%, profit: 0.44$ balance: 81.89 
- side: long, entered rsi: 37.10
-
-> Bitcoin:
-symbol: GRASSUSDT, ror: 5.12%, profit: 0.43$ balance: 82.33 
- side: long, entered rsi: 38.18
-
-> Bitcoin:
-symbol: AGLDUSDT, ror: 5.02%, profit: 0.29$ balance: 82.59 
- side: long, entered rsi: 31.88
-
-> Bitcoin:
-symbol: TURBOUSDT, ror: -5.04%, profit: -0.39$ balance: 82.16 
- side: long, entered rsi: 39.80
+symbol: GASUSDT, ror: -5.55%, profit: -0.38$ balance: 75.42 
+ side: long, entered rsi: 35.38
 
 > Bitcoin:
-symbol: CRVUSDT, ror: -5.14%, profit: -0.40$ balance: 81.75 
- side: long, entered rsi: 36.77
+symbol: LSKUSDT, ror: -5.02%, profit: -0.36$ balance: 75.04 
+ side: long, entered rsi: 37.45
 
 > Bitcoin:
-symbol: VIRTUALUSDT, ror: 5.01%, profit: 0.42$ balance: 82.16 
- side: long, entered rsi: 28.96
+symbol: STMXUSDT, ror: 7.54%, profit: 0.61$ balance: 75.65 
+ side: long, entered rsi: 44.40
