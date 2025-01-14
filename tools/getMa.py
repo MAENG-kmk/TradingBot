@@ -1,11 +1,12 @@
 def getMa(data):
   closes = []
-  short_period = 5
-  long_period = 14
-  for close in data.iloc[-20:]['Close']:
+  short_period = 7
+  long_period = 25
+  for close in data.iloc[-27:]['Close']:
     closes.append(float(close))
   short_ma = sum(closes[-short_period:]) / short_period
   long_ma = sum(closes[-long_period:]) / long_period
+
   if short_ma > long_ma:
     return 'long'
   else:
@@ -13,10 +14,14 @@ def getMa(data):
   
 def getMa_diff(data):
   closes = []
-  short_period = 5
-  long_period = 14
-  for close in data.iloc[-20:]['Close']:
+  short_period = 7
+  long_period = 25
+  for close in data.iloc[-27:]['Close']:
     closes.append(float(close))
+    
+  short_ma = sum(closes[-short_period-3:-3]) / short_period
+  long_ma = sum(closes[-long_period-3:-3]) / long_period
+  
   short_ma1 = sum(closes[-short_period-2:-2]) / short_period
   long_ma1 = sum(closes[-long_period-2:-2]) / long_period
   
@@ -26,13 +31,18 @@ def getMa_diff(data):
   short_ma3 = sum(closes[-short_period:]) / short_period
   long_ma3 = sum(closes[-long_period:]) / long_period
   
-  diff_1 = short_ma1 - long_ma1
-  diff_2 = short_ma2 - long_ma2
-  diff_3 = short_ma3 - long_ma3
+  gap = short_ma - long_ma
+  gap_1 = short_ma1 - long_ma1
+  gap_2 = short_ma2 - long_ma2
+  gap_3 = short_ma3 - long_ma3
   
-  if diff_1 < diff_2 and diff_2 < diff_3:
+  diff = gap - gap_1
+  diff_1 = gap_1 - gap_2
+  diff_2 = gap_2 - gap_3
+  
+  if diff > diff_1 and diff_1 > diff_2:
     return 'long'
-  elif diff_1 > diff_2 and diff_2 > diff_3:
+  elif diff < diff_1 and diff_1 < diff_2:
     return 'short'
   else:
     return 'None'

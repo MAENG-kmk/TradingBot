@@ -7,7 +7,9 @@ from tools.getRsi import getRsi
 from tools.getData import getData
 from tools.getTicker import getTicker
 from tools.getBalance import getBalance
+from tools.getMa import getMa, getMa_diff
 import math
 
-ticker = getTicker(client)
-print(ticker.iloc()[0])
+data = getData(client, 'BTCUSDT', '1d', 40)
+ma = getMa_diff(data)
+print(ma)
