@@ -25,13 +25,14 @@ asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/1
 
 def run_trading_bot():
   position_info = {}
+  winning_history = [0, 0, 0, 0]
   while True:
     try:
       positions = getPositions(client)
       # 포지션이 있다면 정리할게 있는지 체크
       if len(positions) > 0:
         print("포지션 정리 체크 중,,,")
-        closePosition(client, createOrder, positions, position_info, getBalance, send_message)
+        closePosition(client, createOrder, positions, position_info, winning_history, getBalance, send_message)
 
       # 포지션이 꽉 찼는지 체크
       # 빈 포지션이 있다면 코인 찾기

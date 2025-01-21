@@ -8,8 +8,12 @@ from tools.getData import getData
 from tools.getTicker import getTicker
 from tools.getBalance import getBalance
 from tools.getMa import getMa, getMa_diff
+from logics.decidePosition import decidePosition
+
 import math
 
 data = getData(client, 'BTCUSDT', '1d', 40)
 ma = getMa_diff(data)
-print(ma)
+ticker = getTicker(client)
+BTC_data = getData(client, 'BTCUSDT', '1d', 30)
+side = decidePosition(ticker, BTC_data, getMa)

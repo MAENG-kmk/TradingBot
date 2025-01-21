@@ -23,7 +23,8 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
       else:
         ma_diff = getMa_diff(data)
         rsi = getRsi(data)
-        if ma_diff == 'long' and rsi < 50 and int(rsi) != 99:
+        # rsi 걍 90으로 해놓은 상태
+        if ma_diff == 'long' and rsi < 90 and int(rsi) != 99:
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
             point = 0
@@ -52,7 +53,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
       else:
         ma_diff = getMa_diff(data)
         rsi = getRsi(data)
-        if ma_diff == 'short' and rsi > 50 and int(rsi) != 99:
+        if ma_diff == 'short' and rsi > 10 and int(rsi) != 99:
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
             point = 0
