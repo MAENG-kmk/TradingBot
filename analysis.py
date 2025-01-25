@@ -20,7 +20,7 @@ for line in lines:
     if side == '0,':
       data = []
       continue
-    rsi = float(l[4])
+    rsi = float(l[4][:-1])
     data.append(side)
     data.append(rsi)
   else:
