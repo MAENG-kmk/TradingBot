@@ -8,6 +8,7 @@ from tools.getData import getData
 from tools.getTicker import getTicker
 from tools.getBalance import getBalance
 from tools.getMa import getMa, getMa_diff
+from tools.getVolume import getVolume
 from logics.decidePosition import decidePosition
 
 import math
