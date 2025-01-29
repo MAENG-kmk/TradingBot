@@ -18,8 +18,10 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getData(client, symbol, '1d', 30)
+      if len(data) < 30:
+        continue
       check_volume = getVolume(data)
-      if len(data) < 28 or not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
+      if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
         continue
       else:
         ma_diff = getMa_diff(data)
@@ -49,7 +51,10 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getData(client, symbol, '1d', 30)
-      if len(data) < 28 or symbol[-4:] != 'USDT' or symbol in black_list:
+      if len(data) < 30:
+        continue
+      check_volume = getVolume(data)
+      if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
         continue
       else:
         ma_diff = getMa_diff(data)
