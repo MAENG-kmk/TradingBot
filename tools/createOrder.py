@@ -8,4 +8,5 @@ def createOrder(client, symbol, side, type, quantity):
     )
     return True
   except Exception as e:
+    print(e)
     return False

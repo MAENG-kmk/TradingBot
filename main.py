@@ -52,6 +52,7 @@ def run_trading_bot():
       time.sleep(60)
       
     except Exception as e:
+      print(e)
       asyncio.run(send_message(f"Error code: {e}"))
   
 run_trading_bot()
