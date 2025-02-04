@@ -13,6 +13,7 @@ from tools.setLeverage import setLeverage
 from tools.getRsi import getRsi
 from tools.getMa import getMa, getMa_diff
 from tools.getVolume import getVolume
+from tools.getLarry import getLarry
 
 from logics.decidePosition import decidePosition
 from logics.closePosition import closePosition
@@ -46,7 +47,7 @@ def run_trading_bot():
         side = decidePosition(ticker, BTC_data, getMa)
         if side != 'None':
           positions = getPositions(client)
-          enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, getVolume, setLeverage, createOrder)
+          enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder)
         
       print("정상 작동 중,,,")
       time.sleep(60)

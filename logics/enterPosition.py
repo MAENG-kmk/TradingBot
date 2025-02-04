@@ -7,7 +7,7 @@ def checkOverlap(positions, symbol):
   return False
 
 
-def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, getVolume, setLeverage, createOrder):
+def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
@@ -18,16 +18,18 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getData(client, symbol, '1d', 30)
-      if len(data) < 30:
+      if len(data) < 28:
         continue
       check_volume = getVolume(data)
       if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
+        print(check_volume)
         continue
       else:
         ma_diff = getMa_diff(data)
         rsi = getRsi(data)
+        larry = getLarry(data)
         # rsi 걍 90으로 해놓은 상태
-        if ma_diff == 'long' and rsi < 90 and int(rsi) != 99:
+        if ma_diff == 'long' and larry == 'long' and rsi < 90 and int(rsi) != 99:
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
             point = 0
@@ -51,7 +53,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getData(client, symbol, '1d', 30)
-      if len(data) < 30:
+      if len(data) < 28:
         continue
       check_volume = getVolume(data)
       if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
@@ -59,7 +61,8 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
       else:
         ma_diff = getMa_diff(data)
         rsi = getRsi(data)
-        if ma_diff == 'short' and rsi > 10 and int(rsi) != 99:
+        larry = getLarry(data)
+        if ma_diff == 'short' and larry == 'short' and rsi > 10 and int(rsi) != 99:
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
             point = 0
