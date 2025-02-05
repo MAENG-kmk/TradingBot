@@ -22,7 +22,6 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
         continue
       check_volume = getVolume(data)
       if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
-        print(check_volume)
         continue
       else:
         ma_diff = getMa_diff(data)

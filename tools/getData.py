@@ -23,7 +23,7 @@ def getData(client, symbol, type, limit):
   df['time'] = pd.to_datetime(df['time'], unit='ms')
   df['Open'] = pd.to_numeric(df['Open'])
   df['Close'] = pd.to_numeric(df['Close'])
-  df['Body'] = df['Open'] - df['Close']
+  df['Body'] = df['Close'] - df['Open']
   df.set_index('time', inplace=True)
   df = df.drop(labels='a',axis=1)
   df = df.drop(labels='b',axis=1)
