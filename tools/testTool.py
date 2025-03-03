@@ -1,3 +1,4 @@
 from getMa import getMa
+from getData import getData
 
-print(getMa([1,2,3,4,5,6,7,8,9]))
+print(getData([1,2,3,4,5,6,7,8,9]))

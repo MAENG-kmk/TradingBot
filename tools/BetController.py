@@ -1,5 +1,5 @@
-from getData import getData
-from getMa import getMa
+from .getData import getData
+from .getMa import getMa
 
 
 class BetController:
