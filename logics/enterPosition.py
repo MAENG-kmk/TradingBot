@@ -7,7 +7,7 @@ def checkOverlap(positions, symbol):
   return False
 
 
-def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder):
+def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder, betController):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
@@ -44,6 +44,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
             if response == False:
               black_list.append(symbol)
             else:
+              betController.saveNew(symbol)
               position_info[symbol] = [side, rsi]
               enter_list.append(symbol)
       if len(enter_list) == bullets:
@@ -77,6 +78,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
             if response == False:
               black_list.append(symbol)
             else: 
+              betController.saveNew(symbol)
               position_info[symbol] = [side, rsi]
               enter_list.append(symbol)
       if len(enter_list) == bullets:
