@@ -1,17 +1,18 @@
 import asyncio
 
-def closePosition(client, createOrder, positions, position_info, winnig_history, getBalance, send_message):
+def closePosition(client, createOrder, positions, position_info, winnig_history, getBalance, send_message, betController):
   message = ""
-  for position in positions:
+  list_to_close = betController.getClosePositions(positions)
+  for position in list_to_close:
     response = False
-    if position['ror'] > 7:
-      if position['side'] == 'long':
+    if position['ror'] > 0:
+      if position['side'] == 'long': 
         response = createOrder(client, position['symbol'], 'SELL', 'MARKET', position['amount'])
         check_num = 0
       else:
         response = createOrder(client, position['symbol'], 'BUY', 'MARKET', position['amount'])
         check_num = 2
-    elif position['ror'] < -5:
+    else:
       if position['side'] == 'long':
         response = createOrder(client, position['symbol'], 'SELL', 'MARKET', position['amount'])
         check_num = 1
@@ -30,3 +31,4 @@ def closePosition(client, createOrder, positions, position_info, winnig_history,
 
   if len(message) > 0:
     asyncio.run(send_message(message))
+    
