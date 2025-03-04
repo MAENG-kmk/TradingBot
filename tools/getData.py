@@ -35,3 +35,27 @@ def getData(client, symbol, type, limit):
   df = df.astype({'Volume': 'int64'})
   df.index.name = None
   return df[-limit:]
+
+
+def getUsaTimeData(client, symbol, limit):
+  data_1h = getData(client, symbol, '1h', limit*24+1)
+  data = []
+  cur_hour = datetime.now().hour
+  start = 24 + (int(cur_hour) - 23) + 1
+  for i in range(limit-1):
+    high = max(data_1h.iloc[-start-24*(limit-1-i):-start-24*(limit-1-i-1)]['High'])
+    low = min(data_1h.iloc[-start-24*(limit-1-i):-start-24*(limit-1-i-1)]['Low'])
+    volume = sum(data_1h.iloc[-start-24*(limit-1-i):-start-24*(limit-1-i-1)]['Volume'])
+    open = data_1h.iloc[-start-24*(limit-1-i)]['Open']
+    close = data_1h.iloc[-start-24*(limit-1-i-1)]['Open']
+    data.append([open, high, low, close, volume])
+  last_data = data_1h.iloc[-start:]
+  open = data_1h.iloc[-start]['Open']
+  high = max(last_data['High'])
+  low = min(last_data['Low'])
+  close = data_1h.iloc[-1]['Close']
+  volume = sum(last_data['Volume'])
+  data.append([open, high, low, close, volume])
+  df = pd.DataFrame(data=data, columns=['Open', 'High', 'Low', 'Close', 'Volume'])
+  
+  return df
