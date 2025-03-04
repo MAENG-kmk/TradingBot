@@ -57,5 +57,6 @@ def getUsaTimeData(client, symbol, limit):
   volume = sum(last_data['Volume'])
   data.append([open, high, low, close, volume])
   df = pd.DataFrame(data=data, columns=['Open', 'High', 'Low', 'Close', 'Volume'])
+  df['Body'] = df['Close'] - df['Open']
   
   return df

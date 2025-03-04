@@ -5,7 +5,7 @@ client = Client(api_key="w6wGRNsx88wZHGNi6j2j663hyvEpDNHrLE6E6UntucPkJ4Lqp8P4ras
 from tools.BetController import BetController
 from tools.getBalance import getBalance
 from tools.telegram import send_message
-from tools.getData import getData
+from tools.getData import getData, getUsaTimeData
 from tools.getTicker import getTicker
 from tools.getPositions import getPositions
 from tools.createOrder import createOrder
@@ -49,7 +49,7 @@ def run_trading_bot():
         side = decidePosition(ticker, BTC_data, getMa)
         if side != 'None':
           positions = getPositions(client)
-          enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder, betController)
+          enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getUsaTimeData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder, betController)
         
       print("정상 작동 중,,,")
       time.sleep(60)
