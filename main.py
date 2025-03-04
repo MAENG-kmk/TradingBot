@@ -45,7 +45,7 @@ def run_trading_bot():
       if not isPositionFull(total_balance, available_balance):
         print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
-        BTC_data = getData(client, 'BTCUSDT', '1d', 30)
+        BTC_data = getData(client, 'BTCUSDT', '1d', 20)
         side = decidePosition(ticker, BTC_data, getMa)
         if side != 'None':
           positions = getPositions(client)

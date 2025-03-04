@@ -1,4 +1,4 @@
-from .getData import getData
+from .getData import getUsaTimeData
 from .getMa import getMa
 
 
@@ -14,7 +14,7 @@ class BetController:
     self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]
     
   def bet(self, symbol, side):
-    data = getData(self.client, symbol, '1d', 30)
+    data = getUsaTimeData(self.client, symbol, 20)
     ma = getMa(data)
     currentSide = ma
     if side == currentSide:
@@ -35,7 +35,9 @@ class BetController:
         betting = self.bet(symbol, position['side'])
         if betting == 'close':
           list_to_close.append(position)  
+          self.targetRorChecker.pop(symbol, None)
       elif ror < stopLoss:
         list_to_close.append(position)
+        self.targetRorChecker.pop(symbol, None)
         
     return list_to_close

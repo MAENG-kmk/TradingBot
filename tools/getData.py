@@ -39,6 +39,8 @@ def getData(client, symbol, type, limit):
 
 def getUsaTimeData(client, symbol, limit):
   data_1h = getData(client, symbol, '1h', limit*24+1)
+  if len(data_1h) < limit*24:
+    return []
   data = []
   cur_hour = datetime.now().hour
   start = 24 + (int(cur_hour) - 23) + 1
@@ -58,5 +60,5 @@ def getUsaTimeData(client, symbol, limit):
   data.append([open, high, low, close, volume])
   df = pd.DataFrame(data=data, columns=['Open', 'High', 'Low', 'Close', 'Volume'])
   df['Body'] = df['Close'] - df['Open']
-  
+
   return df

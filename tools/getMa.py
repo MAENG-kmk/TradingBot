@@ -1,7 +1,7 @@
 def getMa(data):
   closes = []
-  short_period = 7
-  long_period = 25
+  short_period = 5
+  long_period = 14
   for close in data.iloc[-27:]['Close']:
     closes.append(float(close))
   short_ma = sum(closes[-short_period:]) / short_period
@@ -14,8 +14,8 @@ def getMa(data):
   
 def getMa_diff(data):
   closes = []
-  short_period = 7
-  long_period = 25
+  short_period = 5
+  long_period = 14
   for close in data.iloc[-27:]['Close']:
     closes.append(float(close))
     

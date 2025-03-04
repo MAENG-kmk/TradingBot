@@ -14,7 +14,7 @@ from tools.getLarry import getLarry
 
 import math
 
-data = getUsaTimeData(client, 'BTCUSDT', 10)
+data = getUsaTimeData(client, 'BTCUSDT', 20)
 print(data)
 # ma = getMa_diff(data)
 # ticker = getTicker(client)
