@@ -25,4 +25,7 @@ def getRsi(data):
     rs = 100
   rsi = rs / ( 1 + rs) * 100
   
-  return rsi
+  if rsi < 50:
+    return 'long'
+  else:
+    return 'short'

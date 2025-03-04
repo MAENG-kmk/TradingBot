@@ -4,9 +4,8 @@ def getVolume(data):
   past_volume = float(volumes.iloc[0])
   k = 1.2
 
-  # if last_volume > past_volume * k:
-  #   return True
-  # else:
-  #   return False
+  if last_volume > past_volume * k:
+    return True
+  else:
+    return False
   
-  return True

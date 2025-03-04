@@ -27,7 +27,7 @@ def closePosition(client, createOrder, positions, position_info, winnig_history,
       else:
         info = [0, 0]
       balance, _ = getBalance(client)
-      message += "symbol: {}, ror: {:.2f}%, profit: {:.2f}$ balance: {:.2f} \n side: {}, entered rsi: {:.2f}, {} \n\n".format(position['symbol'], position['ror'], position['profit'], float(balance), info[0], info[1], winnig_history)
+      message += "symbol: {}, ror: {:.2f}%, profit: {:.2f}$ balance: {:.2f} \n side: {}, {} \n\n".format(position['symbol'], position['ror'], position['profit'], float(balance), info[0], winnig_history)
 
   if len(message) > 0:
     asyncio.run(send_message(message))
