@@ -34,7 +34,7 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getUsaTimeData(client, symbol, 20)
-      if not data:
+      if len(data) < 20:
         continue
       check_volume = getVolume(data)
       if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
