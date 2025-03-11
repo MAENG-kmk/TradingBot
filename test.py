@@ -15,8 +15,8 @@ from tools.getLarry import getLarry
 import math
 
 data = getUsaTimeData(client, 'BTCUSDT', 20)
-print(data)
-# ma = getMa_diff(data)
+ma = getMa(data)
+print(ma)
 # ticker = getTicker(client)
 # BTC_data = getData(client, 'BTCUSDT', '1d', 30)
 # side = decidePosition(ticker, BTC_data, getMa)
