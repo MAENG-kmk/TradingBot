@@ -25,7 +25,7 @@ import time
 
 balance, available = getBalance(client)
 betController = BetController(client)
-asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
+# asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
 
 def run_trading_bot():
   position_info = {}
@@ -45,7 +45,7 @@ def run_trading_bot():
       if not isPositionFull(total_balance, available_balance):
         print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
-        BTC_data = getData(client, 'BTCUSDT', '1d', 20)
+        BTC_data = getUsaTimeData(client, 'BTCUSDT', 20)
         side = decidePosition(ticker, BTC_data, getMa)
         if side != 'None':
           positions = getPositions(client)
