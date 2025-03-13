@@ -41,7 +41,6 @@ def enterPosition(client, side, ticker, total_balance, available_balance, positi
         continue
       else:
         way = logic_filter(data, logic_list)
-        # rsi 걍 90으로 해놓은 상태
         if way == 'long':
           lastQty = coin['lastQty'].split('.')
           if len(lastQty) == 1:
