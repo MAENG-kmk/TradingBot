@@ -12,7 +12,7 @@ from tools.createOrder import createOrder
 from tools.isPositionFull import isPositionFull
 from tools.setLeverage import setLeverage
 from tools.getRsi import getRsi
-from tools.getMa import getMa, getMa_diff
+from tools.getMa import getMa, getMa_diff, getMACD
 from tools.getVolume import getVolume
 from tools.getLarry import getLarry
 
@@ -25,7 +25,9 @@ import time
 
 balance, available = getBalance(client)
 betController = BetController(client)
-# asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
+asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
+
+logic_list = [getLarry, getMACD]
 
 def run_trading_bot():
   position_info = {}
@@ -49,7 +51,7 @@ def run_trading_bot():
         side = decidePosition(ticker, BTC_data, getMa)
         if side != 'None':
           positions = getPositions(client)
-          enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getUsaTimeData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder, betController)
+          enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
         
       print("정상 작동 중,,,")
       time.sleep(60)
