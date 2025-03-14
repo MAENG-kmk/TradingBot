@@ -1,3 +1,5 @@
+import pandas as pd
+
 def getMa(data):
   closes = []
   short_period = 7
@@ -45,3 +47,21 @@ def getMa_diff(data):
     return 'short'
   else:
     return 'None'
+  
+def getMACD(data):
+  data["EMA_9"] = data["Close"].ewm(span=9, adjust=False).mean()
+  data["EMA_20"] = data["Close"].ewm(span=20, adjust=False).mean()
+  data["MACD"] = data["EMA_9"] - data["EMA_20"]
+  data["Signal"] = data["MACD"].ewm(span=7, adjust=False).mean()
+  data["signal"] = 0
+  data.loc[data["MACD"] > data["Signal"], "signal"] = 1
+  data.loc[data["MACD"] < data["Signal"], "signal"] = -1  
+  
+  cur = int(data.iloc[-1]['signal'])
+  last = int(data.iloc[-2]['signal'])
+
+  if cur == 1 and last == -1:
+    return 'long'
+  elif cur == -1 and last == 1:
+    return 'short'
+  

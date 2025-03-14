@@ -7,7 +7,7 @@ from tools.getRsi import getRsi
 from tools.getData import getData, getUsaTimeData
 from tools.getTicker import getTicker
 from tools.getBalance import getBalance
-from tools.getMa import getMa, getMa_diff
+from tools.getMa import getMa, getMa_diff, getMACD
 from tools.getVolume import getVolume
 from logics.decidePosition import decidePosition
 from tools.getLarry import getLarry
@@ -23,6 +23,6 @@ BTC_data = getData(client, 'BTCUSDT', '1d', 30)
 btc = getUsaTimeData(client, 'BTCUSDT', 20)
 side = decidePosition(ticker, BTC_data, getMa)
 side_1 = decidePosition(ticker, btc, getMa)
-print(side)
-print(side_1)
+macd = getMACD(btc)
+print(macd)
 

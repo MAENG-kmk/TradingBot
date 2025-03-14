@@ -7,8 +7,8 @@ class BetController:
     self.client = client
     self.targetRorChecker = {}
     self.defaultTargetRor = 6
-    self.defaultStopLoss = -5
-    self.adjustRor = 3
+    self.defaultStopLoss = -2
+    self.adjustRor = 2
     
   def saveNew(self, symbol):
     self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]

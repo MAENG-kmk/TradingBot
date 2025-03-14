@@ -22,8 +22,7 @@ def logic_filter(data, logiclist):
   return result
 
 
-def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, getUsaTimeData, getRsi, getMa_diff, getVolume, getLarry, setLeverage, createOrder, betController):
-  logic_list = [getLarry, getRsi]
+def enterPosition(client, side, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
