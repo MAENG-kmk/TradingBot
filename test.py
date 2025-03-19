@@ -24,5 +24,6 @@ btc = getUsaTimeData(client, 'BTCUSDT', 20)
 side = decidePosition(ticker, BTC_data, getMa)
 side_1 = decidePosition(ticker, btc, getMa)
 macd = getMACD(btc)
+print(side_1)
 print(macd)
 
