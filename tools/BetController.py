@@ -14,7 +14,7 @@ class BetController:
     self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]
     
   def bet(self, symbol, side):
-    data = getUsaTimeData(self.client, symbol, 20)
+    data = getUsaTimeData(self.client, symbol, 30)
     ma = getMa(data)
     currentSide = ma
     if side == currentSide:

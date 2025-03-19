@@ -9,21 +9,23 @@ from tools.getTicker import getTicker
 from tools.getBalance import getBalance
 from tools.getMa import getMa, getMa_diff, getMACD
 from tools.getVolume import getVolume
+from tools.getPositions import getPositions
+from tools.setLeverage import setLeverage
+from tools.createOrder import createOrder
+from tools.BetController import BetController
 from logics.decidePosition import decidePosition
+from logics.enterPosition import enterPosition
 from tools.getLarry import getLarry
 
 import math
+from datetime import datetime
 
-data = getUsaTimeData(client, 'BTCUSDT', 20)
-
-# ma = getMa(data)
-# print(ma)
+############# enterPosition test ##################
 ticker = getTicker(client)
-# BTC_data = getData(client, 'BTCUSDT', '1d', 30)
-# btc = getUsaTimeData(client, 'BTCUSDT', 20)
-# side = decidePosition(ticker, BTC_data, getMa)
-# side_1 = decidePosition(ticker, btc, getMa)
-# macd = getMACD(btc)
-# print(side_1)
-# print(macd)
-print(ticker[:20])
+total_balance, available_balance = getBalance(client)
+positions = getPositions(client)
+position_info = {}
+logic_list = [getLarry, getMACD]
+betController = BetController(client)
+enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
+####################################################

@@ -31,7 +31,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
 
   for _, coin in ticker.iterrows():
     symbol = coin['symbol']
-    data = getUsaTimeData(client, symbol, 20)
+    data = getUsaTimeData(client, symbol, 30)
     if len(data) < 20:
       continue
     check_volume = getVolume(data)
@@ -39,6 +39,16 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
       continue
     else:
       way = logic_filter(data, logic_list)
+      
+      ######################################## 테스트 시 활성화 #############################################
+      # if way != 'None':
+      #   print('symbol:', symbol)
+      #   print('way:', way)
+      #   print('------------------------------------------------')
+      # way = 'none'
+      # bullets = 100
+      ###################################################################################################
+      
       if way == 'long':
         lastQty = coin['lastQty'].split('.')
         if len(lastQty) == 1:

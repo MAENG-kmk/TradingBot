@@ -51,7 +51,7 @@ def run_trading_bot():
         enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
         
       print("정상 작동 중,,,")
-      time.sleep(60)
+      time.sleep(30)
       
     except Exception as e:
       print(e)
