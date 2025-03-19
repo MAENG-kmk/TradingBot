@@ -6,9 +6,9 @@ class BetController:
   def __init__(self, client):
     self.client = client
     self.targetRorChecker = {}
-    self.defaultTargetRor = 6
+    self.defaultTargetRor = 3
     self.defaultStopLoss = -2
-    self.adjustRor = 2
+    self.adjustRor = 1
     
   def saveNew(self, symbol):
     self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]
@@ -31,7 +31,7 @@ class BetController:
       if symbol not in self.targetRorChecker:
         self.saveNew(symbol)
       [targetRor, stopLoss] = self.targetRorChecker[symbol]
-      if ror > targetRor:
+      if ror >= targetRor:
         betting = self.bet(symbol, position['side'])
         if betting == 'close':
           list_to_close.append(position)  
