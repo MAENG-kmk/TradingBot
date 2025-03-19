@@ -17,7 +17,8 @@ class BetController:
     data = getUsaTimeData(self.client, symbol, 30)
     ma = getMa(data)
     currentSide = ma
-    if side == currentSide:
+    # if side == currentSide:
+    if True:
       self.targetRorChecker[symbol] = [self.targetRorChecker[symbol][0]+self.adjustRor, self.targetRorChecker[symbol][0]-self.adjustRor]
       return 'bet'
     else:
