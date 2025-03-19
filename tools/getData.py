@@ -38,7 +38,28 @@ def getData(client, symbol, type, limit):
 
 
 def getUsaTimeData(client, symbol, limit):
-  data_1h = getData(client, symbol, '1h', limit*24+1)
+  klines = client.futures_klines(
+    symbol=symbol, 
+    interval=client.KLINE_INTERVAL_1HOUR, 
+    limit=limit*24+1
+  )
+  df = pd.DataFrame(data=klines, columns=['time', 'Open', 'High', 'Low', 'Close', 'Volume', 'a', 'b', 'c', 'd', 'e', 'f'])
+  df['time'] = pd.to_datetime(df['time'], unit='ms')
+  df['Open'] = pd.to_numeric(df['Open'])
+  df['Close'] = pd.to_numeric(df['Close'])
+  df['Body'] = df['Close'] - df['Open']
+  df.set_index('time', inplace=True)
+  df = df.drop(labels='a',axis=1)
+  df = df.drop(labels='b',axis=1)
+  df = df.drop(labels='c',axis=1)
+  df = df.drop(labels='d',axis=1)
+  df = df.drop(labels='e',axis=1)
+  df = df.drop(labels='f',axis=1)
+  df = df.astype('float64')
+  df = df.astype({'Volume': 'int64'})
+  df.index.name = None
+  
+  data_1h = df
   if len(data_1h) < limit*24:
     return []
   data = []
