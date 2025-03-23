@@ -21,11 +21,14 @@ import math
 from datetime import datetime
 
 ############# enterPosition test ##################
-ticker = getTicker(client)
-total_balance, available_balance = getBalance(client)
-positions = getPositions(client)
-position_info = {}
-logic_list = [getLarry, getMACD]
-betController = BetController(client)
-enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
+# ticker = getTicker(client)
+# total_balance, available_balance = getBalance(client)
+# positions = getPositions(client)
+# position_info = {}
+# logic_list = [getLarry, getMACD]
+# betController = BetController(client)
+# enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
+data = getUsaTimeData(client, 'BTCUSDT', 60)
+ma = getMACD(data)
+print(ma)

@@ -6,8 +6,8 @@ class BetController:
   def __init__(self, client):
     self.client = client
     self.targetRorChecker = {}
-    self.defaultTargetRor = 3
-    self.defaultStopLoss = -2
+    self.defaultTargetRor = 6
+    self.defaultStopLoss = -3
     self.adjustRor = 1
     
   def saveNew(self, symbol):
@@ -19,7 +19,7 @@ class BetController:
     currentSide = ma
     # if side == currentSide:
     if True:
-      self.targetRorChecker[symbol] = [self.targetRorChecker[symbol][0]+self.adjustRor, self.targetRorChecker[symbol][0]-self.adjustRor]
+      self.targetRorChecker[symbol] = [self.targetRorChecker[symbol][0]+self.adjustRor, self.targetRorChecker[symbol][0]+self.defaultStopLoss+1]
       return 'bet'
     else:
       return 'close'

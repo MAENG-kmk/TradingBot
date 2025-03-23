@@ -31,8 +31,8 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
 
   for _, coin in ticker.iterrows():
     symbol = coin['symbol']
-    data = getUsaTimeData(client, symbol, 30)
-    if len(data) < 20:
+    data = getUsaTimeData(client, symbol, 50)
+    if len(data) < 49:
       continue
     check_volume = getVolume(data)
     if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
@@ -68,6 +68,8 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
             betController.saveNew(symbol)
             position_info[symbol] = [way, 0]
             enter_list.append(symbol)
+            
+            
       elif way == 'short':
         lastQty = coin['lastQty'].split('.')
         if len(lastQty) == 1:
@@ -87,6 +89,8 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
             betController.saveNew(symbol)
             position_info[symbol] = [way, 0]
             enter_list.append(symbol)
+            
+            
     if len(enter_list) == bullets:
       break
     
