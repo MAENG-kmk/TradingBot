@@ -3,8 +3,8 @@ import pandas as pd
 def getMa(data):
   closes = []
   short_period = 7
-  long_period = 20
-  for close in data.iloc[-20:]['Close']:
+  long_period = 25
+  for close in data.iloc[-30:]['Close']:
     closes.append(float(close))
   short_ma = sum(closes[-short_period:]) / short_period
   long_ma = sum(closes[-long_period:]) / long_period

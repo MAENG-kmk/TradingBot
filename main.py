@@ -27,7 +27,7 @@ balance, available = getBalance(client)
 betController = BetController(client)
 asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
 
-logic_list = [getLarry, getMACD]
+logic_list = [getLarry, getMa]
 
 def run_trading_bot():
   position_info = {}
