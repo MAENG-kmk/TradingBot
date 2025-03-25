@@ -29,6 +29,10 @@ from datetime import datetime
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
-data = getUsaTimeData(client, 'BTCUSDT', 60)
-ma = getMACD(data)
-print(ma)
+a = []
+def test1(li):
+  li.append(1)
+def test2(li):
+  print(li.pop())
+test1(a)
+test2(a)

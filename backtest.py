@@ -4,6 +4,7 @@ client = Client(api_key="w6wGRNsx88wZHGNi6j2j663hyvEpDNHrLE6E6UntucPkJ4Lqp8P4ras
 
 from tools.getMa import getMa, getMACD
 from tools.getData import getData
+import matplotlib.pyplot as plt
 
 class Backtest:
   def __init__(self, data):
@@ -22,8 +23,9 @@ class Backtest:
     self.profits = []
     self.stopLoss = 0
     self.targetPrice = 0
-    self.tp = 0.1
-    self.sl = 0.03
+    self.tp = 0.05
+    self.sl = 0.02
+    self.k = 0.5 
     
   def clear(self):
     self.stopLoss = 0
@@ -45,7 +47,7 @@ class Backtest:
     data = self.data.iloc[i-30:i+1]
     ma = getMa(data.iloc[:-1])
     cur = data.iloc[-1]
-    range = (data.iloc[-2]['High'] - data.iloc[-2]['Low']) * 0.5
+    range = (data.iloc[-2]['High'] - data.iloc[-2]['Low']) * self.k
     if range < cur['Open'] * 0.009:
       return
     if ma == 'long':
@@ -100,9 +102,28 @@ class Backtest:
     print('평균 수익률: {:.2f}%'.format(sum(self.profits)/len(self.profits)*100))
     print('MDD: {:.2f}%'.format(min(self.profits)*100))
     
+  def find_k(self):
+    x = []
+    y = []
+    for k in range(30, 71):
+      K = k/100
+      self.k = K
+      self.excute()
+      x.append(K)
+      y.append(self.ror)
+      self.clear()
+      self.ror = 1
+      self.profits = []
+    plt.plot(x, y)
+    plt.xlabel("larry's K")
+    plt.ylabel('ROR')
+    plt.title('BTCUSDT 1500day backtest')
+    plt.show()
     
     
-data = getData(client, 'EOSUSDT', '1d', 1500)
+    
+data = getData(client, 'BTCUSDT', '1d', 1500)
 backtest = Backtest(data)
 backtest.excute()
 backtest.result()
+# backtest.find_k()
