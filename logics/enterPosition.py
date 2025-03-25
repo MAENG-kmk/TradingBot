@@ -54,7 +54,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
         if symbol in special_care:
           if way == special_care[symbol]['side']:
             markPrice = special_care[symbol]['markPrice']
-            curPrice = coin['lastPrice']
+            curPrice = float(coin['lastPrice'])
             if curPrice < markPrice * 0.97:
               special_care.pop(symbol, None)
               continue
@@ -86,7 +86,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
         if symbol in special_care:
           if way == special_care[symbol]['side']:
             markPrice = special_care[symbol]['markPrice']
-            curPrice = coin['lastPrice']
+            curPrice = float(coin['lastPrice'])
             if curPrice > markPrice * 1.03:
               special_care.pop(symbol, None)
               continue
