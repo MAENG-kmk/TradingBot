@@ -22,7 +22,7 @@ def logic_filter(data, logiclist):
   return result
 
 
-def enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController):
+def enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController, special_care):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
@@ -50,6 +50,17 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
       ###################################################################################################
       
       if way == 'long':
+        
+        if symbol in special_care:
+          if way == special_care[symbol]['side']:
+            markPrice = special_care[symbol]['markPrice']
+            curPrice = coin['lastPrice']
+            if curPrice < markPrice * 0.97:
+              special_care.pop(symbol, None)
+              continue
+            if curPrice < markPrice * 1.03:
+              continue
+              
         lastQty = coin['lastQty'].split('.')
         if len(lastQty) == 1:
           point = 0
@@ -71,6 +82,17 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
             
             
       elif way == 'short':
+        
+        if symbol in special_care:
+          if way == special_care[symbol]['side']:
+            markPrice = special_care[symbol]['markPrice']
+            curPrice = coin['lastPrice']
+            if curPrice > markPrice * 1.03:
+              special_care.pop(symbol, None)
+              continue
+            if curPrice > markPrice * 0.97:
+              continue
+            
         lastQty = coin['lastQty'].split('.')
         if len(lastQty) == 1:
           point = 0

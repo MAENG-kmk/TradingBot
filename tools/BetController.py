@@ -3,18 +3,30 @@ from .getMa import getMa
 
 
 class BetController:
-  def __init__(self, client):
+  def __init__(self, client, logicList):
     self.client = client
     self.targetRorChecker = {}
     self.defaultTargetRor = 6
     self.defaultStopLoss = -3
     self.adjustRor = 1
+    self.logicList = logicList
     
   def saveNew(self, symbol):
     self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]
     
+  def decideGoOrStop(self, data, currentPosition):
+    for logic in self.logicList:
+      side = logic(data)
+      if side == currentPosition:
+        continue
+      else:
+        return 'Stop'
+      
+    return 'Go'
+   
+   
   def bet(self, symbol, side):
-    data = getUsaTimeData(self.client, symbol, 30)
+    data = getUsaTimeData(self.client, symbol, 50)
     ma = getMa(data)
     currentSide = ma
     # if side == currentSide:
