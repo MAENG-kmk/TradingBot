@@ -60,6 +60,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
               continue
             if curPrice < markPrice * 1.03:
               continue
+            special_care.pop(symbol, None)
               
         lastQty = coin['lastQty'].split('.')
         if len(lastQty) == 1:
@@ -92,6 +93,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
               continue
             if curPrice > markPrice * 0.97:
               continue
+            special_care.pop(symbol, None)
             
         lastQty = coin['lastQty'].split('.')
         if len(lastQty) == 1:
