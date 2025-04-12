@@ -102,23 +102,23 @@ class Backtest:
     print('평균 수익률: {:.2f}%'.format(sum(self.profits)/len(self.profits)*100))
     print('MDD: {:.2f}%'.format(min(self.profits)*100))
     
-  def find_k(self):
-    x = []
-    y = []
-    for k in range(30, 71):
-      K = k/100
-      self.k = K
-      self.excute()
-      x.append(K)
-      y.append(self.ror)
-      self.clear()
-      self.ror = 1
-      self.profits = []
-    plt.plot(x, y)
-    plt.xlabel("larry's K")
-    plt.ylabel('ROR')
-    plt.title('BTCUSDT 1500day backtest')
-    plt.show()
+  # def find_k(self):
+  #   x = []
+  #   y = []
+  #   for k in range(30, 71):
+  #     K = k/100
+  #     self.k = K
+  #     self.excute()
+  #     x.append(K)
+  #     y.append(self.ror)
+  #     self.clear()
+  #     self.ror = 1
+  #     self.profits = []
+  #   plt.plot(x, y)
+  #   plt.xlabel("larry's K")
+  #   plt.ylabel('ROR')
+  #   plt.title('BTCUSDT 1500day backtest')
+  #   plt.show()
     
     
     

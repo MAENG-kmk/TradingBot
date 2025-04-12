@@ -1,135 +1,872 @@
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.18%, profit: -0.35$ balance: 64.97 
- side: short, entered rsi: 38.84, [0, 0, 0, 1]
+symbol: DFUSDT 
+ ror: -8.99%, profit: -0.74$ 
+ balance: 89.53 
+ entering side: 0 
+ [0, 1, 0, 0]
 
 > Bitcoin:
-symbol: ONDOUSDT, ror: -5.00%, profit: -0.31$ balance: 65.91 
- side: long, entered rsi: 59.31, [2, 1, 1, 1]
+symbol: TONUSDT 
+ ror: -3.69%, profit: -0.32$ 
+ balance: 89.22 
+ entering side: 0 
+ [0, 2, 0, 0]
 
 > Bitcoin:
-symbol: 1000SHIBUSDT, ror: -5.04%, profit: -0.31$ balance: 65.91 
- side: long, entered rsi: 61.00, [2, 2, 1, 1]
+symbol: ORDIUSDT 
+ ror: -3.04%, profit: -0.24$ 
+ balance: 88.96 
+ entering side: 0 
+ [0, 3, 0, 0]
 
 > Bitcoin:
-symbol: SUIUSDT, ror: -5.01%, profit: -0.30$ balance: 66.00 
- side: long, entered rsi: 59.89, [2, 3, 2, 1]
+symbol: SPXUSDT 
+ ror: 3.84%, profit: 0.36$ 
+ balance: 89.32 
+ entering side: 0 
+ [1, 3, 0, 0]
 
 > Bitcoin:
-symbol: OPUSDT, ror: -5.03%, profit: -0.30$ balance: 65.80 
- side: long, entered rsi: 64.92, [2, 4, 3, 1]
+symbol: RSRUSDT 
+ ror: 6.29%, profit: 0.60$ 
+ balance: 89.91 
+ entering side: 0 
+ [2, 3, 0, 0]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -6.61%, profit: -0.46$ balance: 65.33 
- side: short, entered rsi: 45.43, [2, 4, 3, 2]
+symbol: IMXUSDT 
+ ror: -3.36%, profit: -0.28$ 
+ balance: 89.62 
+ entering side: long 
+ [2, 4, 0, 0]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.54%, profit: -0.38$ balance: 64.93 
- side: short, entered rsi: 43.08, [2, 4, 3, 3]
+symbol: 1000CHEEMSUSDT 
+ ror: -3.24%, profit: -0.28$ 
+ balance: 89.33 
+ entering side: long 
+ [2, 5, 0, 0]
 
 > Bitcoin:
-symbol: TAOUSDT, ror: -5.02%, profit: -0.29$ balance: 65.06 
- side: long, entered rsi: 72.22, [2, 5, 4, 3]
+symbol: LINAUSDT 
+ ror: 6.94%, profit: 0.58$ 
+ balance: 89.91 
+ entering side: short 
+ [2, 5, 1, 0]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.23%, profit: -0.35$ balance: 64.49 
- side: short, entered rsi: 45.60, [2, 7, 5, 4]
+symbol: TRUMPUSDT 
+ ror: -3.05%, profit: -0.28$ 
+ balance: 89.69 
+ entering side: 0 
+ [2, 5, 1, 1]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.43%, profit: -0.36$ balance: 64.12 
- side: short, entered rsi: 43.92, [2, 7, 5, 5]
+symbol: MEWUSDT 
+ ror: 3.99%, profit: 0.37$ 
+ balance: 90.04 
+ entering side: long 
+ [3, 5, 1, 1]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.68%, profit: -0.38$ balance: 64.12 
- side: short, entered rsi: 41.76, [2, 7, 5, 6]
+symbol: GMXUSDT 
+ ror: -3.14%, profit: -0.28$ 
+ balance: 89.76 
+ entering side: short 
+ [3, 5, 1, 2]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.01%, profit: -0.33$ balance: 64.26 
- side: short, entered rsi: 45.06, [2, 7, 7, 7]
+symbol: CHILLGUYUSDT 
+ ror: -3.28%, profit: -0.28$ 
+ balance: 89.46 
+ entering side: long 
+ [3, 6, 1, 2]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.35%, profit: -0.36$ balance: 63.85 
- side: short, entered rsi: 43.18, [2, 7, 7, 8]
+symbol: SWELLUSDT 
+ ror: 4.96%, profit: 0.46$ 
+ balance: 90.01 
+ entering side: long 
+ [4, 6, 1, 2]
 
 > Bitcoin:
-symbol: ENAUSDT, ror: -5.04%, profit: -0.29$ balance: 63.55 
- side: long, entered rsi: 58.06, [2, 8, 7, 8]
+symbol: BEAMXUSDT 
+ ror: 3.98%, profit: 0.37$ 
+ balance: 90.36 
+ entering side: 0 
+ [5, 6, 1, 2]
 
 > Bitcoin:
-symbol: LDOUSDT, ror: -5.00%, profit: -0.26$ balance: 63.70 
- side: long, entered rsi: 45.45, [2, 9, 8, 8]
+symbol: ARCUSDT 
+ ror: 3.16%, profit: 0.27$ 
+ balance: 90.68 
+ entering side: short 
+ [5, 6, 2, 2]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -5.19%, profit: -0.34$ balance: 63.34 
- side: short, entered rsi: 43.70, [2, 11, 8, 9]
+symbol: VANRYUSDT 
+ ror: -3.01%, profit: -0.26$ 
+ balance: 90.40 
+ entering side: long 
+ [5, 7, 2, 2] 
+
+ symbol: 1000SHIBUSDT 
+ ror: -3.08%, profit: -0.26$ 
+ balance: 90.13 
+ entering side: long 
+ [5, 8, 2, 2]
 
 > Bitcoin:
-symbol: FARTCOINUSDT, ror: -6.13%, profit: -0.40$ balance: 62.91 
- side: short, entered rsi: 41.61, [2, 11, 8, 10]
+symbol: COTIUSDT 
+ ror: -3.33%, profit: -0.29$ 
+ balance: 89.84 
+ entering side: long 
+ [5, 9, 2, 2]
 
 > Bitcoin:
-symbol: SUIUSDT, ror: -5.13%, profit: -0.30$ balance: 63.00 
- side: long, entered rsi: 58.44, [2, 12, 9, 10]
+symbol: ANIMEUSDT 
+ ror: -3.08%, profit: -0.27$ 
+ balance: 89.52 
+ entering side: long 
+ [5, 10, 2, 2]
 
 > Bitcoin:
-symbol: TAOUSDT, ror: -5.20%, profit: -0.31$ balance: 62.69 
- side: long, entered rsi: 62.46, [2, 13, 9, 10]
+symbol: RENDERUSDT 
+ ror: -3.10%, profit: -0.26$ 
+ balance: 89.26 
+ entering side: long 
+ [5, 11, 2, 2]
 
 > Bitcoin:
-symbol: VIRTUALUSDT, ror: -5.01%, profit: -0.30$ balance: 62.87 
- side: long, entered rsi: 62.82, [2, 14, 10, 10]
+symbol: SWARMSUSDT 
+ ror: -3.03%, profit: -0.28$ 
+ balance: 88.97 
+ entering side: short 
+ [5, 11, 2, 3]
 
 > Bitcoin:
-symbol: TURBOUSDT, ror: -5.40%, profit: -0.32$ balance: 62.95 
- side: long, entered rsi: 66.17, [2, 15, 11, 10]
+symbol: SWELLUSDT 
+ ror: 6.96%, profit: 0.67$ 
+ balance: 89.62 
+ entering side: long 
+ [6, 11, 2, 3]
 
 > Bitcoin:
-symbol: PNUTUSDT, ror: -5.02%, profit: -0.28$ balance: 62.67 
- side: long, entered rsi: 70.66, [2, 16, 11, 10]
+symbol: MEWUSDT 
+ ror: -3.30%, profit: -0.28$ 
+ balance: 89.31 
+ entering side: long 
+ [6, 12, 2, 3]
 
 > Bitcoin:
-symbol: BOMEUSDT, ror: -5.01%, profit: -0.30$ balance: 62.37 
- side: long, entered rsi: 67.30, [2, 17, 11, 10]
+symbol: SUPERUSDT 
+ ror: 3.55%, profit: 0.32$ 
+ balance: 89.63 
+ entering side: long 
+ [7, 12, 2, 3]
 
 > Bitcoin:
-symbol: VIRTUALUSDT, ror: -5.03%, profit: -0.29$ balance: 62.08 
- side: long, entered rsi: 63.66, [2, 18, 11, 10]
+symbol: BANANAUSDT 
+ ror: -3.99%, profit: -0.29$ 
+ balance: 89.33 
+ entering side: long 
+ [7, 13, 2, 3]
 
 > Bitcoin:
-symbol: CGPTUSDT, ror: -5.11%, profit: -0.31$ balance: 61.76 
- side: long, entered rsi: 45.42, [2, 19, 11, 10]
+symbol: SWELLUSDT 
+ ror: -3.13%, profit: -0.27$ 
+ balance: 89.06 
+ entering side: long 
+ [7, 14, 2, 3]
 
 > Bitcoin:
-symbol: AIXBTUSDT, ror: -5.17%, profit: -0.29$ balance: 62.72 
- side: long, entered rsi: 35.05, [5, 20, 11, 10]
+symbol: XRPUSDT 
+ ror: -3.08%, profit: -0.26$ 
+ balance: 88.79 
+ entering side: 0 
+ [7, 15, 2, 3]
 
 > Bitcoin:
-symbol: SUIUSDT, ror: -5.05%, profit: -0.27$ balance: 62.91 
- side: long, entered rsi: 56.08, [6, 21, 11, 10]
+symbol: 1000PEPEUSDT 
+ ror: -3.16%, profit: -0.27$ 
+ balance: 88.22 
+ entering side: long 
+ [7, 17, 2, 3]
 
 > Bitcoin:
-symbol: ALGOUSDT, ror: -5.03%, profit: -0.30$ balance: 62.61 
- side: long, entered rsi: 37.97, [6, 22, 11, 10]
+symbol: SWELLUSDT 
+ ror: -3.10%, profit: -0.26$ 
+ balance: 87.95 
+ entering side: long 
+ [7, 18, 2, 3]
 
 > Bitcoin:
-symbol: PENGUUSDT, ror: -5.17%, profit: -0.30$ balance: 62.30 
- side: long, entered rsi: 73.40, [6, 23, 11, 10]
+symbol: VINEUSDT 
+ ror: -3.06%, profit: -0.28$ 
+ balance: 87.66 
+ entering side: short 
+ [7, 18, 2, 4]
 
 > Bitcoin:
-symbol: VIRTUALUSDT, ror: -5.13%, profit: -0.29$ balance: 62.01 
- side: long, entered rsi: 58.37, [6, 24, 11, 10]
+symbol: ARCUSDT 
+ ror: 5.83%, profit: 0.49$ 
+ balance: 88.14 
+ entering side: short 
+ [7, 18, 3, 4]
 
 > Bitcoin:
-symbol: AIXBTUSDT, ror: -5.15%, profit: -0.27$ balance: 61.74 
- side: long, entered rsi: 36.62, [6, 25, 11, 10]
+symbol: ZROUSDT 
+ ror: 5.91%, profit: 0.54$ 
+ balance: 88.67 
+ entering side: long 
+ [8, 18, 3, 4]
 
 > Bitcoin:
-symbol: JUPUSDT, ror: -5.06%, profit: -0.29$ balance: 61.46 
- side: long, entered rsi: 45.77, [6, 26, 11, 10]
+symbol: SWELLUSDT 
+ ror: -3.13%, profit: -0.26$ 
+ balance: 88.39 
+ entering side: long 
+ [8, 19, 3, 4]
 
 > Bitcoin:
-symbol: EIGENUSDT, ror: -5.13%, profit: -0.29$ balance: 61.17 
- side: long, entered rsi: 57.46, [6, 27, 11, 10]
+symbol: ZETAUSDT 
+ ror: 7.86%, profit: 0.74$ 
+ balance: 89.10 
+ entering side: long 
+ [9, 19, 3, 4]
 
 > Bitcoin:
-symbol: STEEMUSDT, ror: -5.24%, profit: -0.30$ balance: 60.86 
- side: long, entered rsi: 68.74, [6, 28, 11, 10]
+symbol: SWARMSUSDT 
+ ror: 5.98%, profit: 0.50$ 
+ balance: 89.57 
+ entering side: short 
+ [9, 19, 4, 4]
+
+> Bitcoin:
+symbol: MEWUSDT 
+ ror: -3.13%, profit: -0.26$ 
+ balance: 89.28 
+ entering side: long 
+ [9, 20, 4, 4]
+
+> Bitcoin:
+symbol: FILUSDT 
+ ror: -3.00%, profit: -0.25$ 
+ balance: 89.02 
+ entering side: 0 
+ [9, 21, 4, 4]
+
+> Bitcoin:
+symbol: BANANAUSDT 
+ ror: -3.01%, profit: -0.22$ 
+ balance: 88.79 
+ entering side: long 
+ [9, 22, 4, 4]
+
+> Bitcoin:
+symbol: ARCUSDT 
+ ror: -3.04%, profit: -0.27$ 
+ balance: 88.49 
+ entering side: short 
+ [9, 22, 4, 5]
+
+> Bitcoin:
+symbol: ETHFIUSDT 
+ ror: -3.00%, profit: -0.27$ 
+ balance: 88.20 
+ entering side: short 
+ [9, 22, 4, 6]
+
+> Bitcoin:
+symbol: WIFUSDT 
+ ror: -3.06%, profit: -0.28$ 
+ balance: 87.93 
+ entering side: short 
+ [9, 22, 4, 7]
+
+> Bitcoin:
+symbol: AI16ZUSDT 
+ ror: -3.12%, profit: -0.28$ 
+ balance: 87.63 
+ entering side: short 
+ [9, 22, 4, 8]
+
+> Bitcoin:
+symbol: RAREUSDT 
+ ror: -3.02%, profit: -0.27$ 
+ balance: 87.34 
+ entering side: short 
+ [9, 22, 4, 9]
+
+> Bitcoin:
+symbol: ORCAUSDT 
+ ror: 5.92%, profit: 0.54$ 
+ balance: 87.87 
+ entering side: long 
+ [10, 22, 4, 9]
+
+> Bitcoin:
+symbol: BEAMXUSDT 
+ ror: -3.05%, profit: -0.26$ 
+ balance: 87.68 
+ entering side: long 
+ [10, 23, 4, 9]
+
+> Bitcoin:
+symbol: ZROUSDT 
+ ror: -3.35%, profit: -0.27$ 
+ balance: 87.40 
+ entering side: long 
+ [10, 24, 4, 9]
+
+> Bitcoin:
+symbol: DYDXUSDT 
+ ror: -3.11%, profit: -0.26$ 
+ balance: 86.51 
+ entering side: long 
+ [11, 29, 4, 9]
+
+> Bitcoin:
+symbol: ORCAUSDT 
+ ror: -3.81%, profit: -0.31$ 
+ balance: 86.19 
+ entering side: long 
+ [11, 30, 4, 9]
+
+> Bitcoin:
+symbol: ZETAUSDT 
+ ror: 3.66%, profit: 0.32$ 
+ balance: 86.52 
+ entering side: long 
+ [12, 30, 4, 9]
+
+> Bitcoin:
+symbol: SAGAUSDT 
+ ror: -3.86%, profit: -0.32$ 
+ balance: 86.19 
+ entering side: long 
+ [12, 31, 4, 9]
+
+> Bitcoin:
+symbol: SAFEUSDT 
+ ror: 3.63%, profit: 0.32$ 
+ balance: 86.34 
+ entering side: long 
+ [13, 31, 4, 9]
+
+> Bitcoin:
+symbol: ORCAUSDT 
+ ror: -3.34%, profit: -0.27$ 
+ balance: 86.08 
+ entering side: long 
+ [13, 32, 4, 9]
+
+> Bitcoin:
+symbol: PENDLEUSDT 
+ ror: -3.02%, profit: -0.17$ 
+ balance: 85.89 
+ entering side: long 
+ [13, 33, 4, 9]
+
+> Bitcoin:
+symbol: SUIUSDT 
+ ror: -3.05%, profit: -0.25$ 
+ balance: 85.63 
+ entering side: long 
+ [13, 34, 4, 9]
+
+> Bitcoin:
+symbol: 1000SATSUSDT 
+ ror: -3.23%, profit: -0.28$ 
+ balance: 85.34 
+ entering side: short 
+ [13, 34, 4, 10]
+
+> Bitcoin:
+symbol: BEAMXUSDT 
+ ror: -3.19%, profit: -0.26$ 
+ balance: 85.07 
+ entering side: long 
+ [13, 35, 4, 10]
+
+> Bitcoin:
+symbol: SAFEUSDT 
+ ror: -3.05%, profit: -0.24$ 
+ balance: 85.05 
+ entering side: long 
+ [13, 36, 4, 10]
+
+> Bitcoin:
+symbol: 1000SATSUSDT 
+ ror: -3.02%, profit: -0.26$ 
+ balance: 84.77 
+ entering side: short 
+ [13, 36, 4, 11]
+
+> Bitcoin:
+symbol: ZETAUSDT 
+ ror: -3.76%, profit: -0.30$ 
+ balance: 84.47 
+ entering side: long 
+ [13, 37, 4, 11]
+
+> Bitcoin:
+symbol: BIGTIMEUSDT 
+ ror: 4.18%, profit: 0.37$ 
+ balance: 84.84 
+ entering side: long 
+ [14, 37, 4, 11]
+
+> Bitcoin:
+symbol: ORCAUSDT 
+ ror: 6.92%, profit: 0.62$ 
+ balance: 85.45 
+ entering side: long 
+ [15, 37, 4, 11]
+
+> Bitcoin:
+symbol: CRVUSDT 
+ ror: -3.50%, profit: -0.29$ 
+ balance: 85.15 
+ entering side: long 
+ [15, 38, 4, 11]
+
+> Bitcoin:
+symbol: API3USDT 
+ ror: 3.87%, profit: 0.34$ 
+ balance: 85.48 
+ entering side: long 
+ [16, 38, 4, 11]
+
+> Bitcoin:
+symbol: TONUSDT 
+ ror: 3.82%, profit: 0.33$ 
+ balance: 85.81 
+ entering side: long 
+ [17, 38, 4, 11]
+
+> Bitcoin:
+symbol: SUPERUSDT 
+ ror: -3.03%, profit: -0.24$ 
+ balance: 85.56 
+ entering side: long 
+ [17, 39, 4, 11]
+
+> Bitcoin:
+symbol: SUIUSDT 
+ ror: -3.04%, profit: -0.24$ 
+ balance: 85.31 
+ entering side: long 
+ [17, 40, 4, 11]
+
+> Bitcoin:
+symbol: VIDTUSDT 
+ ror: 5.94%, profit: 0.53$ 
+ balance: 85.81 
+ entering side: long 
+ [18, 40, 4, 11]
+
+> Bitcoin:
+symbol: DOTUSDT 
+ ror: -3.00%, profit: -0.25$ 
+ balance: 85.54 
+ entering side: 0 
+ [18, 41, 4, 11]
+
+> Bitcoin:
+symbol: TIAUSDT 
+ ror: -3.01%, profit: -0.22$ 
+ balance: 85.32 
+ entering side: long 
+ [18, 42, 4, 11]
+
+> Bitcoin:
+symbol: EIGENUSDT 
+ ror: 8.94%, profit: 0.70$ 
+ balance: 85.95 
+ entering side: short 
+ [18, 42, 5, 11]
+
+> Bitcoin:
+symbol: ETHFIUSDT 
+ ror: 3.97%, profit: 0.32$ 
+ balance: 86.27 
+ entering side: short 
+ [18, 42, 6, 11]
+
+> Bitcoin:
+symbol: POLUSDT 
+ ror: 5.92%, profit: 0.47$ 
+ balance: 86.73 
+ entering side: short 
+ [18, 42, 7, 11]
+
+> Bitcoin:
+symbol: VIDTUSDT 
+ ror: 14.58%, profit: 1.45$ 
+ balance: 88.17 
+ entering side: long 
+ [19, 42, 7, 11]
+
+> Bitcoin:
+symbol: BERAUSDT 
+ ror: -3.08%, profit: -0.24$ 
+ balance: 88.01 
+ entering side: long 
+ [19, 44, 8, 11]
+
+> Bitcoin:
+symbol: VIDTUSDT 
+ ror: -4.07%, profit: -0.34$ 
+ balance: 87.88 
+ entering side: long 
+ [19, 45, 8, 11]
+
+> Bitcoin:
+symbol: MEWUSDT 
+ ror: -3.08%, profit: -0.26$ 
+ balance: 87.61 
+ entering side: long 
+ [19, 46, 8, 11]
+
+> Bitcoin:
+symbol: AIXBTUSDT 
+ ror: 3.72%, profit: 0.31$ 
+ balance: 87.91 
+ entering side: short 
+ [19, 46, 9, 11]
+
+> Bitcoin:
+symbol: AI16ZUSDT 
+ ror: 5.99%, profit: 0.49$ 
+ balance: 88.38 
+ entering side: short 
+ [19, 46, 10, 11]
+
+> Bitcoin:
+symbol: ARCUSDT 
+ ror: -3.07%, profit: -0.27$ 
+ balance: 88.11 
+ entering side: short 
+ [19, 46, 10, 12]
+
+> Bitcoin:
+symbol: TAOUSDT 
+ ror: 8.99%, profit: 0.69$ 
+ balance: 88.78 
+ entering side: short 
+ [19, 46, 11, 12]
+
+> Bitcoin:
+symbol: USUALUSDT 
+ ror: 5.94%, profit: 0.47$ 
+ balance: 89.24 
+ entering side: short 
+ [19, 46, 12, 12]
+
+> Bitcoin:
+symbol: NEOUSDT 
+ ror: 7.87%, profit: 0.62$ 
+ balance: 89.85 
+ entering side: short 
+ [19, 46, 13, 12] 
+
+ symbol: EIGENUSDT 
+ ror: -3.07%, profit: -0.28$ 
+ balance: 89.58 
+ entering side: short 
+ [19, 46, 13, 13]
+
+> Bitcoin:
+symbol: TRUMPUSDT 
+ ror: 3.82%, profit: 0.31$ 
+ balance: 89.88 
+ entering side: short 
+ [19, 46, 14, 13]
+
+> Bitcoin:
+symbol: MEWUSDT 
+ ror: -3.21%, profit: -0.28$ 
+ balance: 89.59 
+ entering side: long 
+ [19, 47, 14, 13]
+
+> Bitcoin:
+symbol: 1000RATSUSDT 
+ ror: -3.03%, profit: -0.26$ 
+ balance: 89.29 
+ entering side: long 
+ [19, 48, 14, 13]
+
+> Bitcoin:
+symbol: JUPUSDT 
+ ror: 18.95%, profit: 1.39$ 
+ balance: 90.68 
+ entering side: short 
+ [19, 48, 15, 13]
+
+> Bitcoin:
+symbol: THEUSDT 
+ ror: 5.83%, profit: 0.48$ 
+ balance: 91.15 
+ entering side: short 
+ [19, 48, 16, 13]
+
+> Bitcoin:
+symbol: INJUSDT 
+ ror: 7.90%, profit: 0.55$ 
+ balance: 91.70 
+ entering side: short 
+ [19, 48, 17, 13]
+
+> Bitcoin:
+symbol: ENSUSDT 
+ ror: 6.90%, profit: 0.44$ 
+ balance: 92.12 
+ entering side: short 
+ [19, 48, 18, 13]
+
+> Bitcoin:
+symbol: MEWUSDT 
+ ror: 7.63%, profit: 0.73$ 
+ balance: 92.84 
+ entering side: long 
+ [20, 48, 18, 13]
+
+> Bitcoin:
+symbol: AI16ZUSDT 
+ ror: -3.04%, profit: -0.28$ 
+ balance: 92.54 
+ entering side: short 
+ [20, 48, 18, 14]
+
+> Bitcoin:
+symbol: 1000SATSUSDT 
+ ror: -3.17%, profit: -0.30$ 
+ balance: 92.21 
+ entering side: short 
+ [20, 48, 18, 15]
+
+> Bitcoin:
+symbol: PNUTUSDT 
+ ror: -3.06%, profit: -0.27$ 
+ balance: 91.93 
+ entering side: long 
+ [20, 49, 18, 15]
+
+> Bitcoin:
+symbol: 1000XUSDT 
+ ror: -3.14%, profit: -0.28$ 
+ balance: 91.63 
+ entering side: long 
+ [20, 50, 18, 15]
+
+> Bitcoin:
+symbol: GRASSUSDT 
+ ror: -3.12%, profit: -0.28$ 
+ balance: 91.34 
+ entering side: long 
+ [20, 51, 18, 15]
+
+> Bitcoin:
+symbol: 1000XUSDT 
+ ror: 8.94%, profit: 0.89$ 
+ balance: 92.25 
+ entering side: long 
+ [21, 52, 19, 15]
+
+> Bitcoin:
+symbol: ALCHUSDT 
+ ror: -3.14%, profit: -0.28$ 
+ balance: 91.96 
+ entering side: long 
+ [21, 53, 19, 15]
+
+> Bitcoin:
+symbol: EOSUSDT 
+ ror: -3.28%, profit: -0.29$ 
+ balance: 91.64 
+ entering side: long 
+ [21, 54, 19, 15]
+
+> Bitcoin:
+symbol: VIDTUSDT 
+ ror: -3.37%, profit: -0.30$ 
+ balance: 91.32 
+ entering side: long 
+ [21, 55, 19, 15]
+
+> Bitcoin:
+symbol: VINEUSDT 
+ ror: -3.03%, profit: -0.26$ 
+ balance: 91.07 
+ entering side: long 
+ [21, 56, 19, 15]
+
+> Bitcoin:
+symbol: ZROUSDT 
+ ror: 3.90%, profit: 0.36$ 
+ balance: 91.42 
+ entering side: long 
+ [22, 56, 19, 15]
+
+> Bitcoin:
+symbol: FETUSDT 
+ ror: 4.94%, profit: 0.41$ 
+ balance: 91.42 
+ entering side: short 
+ [22, 56, 20, 15]
+
+> Bitcoin:
+symbol: ADAUSDT 
+ ror: 4.94%, profit: 0.41$ 
+ balance: 92.22 
+ entering side: short 
+ [22, 56, 21, 15]
+
+> Bitcoin:
+symbol: SEIUSDT 
+ ror: 5.91%, profit: 0.49$ 
+ balance: 92.71 
+ entering side: short 
+ [22, 56, 22, 15]
+
+> Bitcoin:
+symbol: AUCTIONUSDT 
+ ror: 4.00%, profit: 0.35$ 
+ balance: 93.05 
+ entering side: short 
+ [22, 56, 23, 15]
+
+> Bitcoin:
+symbol: HBARUSDT 
+ ror: 8.95%, profit: 0.70$ 
+ balance: 93.75 
+ entering side: short 
+ [22, 56, 24, 15]
+
+> Bitcoin:
+symbol: NEOUSDT 
+ ror: 17.93%, profit: 1.38$ 
+ balance: 95.14 
+ entering side: short 
+ [22, 56, 25, 15]
+
+> Bitcoin:
+symbol: ALGOUSDT 
+ ror: -3.28%, profit: -0.31$ 
+ balance: 94.83 
+ entering side: short 
+ [22, 56, 25, 16]
+
+> Bitcoin:
+symbol: BELUSDT 
+ ror: -3.44%, profit: -0.30$ 
+ balance: 94.49 
+ entering side: long 
+ [22, 57, 25, 16]
+
+> Bitcoin:
+symbol: VANAUSDT 
+ ror: -3.09%, profit: -0.28$ 
+ balance: 94.20 
+ entering side: long 
+ [22, 58, 25, 16]
+
+> Bitcoin:
+symbol: NEOUSDT 
+ ror: -3.12%, profit: -0.30$ 
+ balance: 93.89 
+ entering side: short 
+ [22, 58, 25, 17]
+
+> Bitcoin:
+symbol: TAOUSDT 
+ ror: -3.16%, profit: -0.29$ 
+ balance: 93.60 
+ entering side: short 
+ [22, 58, 25, 18]
+
+> Bitcoin:
+symbol: VINEUSDT 
+ ror: 5.65%, profit: 0.55$ 
+ balance: 94.13 
+ entering side: long 
+ [23, 58, 25, 18]
+
+> Bitcoin:
+symbol: SAFEUSDT 
+ ror: 3.80%, profit: 0.34$ 
+ balance: 94.37 
+ entering side: long 
+ [25, 59, 25, 19]
+
+> Bitcoin:
+symbol: PENDLEUSDT 
+ ror: -3.08%, profit: -0.24$ 
+ balance: 94.12 
+ entering side: long 
+ [25, 60, 25, 19]
+
+> Bitcoin:
+symbol: GRIFFAINUSDT 
+ ror: -3.00%, profit: -0.29$ 
+ balance: 93.82 
+ entering side: short 
+ [25, 60, 25, 20]
+
+> Bitcoin:
+symbol: 1000SATSUSDT 
+ ror: 5.89%, profit: 0.51$ 
+ balance: 94.31 
+ entering side: short 
+ [25, 60, 26, 20]
+
+> Bitcoin:
+symbol: MEWUSDT 
+ ror: -3.39%, profit: -0.31$ 
+ balance: 93.99 
+ entering side: long 
+ [25, 61, 26, 20]
+
+> Bitcoin:
+symbol: JUPUSDT 
+ ror: 4.00%, profit: 0.34$ 
+ balance: 94.33 
+ entering side: short 
+ [25, 61, 27, 20]
+
+> Bitcoin:
+symbol: ONDOUSDT 
+ ror: -3.01%, profit: -0.29$ 
+ balance: 94.02 
+ entering side: short 
+ [25, 61, 27, 21]
+
+> Bitcoin:
+symbol: NEOUSDT 
+ ror: -3.14%, profit: -0.30$ 
+ balance: 93.72 
+ entering side: short 
+ [25, 61, 27, 22]
+
+> Bitcoin:
+symbol: WIFUSDT 
+ ror: -3.03%, profit: -0.29$ 
+ balance: 93.43 
+ entering side: short 
+ [25, 61, 27, 23]
+
+> Bitcoin:
+symbol: VIRTUALUSDT 
+ ror: -3.15%, profit: -0.30$ 
+ balance: 93.11 
+ entering side: short 
+ [25, 61, 27, 24]
+
+> Bitcoin:
+symbol: FARTCOINUSDT 
+ ror: 3.97%, profit: 0.38$ 
+ balance: 93.49 
+ entering side: long 
+ [26, 61, 27, 24]
