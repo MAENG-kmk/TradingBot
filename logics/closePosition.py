@@ -1,7 +1,12 @@
 import asyncio
+import sys
+import os
+from datetime import datetime
+sys.path.append(os.path.abspath("."))
+from MongoDB_python.client import addDataToMongoDB
 
 def closePosition(client, createOrder, positions, position_info, winnig_history, getBalance, send_message, betController, special_care):
-  message = ""
+  datas = []
   list_to_close = betController.getClosePositions(positions)
   for position in list_to_close:
     response = False
@@ -25,14 +30,17 @@ def closePosition(client, createOrder, positions, position_info, winnig_history,
         check_num = 3
       
     if response:
-      winnig_history[check_num] += 1
-      if position['symbol'] in position_info:
-        info = position_info.pop(position['symbol'], None)
-      else:
-        info = [0, 0]
-      balance, _ = getBalance(client)
-      message += " symbol: {} \n ror: {:.2f}%, profit: {:.2f}$ \n balance: {:.2f} \n entering side: {} \n {} \n\n".format(position['symbol'], position['ror'], position['profit'], float(balance), info[0], winnig_history)
+      data = position
+      data['closeTime'] = int(datetime.now().timestamp())
+      datas.append(data)
+      
+      # winnig_history[check_num] += 1
+      # if position['symbol'] in position_info:
+      #   info = position_info.pop(position['symbol'], None)
+      # else:
+      #   info = [0, 0]
+      # balance, _ = getBalance(client)
+      # message += " symbol: {} \n ror: {:.2f}%, profit: {:.2f}$ \n balance: {:.2f} \n entering side: {} \n {} \n\n".format(position['symbol'], position['ror'], position['profit'], float(balance), info[0], winnig_history)
 
-  if len(message) > 0:
-    asyncio.run(send_message(message))
-    
+  if datas:
+    addDataToMongoDB(datas)
