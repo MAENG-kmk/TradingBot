@@ -1,10 +1,11 @@
 from binance.client import Client
-client = Client(api_key="w6wGRNsx88wZHGNi6j2j663hyvEpDNHrLE6E6UntucPkJ4Lqp8P4rasX1lAx9ylE",
-                api_secret="EtbkzmsRjVw2NHqis4rLlIvrZN4HVfHp77Qdzd8wG1AbyoXttLV8EgS7z9Efz9ut")
+from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET
+client = Client(api_key=BINANCE_API_KEY,
+                api_secret=BINANCE_API_SECRET)
 
 from tools.getData import getData
 from tools.getRsi import getRsi
-from tools.getData import getData, getUsaTimeData
+from tools.getData import getData, getUsaTimeData, get1HData
 from tools.getTicker import getTicker
 from tools.getBalance import getBalance
 from tools.getMa import getMa, getMa_diff, getMACD
@@ -16,9 +17,11 @@ from tools.BetController import BetController
 from logics.decidePosition import decidePosition
 from logics.enterPosition import enterPosition
 from tools.getLarry import getLarry
+from tools.getBolinger import getBolinger
 
 import math
 from datetime import datetime
+from MongoDB_python.client import addDataToMongoDB
 
 ############# enterPosition test ##################
 # ticker = getTicker(client)
@@ -29,10 +32,5 @@ from datetime import datetime
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
-a = []
-def test1(li):
-  li.append(1)
-def test2(li):
-  print(li.pop())
-test1(a)
-test2(a)
+from datetime import datetime
+print(int(datetime.now().timestamp()))

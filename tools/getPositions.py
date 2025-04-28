@@ -17,5 +17,6 @@ def getPositions(client):
       'ror': ror,
       'amount': abs(float(position['positionAmt'])),
       'markPrice': float(position['markPrice']),
+      'enterTime': position['updateTime']
     })
   return position_list

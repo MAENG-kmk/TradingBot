@@ -22,7 +22,7 @@ def logic_filter(data, logiclist):
   return result
 
 
-def enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController, special_care):
+def enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getData, getVolume, setLeverage, createOrder, betController, special_care):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
@@ -31,7 +31,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
 
   for _, coin in ticker.iterrows():
     symbol = coin['symbol']
-    data = getUsaTimeData(client, symbol, 50)
+    data = getData(client, symbol, 50)
     if len(data) < 49:
       continue
     check_volume = getVolume(data)
