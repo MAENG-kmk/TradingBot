@@ -7,10 +7,9 @@ from SecretVariables import MONGODB_URI, COLLECTION
 
 uri = MONGODB_URI
 
-client = MongoClient(uri, server_api=ServerApi('1'))
-
 def addDataToMongoDB(data):
     try:
+        client = MongoClient(uri, server_api=ServerApi('1'))
         database = client.get_database("Trade_History")
         collects = database.get_collection(COLLECTION)
         collects.insert_many(data)
@@ -20,6 +19,7 @@ def addDataToMongoDB(data):
 
 def addErrorCodeToMongoDB(data):
     try:
+        client = MongoClient(uri, server_api=ServerApi('1'))
         database = client.get_database("ErrorCode")
         collects = database.get_collection(COLLECTION)
         collects.insert_many(data)

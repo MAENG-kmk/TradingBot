@@ -56,7 +56,7 @@ def getMACD(data):
   data["signal"] = 0
   data.loc[data["MACD"] > data["Signal"], "signal"] = 1
   data.loc[data["MACD"] < data["Signal"], "signal"] = -1  
-  
+
   cur = int(data.iloc[-1]['signal'])
   last = int(data.iloc[-2]['signal'])
   

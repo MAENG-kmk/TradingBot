@@ -8,6 +8,7 @@ from MongoDB_python.client import addDataToMongoDB
 def closePosition(client, createOrder, positions, position_info, winnig_history, getBalance, send_message, betController, special_care):
   datas = []
   list_to_close = betController.getClosePositions(positions)
+  
   for position in list_to_close:
     response = False
     special_care[position['symbol']] = {
