@@ -1,4 +1,4 @@
-from .getData import getUsaTimeData
+from .getData import get1HData
 from .getMa import getMa
 
 
@@ -26,9 +26,9 @@ class BetController:
    
    
   def bet(self, symbol, side):
-    data = getUsaTimeData(self.client, symbol, 50)
-    ma = getMa(data)
-    currentSide = ma
+    # data = get1HData(self.client, symbol, 50)
+    # ma = getMa(data)
+    # currentSide = ma
     # if side == currentSide:
     if True:
       self.targetRorChecker[symbol] = [self.targetRorChecker[symbol][0]+self.adjustRor, self.targetRorChecker[symbol][0]+self.defaultStopLoss+1]

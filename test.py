@@ -32,5 +32,5 @@ from MongoDB_python.client import addDataToMongoDB
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
-from datetime import datetime
-print(int(datetime.now().timestamp()))
+data = get1HData(client, 'BTCUSDT', 30)
+getBolinger(data)
