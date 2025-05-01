@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { getCollection } = require("./mongodb");
+const { getCollection, getDocuments } = require("./mongodb");
 const Binance = require("binance-api-node").default;
 
 dotenv.config();
@@ -42,13 +42,31 @@ app.get("/balance", async (req, res) => {
   }
 });
 
-app.get("/test", async (req, res) => {
+app.get("/currentVersion", async (req, res) => {
   try {
-    const a = await getCollection();
-    console.log(a);
+    const versionAndDate = await getDocuments('Version_History', 'history');
+    const lastData = versionAndDate.pop();
+    const version = lastData.version
+    const date = lastData.date
 
     res.json({
-      db: a,
+      success: true,
+      version: version,
+      date: date,
+    })
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.get("/datas", async (req, res) => {
+  try {
+    const collectionName = req.query.collection;
+    const datas = await getDocuments('Trade_History', collectionName);
+
+    res.json({
+      success: true,
+      datas: datas,
     })
   } catch (err) {
     console.log(err);

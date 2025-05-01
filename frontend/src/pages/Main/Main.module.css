@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Orbitron:wght@400;700&display=swap');
+body {
+  font-family: 'Orbitron', sans-serif;
+  background-color: #0a0a0a;
+  color: #e2e2e2;
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+  height: 100%;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  width: 90vw;
+  height: 15vh;
+  font-size: 20px;
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  display: flex;
+  align-items: end;
+}
+
+.modelName {
+  display: flex;
+  align-items: end;
+  color: cyan;
+  margin-left: 3pt;
+  font-size: medium;
+}
+
+.assetContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90vw;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 95%;
+  height: 10vh;
+}
+
+.name {
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.7);
+  font-size: x-large;
+}
+
+.balance {
+  font-size: xx-large;
+  font-weight: bold;
+  color: rgb(35, 255, 35);
+}
+
+.graph {
+  width: 95%;
+  height: 30vh;
+  font-family: sans-serif;
+}
+
+.glow_text {
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.7);
+  font-size: xx-large;
+  font-weight: bold;
+}
+
+.glow_box {
+  border: 1px solid cyan;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.gradient-border {
+  border: 1px solid transparent;
+  background: linear-gradient(#0a0a0a, #0a0a0a) padding-box,
+              linear-gradient(135deg, #00ffff, #0088ff) border-box;
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.4);
+  }
+  70% {
+      box-shadow: 0 0 0 10px rgba(0, 255, 255, 0);
+  }
+  100% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
+  }
+}

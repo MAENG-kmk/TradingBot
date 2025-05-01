@@ -21,7 +21,7 @@ from tools.getBolinger import getBolinger
 
 import math
 from datetime import datetime
-from MongoDB_python.client import addDataToMongoDB
+from MongoDB_python.client import addDataToMongoDB, addVersionAndDate
 
 ############# enterPosition test ##################
 # ticker = getTicker(client)
@@ -32,5 +32,4 @@ from MongoDB_python.client import addDataToMongoDB
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
-data = get1HData(client, 'BTCUSDT', 30)
-getBolinger(data)
+addVersionAndDate('BolingerBend+MACD')

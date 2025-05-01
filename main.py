@@ -1,5 +1,5 @@
 from binance.client import Client
-from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET
+from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET, COLLECTION
 
 client = Client(api_key=BINANCE_API_KEY,
                 api_secret=BINANCE_API_SECRET)
@@ -22,6 +22,8 @@ from tools.getBolinger import getBolinger
 from logics.decidePosition import decidePosition
 from logics.closePosition import closePosition
 from logics.enterPosition import enterPosition
+
+from MongoDB_python.client import addVersionAndDate
 import asyncio
 import time
 
@@ -30,6 +32,7 @@ logic_list = [getBolinger, getMACD]
 balance, available = getBalance(client)
 betController = BetController(client, logic_list)
 # asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
+addVersionAndDate(COLLECTION)
 
 
 def run_trading_bot():
