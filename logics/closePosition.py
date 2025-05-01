@@ -33,6 +33,8 @@ def closePosition(client, createOrder, positions, position_info, winnig_history,
     if response:
       data = position
       data['closeTime'] = int(datetime.now().timestamp())
+      balance, _ = getBalance(client)
+      data['balance'] = balance
       datas.append(data)
       
       # winnig_history[check_num] += 1
@@ -40,7 +42,6 @@ def closePosition(client, createOrder, positions, position_info, winnig_history,
       #   info = position_info.pop(position['symbol'], None)
       # else:
       #   info = [0, 0]
-      # balance, _ = getBalance(client)
       # message += " symbol: {} \n ror: {:.2f}%, profit: {:.2f}$ \n balance: {:.2f} \n entering side: {} \n {} \n\n".format(position['symbol'], position['ror'], position['profit'], float(balance), info[0], winnig_history)
 
   if datas:

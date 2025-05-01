@@ -2,11 +2,10 @@ const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
 const uri = process.env.MONGODB_URI;
-const dbName = 'Trade_History';
 
 let client;
 
-const connectMongo = async () => {
+const connectMongo = async (dbName) => {
   if (!client) {
     client = new MongoClient(uri);
     await client.connect();
@@ -15,17 +14,18 @@ const connectMongo = async () => {
   return client.db(dbName)
 };
 
-const getCollection = async (collectionName) => {
+const getDocuments = async (dbName, collectionName) => {
   try {
-    const db = await connectMongo();
-    const cols = await db.listCollections().toArray();
-    console.log(cols)
-    return cols
-  } catch(error) {
-    console.log(error)
+    const db = await connectMongo(dbName);
+    const collection = db.collection(collectionName);
+    const documents = await collection.find({}).toArray();
+    return documents;
+  } catch (err) {
+    console.log(err)
   }
 };
 
+
 module.exports = {
-  getCollection,
+  getDocuments,
 };
