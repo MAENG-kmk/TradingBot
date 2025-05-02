@@ -33,14 +33,15 @@ def addErrorCodeToMongoDB(data):
             "Unable to find the document due to the following error: ", e)
 
 
-def addVersionAndDate(version):
+def addVersionAndDate(version, balance):
     try:
         client = MongoClient(uri, server_api=ServerApi('1'))
         database = client.get_database("Version_History")
         collects = database.get_collection("history")
         data = {
           'version': version,
-          'date': datetime.now().timestamp()
+          'date': datetime.now().timestamp(),
+          'balance': balance,
         }
         collects.insert_one(data)
         client.close()
