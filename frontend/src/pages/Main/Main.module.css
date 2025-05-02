@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Orbitron:wght@400;700&display=swap');
 body {
   font-family: 'Orbitron', sans-serif;
-  background-color: #0a0a0a;
+  background-color: #0D1117;
   color: #e2e2e2;
 }
 
@@ -19,7 +19,8 @@ body {
 .headerContainer {
   display: flex;
   align-items: center;
-  width: 90vw;
+  justify-content: space-between;
+  width: 92vw;
   height: 15vh;
   font-size: 20px;
 }
@@ -42,11 +43,54 @@ body {
   font-size: medium;
 }
 
+.button {
+  font-family: 'Orbitron', sans-serif;
+  font-size: large;
+  color: #e2e2e2;
+  background-color: rgba(21, 94, 117, 0.5);
+  width: 12vw;
+  height: 7vh;
+  border: none;
+  border-radius: 10px;
+}
+
+.button:hover {
+  cursor: pointer;
+  background-color: #0D1117;
+  color: cyan;
+  border: 1px solid cyan;
+  border: 1px solid transparent;
+  background: linear-gradient(#0a0a0a, #0a0a0a) padding-box,
+              linear-gradient(135deg, #00ffff, #0088ff) border-box;
+}
+
+.row {
+  display: flex;
+  width: 92vw;
+  justify-content: space-between;
+}
+
+.secondRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 92vw;
+  height: 40vh;
+  margin-top: 3vh;
+}
+
 .assetContent {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90vw;
+  width: 70vw;
+}
+
+.rorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20vw;
 }
 
 .header {
@@ -54,7 +98,14 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 95%;
-  height: 10vh;
+  height: 8vh;
+}
+
+.floor {
+  display: flex;
+  align-items: center;
+  width: 95%;
+  height: 4vh;
 }
 
 .name {
@@ -62,16 +113,54 @@ body {
   font-size: x-large;
 }
 
+.statistics {
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.7);
+  font-size: large;
+  margin: 0 5pt;
+}
+
 .balance {
+  display: flex;
+  align-items: center;
+  font-size: xx-large;
+  font-weight: bold;
+  color: #FFD700;
+}
+
+.plus {
+  display: flex;
+  align-items: center;
   font-size: xx-large;
   font-weight: bold;
   color: rgb(35, 255, 35);
 }
 
+.minus {
+  display: flex;
+  align-items: center;
+  font-size: xx-large;
+  font-weight: bold;
+  color: #F44336;
+}
+
+.label {
+  font-size: large;
+  font-weight: bold;
+  color: #e2e2e2;
+  margin-right: 10px;
+}
+
 .graph {
   width: 95%;
-  height: 30vh;
+  height: 32vh;
   font-family: sans-serif;
+}
+
+.pieGraph {
+  width: 95%;
+  height: 20vh;
+  font-family: sans-serif;
+  margin-bottom: 2vh;
 }
 
 .glow_text {
@@ -86,7 +175,7 @@ body {
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
 }
 
-.gradient-border {
+.gradient_border {
   border: 1px solid transparent;
   background: linear-gradient(#0a0a0a, #0a0a0a) padding-box,
               linear-gradient(135deg, #00ffff, #0088ff) border-box;

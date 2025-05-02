@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react'
 import styles from './Main.module.css'
 import axios from 'axios'
-import Graph from '../../components/Graph/Graph';
+import LineGraph from '../../components/Graph/LineGraph';
 import formatTimestamp from '../../tools/formatTimeStamp';
+import BarGraph from '../../components/Graph/BarGraph';
+import PieGraph from '../../components/Graph/PieGraph';
 
 const Main = () => {
   const [balance, setBalance] = useState('');
+  const [pnl, setPnl] = useState(0);
+  const [numTrade, setNumTrade] = useState(0);
   const [version, setVersion] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [datas, setDatas] = useState([]);
+  const [balanceDatas, setBalanceDatas] = useState([]);
+  const [pnlDatas, setPnlDatas] = useState([]);
+  const [winningRateData, setWinningRateData] = useState([]);
 
   useEffect(() => {
     const getBalance = async () => {
@@ -27,22 +32,49 @@ const Main = () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/currentVersion`)
         if (response.data.success) {
           const vers = response.data.version;
-          const date = response.data.date;
-          const convertDate = formatTimestamp(date);
+          // const vers = 'BolingerBend+MACD'
           setVersion(vers);
-          setStartDate(convertDate);
 
           const incodig = encodeURIComponent(vers);
           const response_2 = await axios.get(`${process.env.REACT_APP_API_URL}/datas?collection=${incodig}`);
           if (response_2.data.success) {
             const messData = response_2.data.datas;
+            setNumTrade(messData.length);
+            var win = 0;
+            var lose = 0;
+            var totalPnl = 0;
+            const balances = [];
             const processed = messData.map(data => {
               const filter = {};
-              filter['name'] =  formatTimestamp(data.closeTime);
-              filter['value'] = data.ror;
+              const convertedDate = formatTimestamp(data.closeTime);
+              balances.push({
+                name: convertedDate,
+                Balance: parseFloat(data.balance).toFixed(2),
+              })
+              filter['name'] =  convertedDate;
+              filter['Profit'] = parseFloat(data.profit).toFixed(2);
+              totalPnl += parseFloat(data.profit);
+              if (data.ror > 0) {
+                win += 1;
+              } else {
+                lose += 1;
+              };
+
               return filter;
-            })
-            setDatas(processed);
+            });
+            setPnl(totalPnl.toFixed(2));
+            setBalanceDatas(balances);
+            setPnlDatas(processed);
+            setWinningRateData([
+              {
+                name: 'win',
+                value: win,
+              },
+              {
+                name: 'lose',
+                value: lose,
+              }
+            ]);
           };
         }
       } catch (error) {
@@ -54,21 +86,52 @@ const Main = () => {
     getDatas();
   }, [])
 
+  const handleClickButton = () => {
+    alert('Open Soon');
+  };
+
   return(
     <div className={styles.background}>
       <div className={styles.headerContainer}>
         <div className={styles.titleContainer}>
-          <div className={`${styles.title} ${styles.glow_text}`}>Crypto Trading Bot</div>
+          <div className={`${styles.title} ${styles.glow_text}`}>CRYPTO TRADING BOT</div>
           <div className={styles.modelName}>Current Model : {version}</div>
         </div>
+        <button className={styles.button} onClick={handleClickButton}>Go Model History</button>
       </div>
-      <div className={`${styles.assetContent} ${styles.glow_box}`}>
+      <div className={styles.row}>
+        <div className={`${styles.assetContent} ${styles.glow_box} ${styles.gradient_border}`}>
+          <div className={styles.header}>
+            <div className={styles.name}>Asset Value</div>
+            <div className={styles.balance}><span className={styles.label}>Current Asset :</span>{balance} $</div>
+          </div>
+          <div className={styles.graph}>
+            <LineGraph datas={balanceDatas} />
+          </div>
+        </div>
+        <div className={`${styles.rorContent} ${styles.glow_box} ${styles.gradient_border}`}>
+          <div className={styles.header}>
+            <div className={styles.statistics}>Winning Rate</div>
+          </div>
+          <div className={styles.pieGraph}>
+            <PieGraph datas={winningRateData} />
+          </div>
+          <div className={styles.floor}>
+            <div className={styles.statistics}>Total Trade : {numTrade}</div>
+          </div>
+          <div className={styles.floor}>
+            <div className={styles.statistics}>Total ROR :</div>
+            <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl/balance*100).toFixed(2)} %</div>
+          </div>
+        </div>
+      </div>
+      <div className={`${styles.secondRow} ${styles.glow_box} ${styles.gradient_border}`}>
         <div className={styles.header}>
-          <div className={styles.name}>Asset Value</div>
-          <div className={styles.balance}>{balance} $</div>
+          <div className={styles.name}>Profit and Loss ($)</div>
+          <div className={pnl > 0 ? styles.plus : styles.minus}><span className={styles.label}>Total :</span>{pnl} $</div>
         </div>
         <div className={styles.graph}>
-          <Graph datas={datas} />
+          <BarGraph datas={pnlDatas} />
         </div>
       </div>
     </div>
