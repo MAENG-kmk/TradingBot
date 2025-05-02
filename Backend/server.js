@@ -9,7 +9,8 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ 
+  origin: ["http://localhost:3000", "https://trading-c64rtweb0-maeng-kmks-projects.vercel.app"] }));
 
 const client = Binance({
   apiKey: process.env.BINANCE_API_KEY,
