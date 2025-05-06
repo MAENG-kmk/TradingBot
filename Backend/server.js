@@ -3,17 +3,6 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const { getCollection, getDocuments } = require("./mongodb");
 const Binance = require("binance-api-node").default;
-const http = require('http');
-const https = require('https');
-const fs = require('fs');
-
-const HTTPS_PORT= 8080;
-
-const options = {
-  key: fs.readFileSync('./rootca.key'),
-  cert: fs.readFileSync('./rootca.crt')
-};
-
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;
@@ -88,5 +77,3 @@ app.get("/datas", async (req, res) => {
 app.listen(app.get("port"), () => {
   console.log(app.get("port"), "번 포트에서 대기 중");
 });
-
-https.createServer(options, app).listen(HTTPS_PORT);
