@@ -196,3 +196,59 @@ body {
       box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
   }
 }
+
+@media (max-width: 900px) {
+  .headerContainer {
+    margin-top: 3vh;
+  }
+
+  .glow_text {
+    font-size: x-large;
+  }
+
+  .modelName {
+    font-size: small;
+  }
+
+  .button {
+    font-size: x-small;
+  }
+
+  .row {
+    flex-direction: column;
+    margin-top: 3vh;
+  }
+
+  .assetContent {
+    width: 90vw;
+  }
+
+  .name {
+    font-size: medium;
+  }
+
+  .balance {
+    font-size: small;
+  }
+
+  .label {
+    font-size: small;
+  }
+
+  .rorContent {
+    width: 90vw;
+    margin-top: 3vh;
+  }
+
+  .statistics {
+    font-size: medium;
+  }
+
+  .plus {
+    font-size: large;
+  }
+
+  .minus {
+    font-size: large;
+  }
+} 
