@@ -1,12 +1,12 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
 
 const LingeGraph = ({datas}) => {
-
+  console.log(datas)
   return(
     <ResponsiveContainer width='100%' height='100%'>
       <LineChart data={datas}>
         <XAxis dataKey="name" />
-        <YAxis domain={['dataMin - 1', 'dataMax + 1']}/>
+        <YAxis domain={['dataMin - 5', 'dataMax + 10']}/>
         <Tooltip />
         <CartesianGrid horizontal={false} vertical={false} />
         {/* <CartesianGrid stroke="#9d9d9d" /> */}
