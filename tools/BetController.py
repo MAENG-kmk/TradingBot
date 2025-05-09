@@ -6,9 +6,9 @@ class BetController:
   def __init__(self, client, logicList):
     self.client = client
     self.targetRorChecker = {}
-    self.defaultTargetRor = 6
-    self.defaultStopLoss = -3
-    self.adjustRor = 1
+    self.defaultTargetRor = 10
+    self.defaultStopLoss = -5
+    self.adjustRor = 2
     self.logicList = logicList
     
   def saveNew(self, symbol):

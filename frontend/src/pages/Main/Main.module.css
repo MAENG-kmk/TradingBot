@@ -130,7 +130,7 @@ body {
 .plus {
   display: flex;
   align-items: center;
-  font-size: xx-large;
+  font-size: x-large;
   font-weight: bold;
   color: rgb(35, 255, 35);
 }
@@ -138,7 +138,7 @@ body {
 .minus {
   display: flex;
   align-items: center;
-  font-size: xx-large;
+  font-size: x-large;
   font-weight: bold;
   color: #F44336;
 }
@@ -220,7 +220,7 @@ body {
   }
 
   .assetContent {
-    width: 90vw;
+    width: 92vw;
   }
 
   .name {
@@ -236,7 +236,7 @@ body {
   }
 
   .rorContent {
-    width: 90vw;
+    width: 92vw;
     margin-top: 3vh;
   }
 

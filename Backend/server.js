@@ -48,13 +48,15 @@ app.get("/currentVersion", async (req, res) => {
   try {
     const versionAndDate = await getDocuments('Version_History', 'history');
     const lastData = versionAndDate.pop();
-    const version = lastData.version
-    const date = lastData.date
+    const version = lastData.version;
+    const date = lastData.date;
+    const balance = lastData.balance;
 
     res.json({
       success: true,
       version: version,
       date: date,
+      balance: balance,
     })
   } catch (err) {
     console.log(err);

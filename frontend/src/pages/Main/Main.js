@@ -7,6 +7,7 @@ import BarGraph from '../../components/Graph/BarGraph';
 import PieGraph from '../../components/Graph/PieGraph';
 
 const Main = () => {
+  const [startBalance, setStartBalance] = useState('');
   const [balance, setBalance] = useState('');
   const [pnl, setPnl] = useState(0);
   const [numTrade, setNumTrade] = useState(0);
@@ -16,23 +17,29 @@ const Main = () => {
   const [winningRateData, setWinningRateData] = useState([]);
 
   useEffect(() => {
-    const getBalance = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/balance`);
-        if (response.data.success) {
-          setBalance(parseFloat(response.data.balance).toFixed(2));
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    };
+    // const getBalance = async () => {
+    //   try {
+    //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/balance`);
+    //     if (response.data.success) {
+    //       setBalance(parseFloat(response.data.balance).toFixed(2));
+    //     }
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
+    // };
 
     const getDatas = async () => {
       try {
+        const response_0 = await axios.get(`${process.env.REACT_APP_API_URL}/balance`);
+        if (response_0.data.success) {
+          setBalance(parseFloat(response_0.data.balance).toFixed(2));
+        };
+
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/currentVersion`)
         if (response.data.success) {
           const vers = response.data.version;
-          // const vers = 'BolingerBend+MACD'
+          const sb = response.data.balance;
+          setStartBalance(sb);
           setVersion(vers);
 
           const incodig = encodeURIComponent(vers);
@@ -42,7 +49,6 @@ const Main = () => {
             setNumTrade(messData.length);
             var win = 0;
             var lose = 0;
-            var totalPnl = 0;
             const balances = [];
             const processed = messData.map(data => {
               const filter = {};
@@ -53,7 +59,6 @@ const Main = () => {
               })
               filter['name'] =  convertedDate;
               filter['Profit'] = parseFloat(data.profit).toFixed(2);
-              totalPnl += parseFloat(data.profit);
               if (data.ror > 0) {
                 win += 1;
               } else {
@@ -62,7 +67,8 @@ const Main = () => {
 
               return filter;
             });
-            setPnl(totalPnl.toFixed(2));
+            // setPnl(totalPnl.toFixed(2));
+            setPnl((parseFloat(response_0.data.balance)-parseFloat(sb)).toFixed(2))
             setBalanceDatas(balances);
             setPnlDatas(processed);
             setWinningRateData([
@@ -82,7 +88,7 @@ const Main = () => {
       }
     };
 
-    getBalance();
+    // getBalance();
     getDatas();
   }, [])
 
@@ -121,7 +127,7 @@ const Main = () => {
           </div>
           <div className={styles.floor}>
             <div className={styles.statistics}>Total ROR :</div>
-            <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl/balance*100).toFixed(2)} %</div>
+            <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl/startBalance*100).toFixed(2)} %</div>
           </div>
         </div>
       </div>

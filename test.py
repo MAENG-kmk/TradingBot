@@ -5,7 +5,7 @@ client = Client(api_key=BINANCE_API_KEY,
 
 from tools.getData import getData
 from tools.getRsi import getRsi
-from tools.getData import getData, getUsaTimeData, get1HData
+from tools.getData import getData, getUsaTimeData, get1HData, get4HData
 from tools.getTicker import getTicker
 from tools.getBalance import getBalance
 from tools.getMa import getMa, getMa_diff, getMACD
@@ -32,4 +32,4 @@ from MongoDB_python.client import addDataToMongoDB, addVersionAndDate
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
-addVersionAndDate('BolingerBend+MACD')
+print(get4HData(client, 'BTCUSDT', 20))
