@@ -7,7 +7,7 @@ client = Client(api_key=BINANCE_API_KEY,
 from tools.BetController import BetController
 from tools.getBalance import getBalance
 from tools.telegram import send_message
-from tools.getData import getData, getUsaTimeData, get1HData
+from tools.getData import getData, getUsaTimeData, get1HData, get4HData
 from tools.getTicker import getTicker
 from tools.getPositions import getPositions
 from tools.createOrder import createOrder
@@ -55,7 +55,7 @@ def run_trading_bot():
         # print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
         positions = getPositions(client)
-        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController, special_care)
+        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get4HData, getVolume, setLeverage, createOrder, betController, special_care)
         
       # print("정상 작동 중,,,")
       time.sleep(30)
