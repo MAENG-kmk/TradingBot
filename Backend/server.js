@@ -77,6 +77,19 @@ app.get("/datas", async (req, res) => {
   }
 });
 
+app.get("/versionDatas", async (req, res) => {
+  try {
+    const datas = await getDocuments('Version_History', 'history');
+
+    res.json({
+      success: true,
+      datas: datas,
+    })
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 app.listen(app.get("port"), () => {
   console.log(app.get("port"), "번 포트에서 대기 중");
 });
