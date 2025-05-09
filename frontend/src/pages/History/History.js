@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import styles from './Main.module.css'
+import styles from './History.module.css'
 import axios from 'axios'
 import LineGraph from '../../components/Graph/LineGraph';
 import formatTimestamp from '../../tools/formatTimeStamp';
 import BarGraph from '../../components/Graph/BarGraph';
 import PieGraph from '../../components/Graph/PieGraph';
-import { useNavigate } from 'react-router-dom';
+import { data, useNavigate } from 'react-router-dom';
 
-const Main = () => {
+const History = () => {
   const [startBalance, setStartBalance] = useState('');
   const [balance, setBalance] = useState('');
   const [pnl, setPnl] = useState(0);
@@ -30,6 +30,17 @@ const Main = () => {
     //     console.log(error)
     //   }
     // };
+    const getVersions = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/versionDatas`);
+        if (response.data.success) {
+          const datas = response.data.datas;
+          console.log(datas)
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
     const getDatas = async () => {
       try {
@@ -91,60 +102,65 @@ const Main = () => {
       }
     };
 
-    // getBalance();
+    getVersions();
     getDatas();
   }, [])
 
   const handleClickButton = () => {
-    navigate('/history');
+    navigate('/');
   };
 
   return(
     <div className={styles.background}>
-      <div className={styles.headerContainer}>
-        <div className={styles.titleContainer}>
-          <div className={`${styles.title} ${styles.glow_text}`}>CRYPTO TRADING BOT</div>
-          <div className={styles.modelName}>Current Model : {version}</div>
-        </div>
-        <button className={styles.button} onClick={handleClickButton}>Model History</button>
+      <div className={styles.sideBar}>
+        
       </div>
-      <div className={styles.row}>
-        <div className={`${styles.assetContent} ${styles.glow_box} ${styles.gradient_border}`}>
+      <div className={styles.contentContainer}>
+        <div className={styles.headerContainer}>
+          <div className={styles.titleContainer}>
+            <div className={`${styles.title} ${styles.glow_text}`}>CRYPTO TRADING BOT</div>
+            <div className={styles.modelName}>Current Model : {version}</div>
+          </div>
+          <button className={styles.button} onClick={handleClickButton}>Go Live</button>
+        </div>
+        <div className={styles.row}>
+          <div className={`${styles.assetContent} ${styles.glow_box} ${styles.gradient_border}`}>
+            <div className={styles.header}>
+              <div className={styles.name}>Asset Value</div>
+              <div className={styles.balance}><span className={styles.label}>Current Asset :</span>{balance} $</div>
+            </div>
+            <div className={styles.graph}>
+              <LineGraph datas={balanceDatas} />
+            </div>
+          </div>
+          <div className={`${styles.rorContent} ${styles.glow_box} ${styles.gradient_border}`}>
+            <div className={styles.header}>
+              <div className={styles.statistics}>Winning Rate</div>
+            </div>
+            <div className={styles.pieGraph}>
+              <PieGraph datas={winningRateData} />
+            </div>
+            <div className={styles.floor}>
+              <div className={styles.statistics}>Total Trade : {numTrade}</div>
+            </div>
+            <div className={styles.floor}>
+              <div className={styles.statistics}>Total ROR :</div>
+              <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl/startBalance*100).toFixed(2)} %</div>
+            </div>
+          </div>
+        </div>
+        <div className={`${styles.secondRow} ${styles.glow_box} ${styles.gradient_border}`}>
           <div className={styles.header}>
-            <div className={styles.name}>Asset Value</div>
-            <div className={styles.balance}><span className={styles.label}>Current Asset :</span>{balance} $</div>
+            <div className={styles.name}>Profit and Loss ($)</div>
+            <div className={pnl > 0 ? styles.plus : styles.minus}><span className={styles.label}>Total :</span>{pnl} $</div>
           </div>
           <div className={styles.graph}>
-            <LineGraph datas={balanceDatas} />
+            <BarGraph datas={pnlDatas} />
           </div>
-        </div>
-        <div className={`${styles.rorContent} ${styles.glow_box} ${styles.gradient_border}`}>
-          <div className={styles.header}>
-            <div className={styles.statistics}>Winning Rate</div>
-          </div>
-          <div className={styles.pieGraph}>
-            <PieGraph datas={winningRateData} />
-          </div>
-          <div className={styles.floor}>
-            <div className={styles.statistics}>Total Trade : {numTrade}</div>
-          </div>
-          <div className={styles.floor}>
-            <div className={styles.statistics}>Total ROR :</div>
-            <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl/startBalance*100).toFixed(2)} %</div>
-          </div>
-        </div>
-      </div>
-      <div className={`${styles.secondRow} ${styles.glow_box} ${styles.gradient_border}`}>
-        <div className={styles.header}>
-          <div className={styles.name}>Profit and Loss ($)</div>
-          <div className={pnl > 0 ? styles.plus : styles.minus}><span className={styles.label}>Total :</span>{pnl} $</div>
-        </div>
-        <div className={styles.graph}>
-          <BarGraph datas={pnlDatas} />
         </div>
       </div>
     </div>
   )
-}
+};
 
-export default Main
+export default History;

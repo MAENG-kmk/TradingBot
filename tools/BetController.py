@@ -31,7 +31,7 @@ class BetController:
     # currentSide = ma
     # if side == currentSide:
     if True:
-      self.targetRorChecker[symbol] = [self.targetRorChecker[symbol][0]+self.adjustRor, self.targetRorChecker[symbol][0]+self.defaultStopLoss+1]
+      self.targetRorChecker[symbol] = [self.targetRorChecker[symbol][0]+self.adjustRor-1, self.targetRorChecker[symbol][0]-self.adjustRor]
       return 'bet'
     else:
       return 'close'
