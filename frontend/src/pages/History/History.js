@@ -5,11 +5,12 @@ import LineGraph from '../../components/Graph/LineGraph';
 import formatTimestamp from '../../tools/formatTimeStamp';
 import BarGraph from '../../components/Graph/BarGraph';
 import PieGraph from '../../components/Graph/PieGraph';
-import { data, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const History = () => {
+  const [versionDatas, setVersionDatas] = useState([]);
   const [startBalance, setStartBalance] = useState('');
-  const [balance, setBalance] = useState('');
+  const [date, setDate] = useState('');
   const [pnl, setPnl] = useState(0);
   const [numTrade, setNumTrade] = useState(0);
   const [version, setVersion] = useState('');
@@ -20,22 +21,12 @@ const History = () => {
   const navigate  = useNavigate();
 
   useEffect(() => {
-    // const getBalance = async () => {
-    //   try {
-    //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/balance`);
-    //     if (response.data.success) {
-    //       setBalance(parseFloat(response.data.balance).toFixed(2));
-    //     }
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // };
     const getVersions = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/versionDatas`);
         if (response.data.success) {
           const datas = response.data.datas;
-          console.log(datas)
+          setVersionDatas(datas);
         }
       } catch (err) {
         console.log(err);
@@ -44,19 +35,8 @@ const History = () => {
 
     const getDatas = async () => {
       try {
-        const response_0 = await axios.get(`${process.env.REACT_APP_API_URL}/balance`);
-        if (response_0.data.success) {
-          setBalance(parseFloat(response_0.data.balance).toFixed(2));
-        };
-
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/currentVersion`)
-        if (response.data.success) {
-          const vers = response.data.version;
-          const sb = response.data.balance;
-          setStartBalance(sb);
-          setVersion(vers);
-
-          const incodig = encodeURIComponent(vers);
+        if (version) {
+          const incodig = encodeURIComponent(version);
           const response_2 = await axios.get(`${process.env.REACT_APP_API_URL}/datas?collection=${incodig}`);
           if (response_2.data.success) {
             const messData = response_2.data.datas;
@@ -82,8 +62,8 @@ const History = () => {
               return filter;
             });
             // setPnl(totalPnl.toFixed(2));
-            setPnl((parseFloat(response_0.data.balance)-parseFloat(sb)).toFixed(2))
             setBalanceDatas(balances);
+            setPnl((parseFloat(balances.pop().Balance)-parseFloat(startBalance)).toFixed(2))
             setPnlDatas(processed);
             setWinningRateData([
               {
@@ -104,22 +84,35 @@ const History = () => {
 
     getVersions();
     getDatas();
-  }, [])
+  }, [version, startBalance])
 
   const handleClickButton = () => {
     navigate('/');
   };
 
+  const handleClickSidebarItem = (data) => {
+    setVersion(data.version);
+    setStartBalance(data.balance);
+    setDate(data.date);
+  };
+
   return(
     <div className={styles.background}>
       <div className={styles.sideBar}>
-        
+        {versionDatas.map((data) => {
+          return(
+            <div className={styles.sidebarItem} key={data._id} onClick={() => handleClickSidebarItem(data)}>
+              {data.version}
+            </div>
+          )
+        })}
       </div>
       <div className={styles.contentContainer}>
         <div className={styles.headerContainer}>
           <div className={styles.titleContainer}>
             <div className={`${styles.title} ${styles.glow_text}`}>CRYPTO TRADING BOT</div>
             <div className={styles.modelName}>Current Model : {version}</div>
+            <div className={styles.date}>Since: {date && formatTimestamp(date)}</div>
           </div>
           <button className={styles.button} onClick={handleClickButton}>Go Live</button>
         </div>
@@ -127,7 +120,6 @@ const History = () => {
           <div className={`${styles.assetContent} ${styles.glow_box} ${styles.gradient_border}`}>
             <div className={styles.header}>
               <div className={styles.name}>Asset Value</div>
-              <div className={styles.balance}><span className={styles.label}>Current Asset :</span>{balance} $</div>
             </div>
             <div className={styles.graph}>
               <LineGraph datas={balanceDatas} />
@@ -145,7 +137,7 @@ const History = () => {
             </div>
             <div className={styles.floor}>
               <div className={styles.statistics}>Total ROR :</div>
-              <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl/startBalance*100).toFixed(2)} %</div>
+              <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl && pnl/startBalance*100).toFixed(2)} %</div>
             </div>
           </div>
         </div>
