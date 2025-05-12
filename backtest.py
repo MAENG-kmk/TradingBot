@@ -3,7 +3,8 @@ client = Client(api_key="w6wGRNsx88wZHGNi6j2j663hyvEpDNHrLE6E6UntucPkJ4Lqp8P4ras
                 api_secret="EtbkzmsRjVw2NHqis4rLlIvrZN4HVfHp77Qdzd8wG1AbyoXttLV8EgS7z9Efz9ut")
 
 from tools.getMa import getMa, getMACD
-from tools.getData import getData
+from tools.getData import getData, get4HData
+from tools.getBolinger import getBolinger
 import matplotlib.pyplot as plt
 
 class Backtest:
@@ -122,7 +123,7 @@ class Backtest:
     
     
     
-data = getData(client, 'BTCUSDT', '1d', 1500)
+data = get4HData(client, 'BTCUSDT', 1500)
 backtest = Backtest(data)
 backtest.excute()
 backtest.result()

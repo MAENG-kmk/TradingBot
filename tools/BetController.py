@@ -1,5 +1,6 @@
-from .getData import get1HData
+from .getData import get4HData
 from .getMa import getMa
+from .getBolinger import getBolingerClose
 
 
 class BetController:
@@ -40,17 +41,9 @@ class BetController:
     list_to_close = []
     for position in positions:
       symbol = position['symbol']
-      ror = position['ror']
-      if symbol not in self.targetRorChecker:
-        self.saveNew(symbol)
-      [targetRor, stopLoss] = self.targetRorChecker[symbol]
-      if ror >= targetRor:
-        betting = self.bet(symbol, position['side'])
-        if betting == 'close':
-          list_to_close.append(position)  
-          self.targetRorChecker.pop(symbol, None)
-      elif ror < stopLoss:
+      data = get4HData(self.client, symbol, 50)
+      close = getBolingerClose(data, position['side'])
+      if close == 'close':
         list_to_close.append(position)
-        self.targetRorChecker.pop(symbol, None)
         
     return list_to_close
