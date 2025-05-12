@@ -52,16 +52,14 @@ const Main = () => {
             setNumTrade(messData.length);
             var win = 0;
             var lose = 0;
-            const balances = [];
             const processed = messData.map(data => {
               const filter = {};
               const convertedDate = formatTimestamp(data.closeTime);
-              balances.push({
-                name: convertedDate,
-                Balance: parseFloat(data.balance).toFixed(2),
-              })
               filter['name'] =  convertedDate;
+              filter['symbol'] = data.symbol;
+              filter['enterTime'] = formatTimestamp(data.enterTime);
               filter['Profit'] = parseFloat(data.profit).toFixed(2);
+              filter['balance'] = parseFloat(data.balance).toFixed(2);
               if (data.ror > 0) {
                 win += 1;
               } else {
@@ -72,7 +70,7 @@ const Main = () => {
             });
             // setPnl(totalPnl.toFixed(2));
             setPnl((parseFloat(response_0.data.balance)-parseFloat(sb)).toFixed(2))
-            setBalanceDatas(balances);
+            setBalanceDatas(processed);
             setPnlDatas(processed);
             setWinningRateData([
               {

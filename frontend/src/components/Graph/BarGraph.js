@@ -1,4 +1,5 @@
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import CustomTooltip from "./CustomTooltip";
 
 const BarGraph = ({datas}) => {
 
@@ -7,7 +8,7 @@ const BarGraph = ({datas}) => {
       <BarChart data={datas}>
         <XAxis dataKey="name" />
         <YAxis />
-        <Tooltip cursor={false} />
+        <Tooltip cursor={false} content={<CustomTooltip />} />
         <Bar dataKey="Profit" 
           fill="#8884d8"  
           shape={(props) => {
