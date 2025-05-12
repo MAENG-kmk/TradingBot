@@ -1,4 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+import CustomTooltip from "./CustomTooltip";
 
 const LingeGraph = ({datas}) => {
   return(
@@ -6,10 +7,10 @@ const LingeGraph = ({datas}) => {
       <LineChart data={datas}>
         <XAxis dataKey="name" />
         <YAxis domain={['dataMin - 5', 'dataMax + 10']}/>
-        <Tooltip />
+        <Tooltip content={<CustomTooltip />} />
         <CartesianGrid horizontal={false} vertical={false} />
         {/* <CartesianGrid stroke="#9d9d9d" /> */}
-        <Line type="linear" dataKey="Balance" stroke="cyan" dot={false} strokeWidth={3}/>
+        <Line type="linear" dataKey="balance" stroke="cyan" dot={false} strokeWidth={3}/>
       </LineChart>
     </ResponsiveContainer>
   )

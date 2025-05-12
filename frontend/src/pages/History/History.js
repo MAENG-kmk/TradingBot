@@ -52,7 +52,10 @@ const History = () => {
                 Balance: parseFloat(data.balance).toFixed(2),
               })
               filter['name'] =  convertedDate;
+              filter['symbol'] = data.symbol;
+              filter['enterTime'] = formatTimestamp(data.enterTime);
               filter['Profit'] = parseFloat(data.profit).toFixed(2);
+              filter['balance'] = parseFloat(data.balance).toFixed(2);
               if (data.ror > 0) {
                 win += 1;
               } else {
@@ -62,7 +65,7 @@ const History = () => {
               return filter;
             });
             // setPnl(totalPnl.toFixed(2));
-            setBalanceDatas(balances);
+            setBalanceDatas(processed);
             setPnl((parseFloat(balances.pop().Balance)-parseFloat(startBalance)).toFixed(2))
             setPnlDatas(processed);
             setWinningRateData([
@@ -111,7 +114,7 @@ const History = () => {
         <div className={styles.headerContainer}>
           <div className={styles.titleContainer}>
             <div className={`${styles.title} ${styles.glow_text}`}>CRYPTO TRADING BOT</div>
-            <div className={styles.modelName}>Current Model : {version}</div>
+            <div className={styles.modelName}>Model : {version}</div>
             <div className={styles.date}>Since: {date && formatTimestamp(date)}</div>
           </div>
           <button className={styles.button} onClick={handleClickButton}>Go Live</button>
