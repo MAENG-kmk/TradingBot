@@ -4,18 +4,16 @@ import axios from 'axios'
 import LineGraph from '../../components/Graph/LineGraph';
 import formatTimestamp from '../../tools/formatTimeStamp';
 import BarGraph from '../../components/Graph/BarGraph';
-import PieGraph from '../../components/Graph/PieGraph';
 import { useNavigate } from 'react-router-dom';
 
 const Main = () => {
   const [startBalance, setStartBalance] = useState('');
   const [balance, setBalance] = useState('');
   const [pnl, setPnl] = useState(0);
-  const [numTrade, setNumTrade] = useState(0);
   const [version, setVersion] = useState('');
   const [balanceDatas, setBalanceDatas] = useState([]);
   const [pnlDatas, setPnlDatas] = useState([]);
-  const [winningRateData, setWinningRateData] = useState([]);
+  const [positionDatas, setPositionDatas] = useState([]);
 
   const navigate  = useNavigate();
 
@@ -38,20 +36,31 @@ const Main = () => {
           setBalance(parseFloat(response_0.data.balance).toFixed(2));
         };
 
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/currentVersion`)
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/currentVersion`);
         if (response.data.success) {
           const vers = response.data.version;
           const sb = response.data.balance;
           setStartBalance(sb);
           setVersion(vers);
 
+          const positions = await axios.get(`${process.env.REACT_APP_API_URL}/positions`);
+          if (positions.data.success) {
+            const curPosition = positions.data.datas;
+            const positionList = curPosition.map((data) => {
+              const ror = (parseFloat(data.unrealizedProfit) / parseFloat(data.positionInitialMargin) * 100).toFixed(2);
+              const cur = {
+                symbol: data.symbol,
+                ror: ror,
+              };
+              return cur;
+            });
+            setPositionDatas(positionList);
+          };
+
           const incodig = encodeURIComponent(vers);
           const response_2 = await axios.get(`${process.env.REACT_APP_API_URL}/datas?collection=${incodig}`);
           if (response_2.data.success) {
             const messData = response_2.data.datas;
-            setNumTrade(messData.length);
-            var win = 0;
-            var lose = 0;
             const processed = messData.map(data => {
               const filter = {};
               const convertedDate = formatTimestamp(data.closeTime);
@@ -60,11 +69,6 @@ const Main = () => {
               filter['enterTime'] = formatTimestamp(data.enterTime);
               filter['Profit'] = parseFloat(data.profit).toFixed(2);
               filter['balance'] = parseFloat(data.balance).toFixed(2);
-              if (data.ror > 0) {
-                win += 1;
-              } else {
-                lose += 1;
-              };
 
               return filter;
             });
@@ -72,16 +76,6 @@ const Main = () => {
             setPnl((parseFloat(response_0.data.balance)-parseFloat(sb)).toFixed(2))
             setBalanceDatas(processed);
             setPnlDatas(processed);
-            setWinningRateData([
-              {
-                name: 'win',
-                value: win,
-              },
-              {
-                name: 'lose',
-                value: lose,
-              }
-            ]);
           };
         }
       } catch (error) {
@@ -118,24 +112,22 @@ const Main = () => {
         </div>
         <div className={`${styles.rorContent} ${styles.glow_box} ${styles.gradient_border}`}>
           <div className={styles.header}>
-            <div className={styles.statistics}>Winning Rate</div>
+            <div className={styles.statistics}>Current Position</div>
           </div>
-          <div className={styles.pieGraph}>
-            <PieGraph datas={winningRateData} />
-          </div>
-          <div className={styles.floor}>
-            <div className={styles.statistics}>Total Trade : {numTrade}</div>
-          </div>
-          <div className={styles.floor}>
-            <div className={styles.statistics}>Total ROR :</div>
-            <div className={pnl > 0 ? styles.plus : styles.minus}>{(pnl/startBalance*100).toFixed(2)} %</div>
-          </div>
+          {positionDatas.map((position) => {
+            return(
+              <div className={styles.position} key={position.symbol}>
+                <div>{position.symbol}</div>
+                <div style={position.ror > 0 ? {color: 'rgb(35, 255, 35)'} : {color: '#F44336'}}>{position.ror}%</div>
+              </div>
+            )
+          })}
         </div>
       </div>
       <div className={`${styles.secondRow} ${styles.glow_box} ${styles.gradient_border}`}>
         <div className={styles.header}>
           <div className={styles.name}>Profit and Loss ($)</div>
-          <div className={pnl > 0 ? styles.plus : styles.minus}><span className={styles.label}>Total :</span>{pnl} $</div>
+          <div className={pnl > 0 ? styles.plus : styles.minus}><span className={styles.label}>Total :</span>{pnl} $ ( {(pnl && pnl/startBalance*100).toFixed(2)} % )</div>
         </div>
         <div className={styles.graph}>
           <BarGraph datas={pnlDatas} />

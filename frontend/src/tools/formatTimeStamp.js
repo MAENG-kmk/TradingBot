@@ -1,5 +1,5 @@
 const formatTimestamp = (timestamp) => {
-  const convertedTS = String(timestamp).length === 10 ? parseFloat(timestamp)*1000 : parseFloat(timestamp);
+  const convertedTS = String(parseInt(timestamp)).length === 10 ? parseFloat(timestamp)*1000 : parseFloat(timestamp);
 
   const date = new Date(convertedTS);
   const year = date.getFullYear();
