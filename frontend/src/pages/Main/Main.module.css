@@ -101,6 +101,15 @@ body {
   height: 8vh;
 }
 
+.position {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  height: 7.5%;
+  border-bottom: 1px solid #a8a8a8;
+}
+
 .floor {
   display: flex;
   align-items: center;

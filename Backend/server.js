@@ -90,6 +90,19 @@ app.get("/versionDatas", async (req, res) => {
   }
 });
 
+app.get("/positions", async (req, res) => {
+  try {
+    const datas = (await client.futuresAccountInfo()).positions;
+    const openPositions = datas.filter(pos => parseFloat(pos.positionAmt) !== 0);
+    res.json({
+      success: true,
+      datas: openPositions,
+    })
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 app.listen(app.get("port"), () => {
   console.log(app.get("port"), "번 포트에서 대기 중");
 });

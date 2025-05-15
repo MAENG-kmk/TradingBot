@@ -3,6 +3,10 @@ import CustomTooltip from "./CustomTooltip";
 
 const BarGraph = ({datas}) => {
 
+  const handleBarClick = (data, index) => {
+    window.open(`https://www.binance.com/en/futures/${data.symbol}`, '_blank');
+  };
+
   return(
     <ResponsiveContainer width='100%' height='100%'>
       <BarChart data={datas}>
@@ -26,6 +30,7 @@ const BarGraph = ({datas}) => {
               />
             );
           }}
+          onClick={handleBarClick}
         />
       </BarChart>
     </ResponsiveContainer>
