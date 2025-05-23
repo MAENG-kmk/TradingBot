@@ -18,6 +18,7 @@ from tools.getMa import getMa, getMa_diff, getMACD
 from tools.getVolume import getVolume
 from tools.getLarry import getLarry
 from tools.getBolinger import getBolinger
+from tools.linearRegression import linearRegression
 
 from logics.decidePosition import decidePosition
 from logics.closePosition import closePosition
@@ -27,7 +28,7 @@ from MongoDB_python.client import addVersionAndDate
 import asyncio
 import time
 
-logic_list = [getBolinger, getMACD]
+logic_list = [linearRegression]
 
 balance, available = getBalance(client)
 betController = BetController(client, logic_list)
