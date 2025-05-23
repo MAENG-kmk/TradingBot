@@ -17,10 +17,14 @@ def getBolinger(data):
   df['Lower'] = df['Middle'] - (df['Std'] * num_std)
 
   cur = df.iloc[-1]
-  if cur['Close'] > cur['Upper']:
-    return 'long'
-  elif cur['Close'] < cur['Lower']:
-    return 'short'
+  last = df.iloc[-2]
+  if cur['Std'] > last['Std']:
+    if cur['Close'] > cur['Upper']:
+      return 'long'
+    elif cur['Close'] < cur['Lower']:
+      return 'short'
+    else:
+      return 'none'
   else:
     return 'none'
 
