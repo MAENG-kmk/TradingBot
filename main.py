@@ -5,6 +5,7 @@ client = Client(api_key=BINANCE_API_KEY,
                 api_secret=BINANCE_API_SECRET)
 
 from tools.BetController import BetController
+from tools.BetControllerTurtle import BetControllerTurtle
 from tools.getBalance import getBalance
 from tools.telegram import send_message
 from tools.getData import getData, getUsaTimeData, get1HData, get4HData
@@ -23,15 +24,16 @@ from tools.linearRegression import linearRegression
 from logics.decidePosition import decidePosition
 from logics.closePosition import closePosition
 from logics.enterPosition import enterPosition
+from logics.enterPositionTurtle import enterPositionTurtle
 
 from MongoDB_python.client import addVersionAndDate
 import asyncio
 import time
 
-logic_list = [linearRegression]
+logic_list = [getBolinger, getMACD]
 
 balance, available = getBalance(client)
-betController = BetController(client, logic_list)
+betController = BetControllerTurtle(client, logic_list)
 # asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
 addVersionAndDate(COLLECTION, balance)
 
@@ -45,7 +47,7 @@ def run_trading_bot():
       positions = getPositions(client)
       # 포지션이 있다면 정리할게 있는지 체크
       if len(positions) > 0:
-        # print("포지션 정리 체크 중,,,")
+        # print("포지션 정리 체크 중,,,") 
         closePosition(client, createOrder, positions, position_info, winning_history, getBalance, send_message, betController, special_care)
 
       # 포지션이 꽉 찼는지 체크
@@ -56,10 +58,10 @@ def run_trading_bot():
         # print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
         positions = getPositions(client)
-        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get4HData, getVolume, setLeverage, createOrder, betController, special_care)
+        enterPositionTurtle(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController, special_care)
         
       # print("정상 작동 중,,,")
-      time.sleep(30)
+      time.sleep(10)
       
     except Exception as e:
       print('e:', e)

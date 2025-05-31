@@ -19,14 +19,14 @@ def getBolinger(data):
   cur = df.iloc[-1]
   last = df.iloc[-2]
   if cur['Std'] > last['Std']:
-    if cur['Close'] > cur['Upper']:
+    if last['Close'] < last['Upper'] and cur['Close'] > cur['Upper']:
       return 'long'
-    elif cur['Close'] < cur['Lower']:
+    elif last['Close'] > last['Lower'] and cur['Close'] < cur['Lower']:
       return 'short'
     else:
-      return 'none'
+      return 'None'
   else:
-    return 'none'
+    return 'None'
 
 def getBolingerClose(data, side):
   window = 20
@@ -49,12 +49,12 @@ def getBolingerClose(data, side):
   cur = df.iloc[-1]
   
   if side == 'long':
-    if cur['Close'] <= cur['Middle']:
+    if  cur['Close'] <= cur['Middle']:
       return 'close'
     else:
       return 'none'
   else:
-    if cur['Close'] >= cur['Middle']:
+    if  cur['Close'] >= cur['Middle']:
       return 'close'
     else:
       return 'none'

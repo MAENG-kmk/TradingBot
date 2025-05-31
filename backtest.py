@@ -6,18 +6,19 @@ import numpy as np
 from backtestStrategy.SMACross import SMACross
 from backtestStrategy.BolingerBend import BolingerBend
 from backtestStrategy.LinearRegression import LinearRegressionStrategy
+from backtestStrategy.TurtleStrategy import TurtleStrategy
 
 # Cerebro 엔진 생성
 cerebro = bt.Cerebro()
-cerebro.addstrategy(LinearRegressionStrategy)
+cerebro.addstrategy(TurtleStrategy)
 
 # 데이터 로딩
-dataName = 'bchusdt_1h'
+dataName = 'btcusdt_4h'
 data = bt.feeds.GenericCSVData(
     dataname='backtestDatas/' + dataName + '.csv',
     dtformat='%Y-%m-%d %H:%M:%S',
     timeframe=bt.TimeFrame.Minutes,
-    compression=60,
+    compression=240,
     openinterest=-1,
     headers=True
 )

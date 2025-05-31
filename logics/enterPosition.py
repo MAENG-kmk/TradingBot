@@ -48,6 +48,15 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
       # way = 'none'
       # bullets = 100
       ###################################################################################################
+      lastQty = coin['lastQty'].split('.')
+      if len(lastQty) == 1:
+        point = 0
+        amount = math.floor((bullet / float(coin['lastPrice'])) )
+      else:
+        point = len(lastQty[1])
+        amount = math.floor((bullet / float(coin['lastPrice'])) * (10**point)) / (10**point)
+      if amount < 10**(-point) or checkOverlap(positions, symbol):
+        continue
       
       if way == 'long':
         
@@ -61,25 +70,15 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
             if curPrice < markPrice * 1.03:
               continue
             special_care.pop(symbol, None)
-              
-        lastQty = coin['lastQty'].split('.')
-        if len(lastQty) == 1:
-          point = 0
-          amount = math.floor((bullet / float(coin['lastPrice'])) )
+           
+        setLeverage(client, symbol, 1)
+        response = createOrder(client, symbol, 'BUY', 'MARKET', amount)
+        if response == False:
+          black_list.append(symbol)
         else:
-          point = len(lastQty[1])
-          amount = math.floor((bullet / float(coin['lastPrice'])) * (10**point)) / (10**point)
-        if amount < 10**(-point) or checkOverlap(positions, symbol):
-          continue
-        else:
-          setLeverage(client, symbol, 1)
-          response = createOrder(client, symbol, 'BUY', 'MARKET', amount)
-          if response == False:
-            black_list.append(symbol)
-          else:
-            betController.saveNew(symbol)
-            position_info[symbol] = [way, 0]
-            enter_list.append(symbol)
+          betController.saveNew(symbol)
+          position_info[symbol] = [way, 0]
+          enter_list.append(symbol)
             
             
       elif way == 'short':
@@ -95,24 +94,14 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
               continue
             special_care.pop(symbol, None)
             
-        lastQty = coin['lastQty'].split('.')
-        if len(lastQty) == 1:
-          point = 0
-          amount = math.floor((bullet / float(coin['lastPrice'])) )
-        else:
-          point = len(lastQty[1])
-          amount = math.floor((bullet / float(coin['lastPrice'])) * (10**point)) / (10**point)
-        if amount < 10**(-point) or checkOverlap(positions, symbol):
-          continue
-        else:
-          setLeverage(client, symbol, 1)
-          response = createOrder(client, symbol, 'SELL', 'MARKET', amount)
-          if response == False:
-            black_list.append(symbol)
-          else: 
-            betController.saveNew(symbol)
-            position_info[symbol] = [way, 0]
-            enter_list.append(symbol)
+        setLeverage(client, symbol, 1)
+        response = createOrder(client, symbol, 'SELL', 'MARKET', amount)
+        if response == False:
+          black_list.append(symbol)
+        else: 
+          betController.saveNew(symbol)
+          position_info[symbol] = [way, 0]
+          enter_list.append(symbol)
             
             
     if len(enter_list) == bullets:
