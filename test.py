@@ -20,18 +20,20 @@ from logics.enterPosition import enterPosition
 from tools.getLarry import getLarry
 from tools.getBolinger import getBolinger
 from tools.linearRegression import linearRegression
+from tools.getAtr import getATR
 
 import math
 from datetime import datetime
 from MongoDB_python.client import addDataToMongoDB, addVersionAndDate
 
 ############# enterPosition test ##################
-ticker = getTicker(client)
+# ticker = getTicker(client)
 # total_balance, available_balance = getBalance(client)
-positions = getPositions(client)
+# positions = getPositions(client)
 # position_info = {}
 # logic_list = [getLarry, getMACD]
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
-print(positions)
+data = get1HData(client, 'ETHUSDT', 30)
+print(getATR(data))

@@ -1,4 +1,8 @@
 import math
+import sys
+import os
+sys.path.append(os.path.abspath("."))
+from tools.getAtr import getATR
 
 def logic_filter(data, logiclist):
   result = 'None'
@@ -31,6 +35,8 @@ def enterPositionTurtle(client, ticker, total_balance, available_balance, positi
     symbol = lastPosition['symbol']
     side = lastPosition['side']
     curPrice = lastPosition['markPrice']
+    data = getData(client, symbol, 50)
+    atr = getATR(data)
     
     lastQty = str(lastPosition['amount']).split('.')
     if len(lastQty) == 1:
@@ -41,9 +47,9 @@ def enterPositionTurtle(client, ticker, total_balance, available_balance, positi
       amount = math.floor((bullet / float(lastPosition['markPrice'])) * (10**point)) / (10**point)
     if amount < 10**(-point):
       return
-
+    
     if betController.symbol == '':
-      betController.saveNew(symbol, side, lastPosition['enterPrice'])
+      betController.saveNew(symbol, side, lastPosition['enterPrice'], atr)
     if side == 'long':
       if curPrice > betController.firePrice:
         setLeverage(client, symbol, 1)
@@ -51,7 +57,7 @@ def enterPositionTurtle(client, ticker, total_balance, available_balance, positi
         if response == False:
           black_list.append(symbol)
         else:
-          betController.saveNew(symbol, side, curPrice)
+          betController.saveNew(symbol, side, curPrice, atr)
           position_info[symbol] = [side, 0]
           enter_list.append(symbol)
     else:
@@ -61,13 +67,14 @@ def enterPositionTurtle(client, ticker, total_balance, available_balance, positi
         if response == False:
           black_list.append(symbol)
         else:
-          betController.saveNew(symbol, side, curPrice)
+          betController.saveNew(symbol, side, curPrice, atr)
           position_info[symbol] = [side, 0]
           enter_list.append(symbol)
   else:
     for _, coin in ticker.iterrows():
       symbol = coin['symbol']
       data = getData(client, symbol, 50)
+      atr = getATR(data)
       if len(data) < 49:
         continue
       check_volume = getVolume(data)
@@ -77,8 +84,10 @@ def enterPositionTurtle(client, ticker, total_balance, available_balance, positi
         side = logic_filter(data, logic_list)
         if side == 'long' or side == 'short':
           curPrice = data.iloc[-1]['Close']
+          if abs(atr/curPrice) < 0.02:
+            continue
           break
-        
+    
     lastQty = coin['lastQty'].split('.')
     if len(lastQty) == 1:
       point = 0
@@ -95,7 +104,7 @@ def enterPositionTurtle(client, ticker, total_balance, available_balance, positi
       if response == False:
         black_list.append(symbol)
       else:
-        betController.saveNew(symbol, side, curPrice)
+        betController.saveNew(symbol, side, curPrice, atr)
         position_info[symbol] = [side, 0]
         enter_list.append(symbol)
 
@@ -105,7 +114,7 @@ def enterPositionTurtle(client, ticker, total_balance, available_balance, positi
       if response == False:
         black_list.append(symbol)
       else: 
-        betController.saveNew(symbol, side, curPrice)
+        betController.saveNew(symbol, side, curPrice, atr)
         position_info[symbol] = [side, 0]
         enter_list.append(symbol)
           
