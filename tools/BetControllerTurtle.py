@@ -8,6 +8,7 @@ class BetControllerTurtle:
     self.logicList = logicList
     
     self.step = 0.02
+    self.atr = 0
     self.symbol = ''
     self.side = 'none'
     self.enterPrice = 0
@@ -15,16 +16,18 @@ class BetControllerTurtle:
     self.closePrice = 0
     self.isFull = False
     
-  def saveNew(self, symbol, side, enterPrice):
+  def saveNew(self, symbol, side, enterPrice, atr):
     self.symbol = symbol
     self.enterPrice = float(enterPrice)
     self.side = side
+    self.atr = atr
+    k = 0.5
     if side == 'long':
-      self.firePrice = self.enterPrice * (1 + self.step)
-      self.closePrice = self.enterPrice * (1 - self.step)
+      self.firePrice = self.enterPrice + k * atr
+      self.closePrice = self.enterPrice - k * atr
     elif side == 'short':
-      self.firePrice = self.enterPrice * (1 - self.step)
-      self.closePrice = self.enterPrice * (1 + self.step)
+      self.firePrice = self.enterPrice - k * atr
+      self.closePrice = self.enterPrice + k * atr
   
   def clear(self):
     self.symbol = ''
@@ -33,6 +36,7 @@ class BetControllerTurtle:
     self.firePrice = 0
     self.closePrice = 0
     self.isFull = False
+    self.atr = 0
    
   def bet(self, symbol, side):
     # data = get1HData(self.client, symbol, 50)
