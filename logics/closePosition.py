@@ -45,5 +45,4 @@ def closePosition(client, createOrder, positions, position_info, winnig_history,
       # message += " symbol: {} \n ror: {:.2f}%, profit: {:.2f}$ \n balance: {:.2f} \n entering side: {} \n {} \n\n".format(position['symbol'], position['ror'], position['profit'], float(balance), info[0], winnig_history)
 
   if datas:
-    betController.clear()
     addDataToMongoDB(datas)
