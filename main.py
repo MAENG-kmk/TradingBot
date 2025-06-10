@@ -33,7 +33,7 @@ import time
 logic_list = [getBolinger, getMACD]
 
 balance, available = getBalance(client)
-betController = BetControllerTurtle(client, logic_list)
+betController = BetController(client, logic_list)
 # asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
 addVersionAndDate(COLLECTION, balance)
 
@@ -58,10 +58,10 @@ def run_trading_bot():
         # print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
         positions = getPositions(client)
-        enterPositionTurtle(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController, special_care)
+        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController, special_care)
         
       # print("정상 작동 중,,,")
-      time.sleep(10)
+      time.sleep(30)
       
     except Exception as e:
       print('e:', e)

@@ -1,4 +1,8 @@
 import math
+import sys
+import os
+sys.path.append(os.path.abspath("."))
+from tools.getAtr import getATR
 
 def checkOverlap(positions, symbol):
   for position in positions:
@@ -6,11 +10,12 @@ def checkOverlap(positions, symbol):
       return True
   return False
 
-
 def logic_filter(data, logiclist):
   result = 'None'
   for logic in logiclist:
     side = logic(data)
+    if side == 'None':
+      break
     if side == result:
       continue
     elif  result == 'None':
@@ -33,6 +38,10 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
     symbol = coin['symbol']
     data = getData(client, symbol, 50)
     if len(data) < 49:
+      continue
+    atr = getATR(data)
+    targetRor = abs(atr/data.iloc[-1]['Close'])*100
+    if targetRor < 5:
       continue
     check_volume = getVolume(data)
     if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
@@ -76,7 +85,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
         if response == False:
           black_list.append(symbol)
         else:
-          betController.saveNew(symbol)
+          betController.saveNew(symbol, targetRor)
           position_info[symbol] = [way, 0]
           enter_list.append(symbol)
             
@@ -99,7 +108,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
         if response == False:
           black_list.append(symbol)
         else: 
-          betController.saveNew(symbol)
+          betController.saveNew(symbol, targetRor)
           position_info[symbol] = [way, 0]
           enter_list.append(symbol)
             
