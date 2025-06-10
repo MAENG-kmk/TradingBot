@@ -19,9 +19,9 @@ def getBolinger(data):
   cur = df.iloc[-1]
   last = df.iloc[-2]
   if cur['Std'] > last['Std']:
-    if last['Close'] < last['Upper'] and cur['Close'] > cur['Upper']:
+    if cur['Close'] > cur['Upper']:
       return 'long'
-    elif last['Close'] > last['Lower'] and cur['Close'] < cur['Lower']:
+    elif cur['Close'] < cur['Lower']:
       return 'short'
     else:
       return 'None'

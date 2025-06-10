@@ -7,13 +7,16 @@ class BetController:
   def __init__(self, client, logicList):
     self.client = client
     self.targetRorChecker = {}
-    self.defaultTargetRor = 10
-    self.defaultStopLoss = -5
+    self.defaultTargetRor = 5
+    self.defaultStopLoss = -2
     self.adjustRor = 1
     self.logicList = logicList
     
-  def saveNew(self, symbol):
-    self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]
+  def saveNew(self, symbol, targetRor):
+    if targetRor == 0:
+      self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]
+    else:
+      self.targetRorChecker[symbol] = [targetRor, -0.3 * targetRor]
     
   def decideGoOrStop(self, data, currentPosition):
     for logic in self.logicList:
@@ -43,7 +46,7 @@ class BetController:
       symbol = position['symbol']
       ror = position['ror']
       if symbol not in self.targetRorChecker:
-        self.saveNew(symbol)
+        self.saveNew(symbol, 0)
       [targetRor, stopLoss] = self.targetRorChecker[symbol]
       if ror >= targetRor:
         betting = self.bet(symbol, position['side'])
