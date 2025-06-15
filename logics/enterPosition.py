@@ -41,8 +41,6 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
       continue
     atr = getATR(data)
     targetRor = abs(atr/data.iloc[-1]['Close'])*100
-    if targetRor < 5:
-      continue
     check_volume = getVolume(data)
     if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
       continue
@@ -66,7 +64,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
         amount = math.floor((bullet / float(coin['lastPrice'])) * (10**point)) / (10**point)
       if amount < 10**(-point) or checkOverlap(positions, symbol):
         continue
-      
+
       if way == 'long':
         
         if symbol in special_care:

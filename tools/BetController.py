@@ -13,10 +13,10 @@ class BetController:
     self.logicList = logicList
     
   def saveNew(self, symbol, targetRor):
-    if targetRor == 0:
+    if targetRor <= 5:
       self.targetRorChecker[symbol] = [self.defaultTargetRor, self.defaultStopLoss]
     else:
-      self.targetRorChecker[symbol] = [targetRor, -0.3 * targetRor]
+      self.targetRorChecker[symbol] = [targetRor, -0.4 * targetRor]
     
   def decideGoOrStop(self, data, currentPosition):
     for logic in self.logicList:
