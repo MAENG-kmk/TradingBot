@@ -108,6 +108,20 @@ body {
   width: 90%;
   height: 7.5%;
   border-bottom: 1px solid #a8a8a8;
+  cursor: pointer;
+}
+
+.position div {
+  display: flex;
+  align-items: center;
+}
+
+.position span{
+  margin-left: 5px;
+  font-size: x-small;
+  border-radius: 2px;
+  background-color: rgba(21, 94, 117, 0.5);
+  padding: 2px 3px;
 }
 
 .floor {
