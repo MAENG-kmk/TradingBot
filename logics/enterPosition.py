@@ -27,7 +27,7 @@ def logic_filter(data, logiclist):
   return result
 
 
-def enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getData, getVolume, setLeverage, createOrder, betController, special_care):
+def enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getData, getVolume, setLeverage, createOrder, betController):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
@@ -65,19 +65,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
       if amount < 10**(-point) or checkOverlap(positions, symbol):
         continue
 
-      if way == 'long':
-        
-        if symbol in special_care:
-          if way == special_care[symbol]['side']:
-            markPrice = special_care[symbol]['markPrice']
-            curPrice = float(coin['lastPrice'])
-            if curPrice < markPrice * 0.97:
-              special_care.pop(symbol, None)
-              continue
-            if curPrice < markPrice * 1.03:
-              continue
-            special_care.pop(symbol, None)
-           
+      if way == 'long':        
         setLeverage(client, symbol, 1)
         response = createOrder(client, symbol, 'BUY', 'MARKET', amount)
         if response == False:
@@ -88,19 +76,7 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
           enter_list.append(symbol)
             
             
-      elif way == 'short':
-        
-        if symbol in special_care:
-          if way == special_care[symbol]['side']:
-            markPrice = special_care[symbol]['markPrice']
-            curPrice = float(coin['lastPrice'])
-            if curPrice > markPrice * 1.03:
-              special_care.pop(symbol, None)
-              continue
-            if curPrice > markPrice * 0.97:
-              continue
-            special_care.pop(symbol, None)
-            
+      elif way == 'short':       
         setLeverage(client, symbol, 1)
         response = createOrder(client, symbol, 'SELL', 'MARKET', amount)
         if response == False:
