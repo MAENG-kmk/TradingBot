@@ -41,6 +41,8 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
       continue
     atr = getATR(data)
     targetRor = abs(atr/data.iloc[-1]['Close'])*100
+    if targetRor < 0.5:
+      continue
     check_volume = getVolume(data)
     if not check_volume or symbol[-4:] != 'USDT' or symbol in black_list:
       continue
