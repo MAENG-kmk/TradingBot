@@ -40,7 +40,6 @@ addVersionAndDate(COLLECTION, balance)
 
 def run_trading_bot():
   position_info = {}
-  special_care = {}
   winning_history = [0, 0, 0, 0]
   while True:
     try:
@@ -48,7 +47,7 @@ def run_trading_bot():
       # 포지션이 있다면 정리할게 있는지 체크
       if len(positions) > 0:
         # print("포지션 정리 체크 중,,,") 
-        closePosition(client, createOrder, positions, position_info, winning_history, getBalance, send_message, betController, special_care)
+        closePosition(client, createOrder, positions, position_info, winning_history, getBalance, send_message, betController)
 
       # 포지션이 꽉 찼는지 체크
       # 빈 포지션이 있다면 코인 찾기
@@ -58,7 +57,7 @@ def run_trading_bot():
         # print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
         positions = getPositions(client)
-        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController, special_care)
+        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController)
         
       # print("정상 작동 중,,,")
       time.sleep(30)
