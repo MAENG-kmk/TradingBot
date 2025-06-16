@@ -48,9 +48,11 @@ const Main = () => {
             const curPosition = positions.data.datas;
             const positionList = curPosition.map((data) => {
               const ror = (parseFloat(data.unrealizedProfit) / parseFloat(data.positionInitialMargin) * 100).toFixed(2);
+              const side = parseFloat(data.positionAmt) > 0 ? 'long' : 'short';
               const cur = {
                 symbol: data.symbol,
                 ror: ror,
+                side: side,
               };
               return cur;
             });
@@ -91,6 +93,10 @@ const Main = () => {
     navigate('/history');
   };
 
+  const handlePositionClick = (symbol) => {
+    window.open(`https://www.binance.com/en/futures/${symbol}`, '_blank');
+  };
+
   return(
     <div className={styles.background}>
       <div className={styles.headerContainer}>
@@ -116,8 +122,8 @@ const Main = () => {
           </div>
           {positionDatas.map((position) => {
             return(
-              <div className={styles.position} key={position.symbol}>
-                <div>{position.symbol}</div>
+              <div className={styles.position} key={position.symbol} onClick={() => {handlePositionClick(position.symbol)}}>
+                <div>{position.symbol}<span>{position.side}</span></div>
                 <div style={position.ror > 0 ? {color: 'rgb(35, 255, 35)'} : {color: '#F44336'}}>{position.ror}%</div>
               </div>
             )
