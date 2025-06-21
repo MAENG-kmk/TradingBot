@@ -1,7 +1,7 @@
 from binance.client import Client
 from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET
-client = Client(api_key=BINANCE_API_KEY,
-                api_secret=BINANCE_API_SECRET)
+# client = Client(api_key=BINANCE_API_KEY,
+#                 api_secret=BINANCE_API_SECRET)
 
 from tools.getData import getData
 from tools.getRsi import getRsi
@@ -35,5 +35,5 @@ from MongoDB_python.client import addDataToMongoDB, addVersionAndDate
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
-data = get1HData(client, 'ETHUSDT', 30)
-print(getATR(data))
+
+print(datetime.now())

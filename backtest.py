@@ -10,7 +10,7 @@ from backtestStrategy.TurtleStrategy import TurtleStrategy
 
 # Cerebro 엔진 생성
 cerebro = bt.Cerebro()
-cerebro.addstrategy(TurtleStrategy)
+cerebro.addstrategy(BolingerBend)
 
 # 데이터 로딩
 dataName = 'btcusdt_4h'
