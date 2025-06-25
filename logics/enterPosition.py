@@ -3,6 +3,7 @@ import sys
 import os
 sys.path.append(os.path.abspath("."))
 from tools.getAtr import getATR
+from tools.checkRisk import checkRisk
 
 def checkOverlap(positions, symbol):
   for position in positions:
@@ -38,6 +39,8 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
     symbol = coin['symbol']
     data = getData(client, symbol, 50)
     if len(data) < 49:
+      continue
+    if checkRisk(data) == False:
       continue
     atr = getATR(data)
     targetRor = abs(atr/data.iloc[-1]['Close'])*100
