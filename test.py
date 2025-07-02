@@ -37,12 +37,5 @@ ticker = getTicker(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
 
-client.futures_create_order(
-  symbol='BCHUSDT',
-  side='SELL',
-  type='LIMIT',
-  quantity=0.045,
-  timeInForce='GTX',
-  price='482'
-)
-  
+data = get1HData(client, 'BTCUSDT', 30)  
+print(getVolume(data))

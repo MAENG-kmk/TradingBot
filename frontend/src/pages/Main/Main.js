@@ -71,6 +71,7 @@ const Main = () => {
               filter['enterTime'] = formatTimestamp(data.enterTime);
               filter['Profit'] = parseFloat(data.profit).toFixed(2);
               filter['balance'] = parseFloat(data.balance).toFixed(2);
+              filter['side'] = data.side;
 
               return filter;
             });
