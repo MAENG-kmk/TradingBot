@@ -30,7 +30,7 @@ from MongoDB_python.client import addVersionAndDate
 import asyncio
 import time
 
-logic_list = [getBolinger, getMACD]
+logic_list = [getBolinger, getVolume]
 
 balance, available = getBalance(client)
 betController = BetController(client, logic_list)
