@@ -37,5 +37,7 @@ ticker = getTicker(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
 
-data = get1HData(client, 'BTCUSDT', 30)  
-print(getVolume(data))
+for _, coin in ticker.iterrows():
+  symbol = coin['symbol']
+  data = get1HData(client, symbol, 50)
+  print(symbol, getVolume(data))
