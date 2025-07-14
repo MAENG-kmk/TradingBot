@@ -22,6 +22,7 @@ from tools.getBolinger import getBolinger
 from tools.linearRegression import linearRegression
 from tools.getAtr import getATR
 from tools.checkRisk import checkRisk
+from tools.getMaxLeverage import getMaxLeverage
 
 import math
 from datetime import datetime
@@ -37,7 +38,5 @@ ticker = getTicker(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
 
-for _, coin in ticker.iterrows():
-  symbol = coin['symbol']
-  data = get1HData(client, symbol, 50)
-  print(symbol, getVolume(data))
+position = getPositions(client)[0]
+print(position)
