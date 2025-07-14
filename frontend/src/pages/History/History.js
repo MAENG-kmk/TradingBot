@@ -56,6 +56,7 @@ const History = () => {
               filter['enterTime'] = formatTimestamp(data.enterTime);
               filter['Profit'] = parseFloat(data.profit).toFixed(2);
               filter['balance'] = parseFloat(data.balance).toFixed(2);
+              filter['side'] = data.side;
               if (data.ror > 0) {
                 win += 1;
               } else {

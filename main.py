@@ -35,7 +35,7 @@ logic_list = [getBolinger]
 balance, available = getBalance(client)
 betController = BetController(client, logic_list)
 # asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
-# addVersionAndDate(COLLECTION, balance)
+addVersionAndDate(COLLECTION, balance)
 
 
 def run_trading_bot():

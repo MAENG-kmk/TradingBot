@@ -60,8 +60,10 @@ def getMACD(data):
   cur = int(data.iloc[-1]['signal'])
   last = int(data.iloc[-2]['signal'])
   
-  if cur == 1:
+  if cur == 1 and last != 1:
     return 'long'
-  elif cur == -1:
+  elif cur == -1 and last != -1:
     return 'short'
+  else:
+    return 'None'
   
