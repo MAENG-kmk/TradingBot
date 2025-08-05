@@ -39,7 +39,7 @@ import json
 from collections import deque
 from datetime import datetime
 
-class HTF:
+class HFT:
   def __init__(self):
     self.R = 0.05
     self.leverage = 75
@@ -249,5 +249,5 @@ class HTF:
 balance, available = getBalance(client)
 # addVersionAndDate(COLLECTION, balance)
 
-htf = HTF()
-htf.run()
+hft = HFT()
+hft.run()
