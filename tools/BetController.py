@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath("."))
-from tools.getData import get1HData
+from tools.getData import get4HData
 
 
 class BetController:
@@ -55,7 +55,7 @@ class BetController:
           list_to_close.append(position)  
           self.targetRorChecker.pop(symbol, None)
       elif ror < stopLoss:
-        data = get1HData(self.client, symbol, 50)
+        data = get4HData(self.client, symbol, 50)
         goOrStop = self.decideGoOrStop(data, position['side'])
         if goOrStop == 'Stop':
           list_to_close.append(position)

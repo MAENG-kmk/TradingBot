@@ -30,12 +30,12 @@ from MongoDB_python.client import addVersionAndDate
 import asyncio
 import time
 
-logic_list = [getBolinger]
+logic_list = [getBolinger, getMACD]
 
 balance, available = getBalance(client)
 betController = BetController(client, logic_list)
 # asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
-addVersionAndDate(COLLECTION, balance)
+# addVersionAndDate(COLLECTION, balance)
 
 
 def run_trading_bot():
@@ -57,7 +57,7 @@ def run_trading_bot():
         print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
         positions = getPositions(client)
-        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController)
+        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get4HData, getVolume, setLeverage, createOrder, betController)
         
       # print("정상 작동 중,,,")
       time.sleep(15)
