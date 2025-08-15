@@ -57,7 +57,7 @@ def run_trading_bot():
         print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
         positions = getPositions(client)
-        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get4HData, getVolume, setLeverage, createOrder, betController)
+        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get1HData, getVolume, setLeverage, createOrder, betController)
         
       # print("정상 작동 중,,,")
       time.sleep(15)

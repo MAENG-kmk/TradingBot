@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath("."))
-from tools.getData import get4HData
+from tools.getData import get1HData
 
 
 class BetController:
