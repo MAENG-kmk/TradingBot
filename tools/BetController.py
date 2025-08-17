@@ -55,9 +55,9 @@ class BetController:
           list_to_close.append(position)  
           self.targetRorChecker.pop(symbol, None)
       elif ror < stopLoss:
-        data = get1HData(self.client, symbol, 50)
-        goOrStop = self.decideGoOrStop(data, position['side'])
-        if goOrStop == 'Stop':
+        # data = get1HData(self.client, symbol, 50)
+        # goOrStop = self.decideGoOrStop(data, position['side'])
+        if True: # goOrStop == 'Stop':
           list_to_close.append(position)
           self.targetRorChecker.pop(symbol, None)
         
