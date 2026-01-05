@@ -36,7 +36,7 @@ def getData_1(client, symbol, type, limit):
   df.index.name = None
   return df[-limit:]
 
-def getData(client, symbol, type, limit):
+def getData(client, symbol, limit):
   klines = client.futures_klines(
     symbol=symbol, 
     interval=client.KLINE_INTERVAL_1DAY, 

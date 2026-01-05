@@ -14,8 +14,6 @@ from tools.getPositions import getPositions
 from tools.setLeverage import setLeverage
 from tools.createOrder import createOrder
 from tools.BetController import BetController
-from tools.BetControllerTurtle import BetControllerTurtle
-from logics.decidePosition import decidePosition
 from logics.enterPosition import enterPosition
 from tools.getLarry import getLarry
 from tools.getBolinger import getBolinger
@@ -30,13 +28,18 @@ from MongoDB_python.client import addDataToMongoDB, addVersionAndDate
 
 ############# enterPosition test ##################
 ticker = getTicker(client)
-# total_balance, available_balance = getBalance(client)
+total_balance, available_balance = getBalance(client)
 # positions = getPositions(client)
 # position_info = {}
 # logic_list = [getLarry, getMACD]
 # betController = BetController(client)
 # enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getUsaTimeData, getVolume, setLeverage, createOrder, betController)
 ####################################################
+ticker = ticker.iloc[:40]
+usdt_coins = [
+    row['symbol'] for _, row in ticker.iterrows() 
+    if row['symbol'].endswith('USDT')
+]
 
-position = getPositions(client)[0]
-print(position)
+print(ticker.loc[ticker.symbol=='OCEANUSDT'])
+print(get4HData(client, 'OCEANUSDT', 5))

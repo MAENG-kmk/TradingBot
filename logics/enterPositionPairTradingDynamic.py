@@ -9,14 +9,9 @@ import math
 import sys
 import os
 import numpy as np
-import warnings
 from datetime import datetime
 
 sys.path.append(os.path.abspath("."))
-
-# Numpy 경고 억제 (0으로 나누기 등)
-warnings.filterwarnings('ignore', category=RuntimeWarning)
-np.seterr(divide='ignore', invalid='ignore')
 
 
 class DynamicPairFinder:
@@ -44,54 +39,18 @@ class DynamicPairFinder:
             float: 상관계수
         """
         try:
-            # 인덱스 리셋 (시간 인덱스가 다를 수 있음)
-            price1_reset = price1.reset_index(drop=True)
-            price2_reset = price2.reset_index(drop=True)
+            returns1 = np.log(price1 / price1.shift(1)).dropna()
+            returns2 = np.log(price2 / price2.shift(1)).dropna()
             
-            # 길이 맞추기 (짧은 쪽에 맞춤)
-            min_len = min(len(price1_reset), len(price2_reset))
-            if min_len < 30:
+            # 공통 인덱스
+            common_idx = returns1.index.intersection(returns2.index)
+            if len(common_idx) < 30:
                 return 0
             
-            price1_reset = price1_reset[:min_len]
-            price2_reset = price2_reset[:min_len]
-            
-            # 로그 수익률 계산
-            returns1 = np.log(price1_reset / price1_reset.shift(1)).dropna()
-            returns2 = np.log(price2_reset / price2_reset.shift(1)).dropna()
-            if len(returns1) < 20 or len(returns2) < 20:
-                return 0
-            
-            # 길이 다시 맞추기
-            min_len2 = min(len(returns1), len(returns2))
-            returns1 = returns1[:min_len2]
-            returns2 = returns2[:min_len2]
-            
-            # 표준편차가 0인 경우 체크 (변동성 없음)
-            std1 = returns1.std()
-            std2 = returns2.std()
-            
-            if std1 == 0 or std2 == 0 or np.isnan(std1) or np.isnan(std2):
-                return 0
-            
-            # NaN, Inf 체크
-            if returns1.isna().any() or returns2.isna().any():
-                return 0
-            if np.isinf(returns1).any() or np.isinf(returns2).any():
-                return 0
-            
-            # 상관계수 계산
-            correlation = returns1.corr(returns2)
-            
-            # 결과가 NaN인 경우
-            if np.isnan(correlation):
-                return 0
-            
+            correlation = returns1.loc[common_idx].corr(returns2.loc[common_idx])
             return correlation
         
         except Exception as e:
-            # 디버깅용 (선택적)
-            # print(f"Correlation error: {e}")
             return 0
     
     def calculate_hedge_ratio(self, price1, price2):
@@ -105,25 +64,10 @@ class DynamicPairFinder:
             float: 헤징 비율
         """
         try:
-            # NaN, Inf 체크
-            if price1.isna().any() or price2.isna().any():
-                return 1.0
-            if np.isinf(price1).any() or np.isinf(price2).any():
-                return 1.0
-            
-            # 표준편차가 0인 경우
-            if price2.std() == 0:
-                return 1.0
-            
             # 선형회귀: price1 = beta * price2 + alpha
             # numpy polyfit 사용
             coeffs = np.polyfit(price2, price1, 1)
             hedge_ratio = coeffs[0]
-            
-            # 결과 검증
-            if np.isnan(hedge_ratio) or np.isinf(hedge_ratio):
-                return 1.0
-            
             return hedge_ratio
         
         except Exception as e:
@@ -177,29 +121,16 @@ class DynamicPairFinder:
         try:
             spread = price1 - hedge_ratio * price2
             
-            # NaN, Inf 체크
-            if spread.isna().any() or np.isinf(spread).any():
-                return 0
-            
             # 전체 기간 평균/표준편차
             spread_mean = spread.mean()
             spread_std = spread.std()
             
-            # 표준편차가 0이거나 NaN인 경우
-            if spread_std == 0 or np.isnan(spread_std) or spread_std < 1e-10:
+            if spread_std == 0:
                 return 0
             
             # 현재 Z-Score
             current_spread = spread.iloc[-1]
-            
-            if np.isnan(current_spread) or np.isinf(current_spread):
-                return 0
-            
             zscore = (current_spread - spread_mean) / spread_std
-            
-            # 결과 검증
-            if np.isnan(zscore) or np.isinf(zscore):
-                return 0
             
             return zscore
         
@@ -229,7 +160,8 @@ class DynamicPairFinder:
         ]
         
         # 상위 거래량 코인만 선택 (속도 최적화)
-        top_coins = usdt_coins[:100]
+        top_coins = usdt_coins[:30]  # 상위 30개만
+        
         print(f"대상 코인: {len(top_coins)}개")
         
         pairs_with_signals = []
@@ -248,17 +180,15 @@ class DynamicPairFinder:
                     data1 = self.getData(self.client, symbol1, 90)
                     data2 = self.getData(self.client, symbol2, 90)
                     
-                    if len(data1) < 50 or len(data2) < 50:
+                    if len(data1) < 90 or len(data2) < 90:
                         continue
-                    if data1.iloc[-1]['Volume'] == 0:
-                      continue
-                    if data2.iloc[-1]['Volume'] == 0:
-                      continue
+                    
                     price1 = data1['Close']
                     price2 = data2['Close']
-
+                    
                     # 1. 상관관계 체크
                     correlation = self.calculate_correlation(price1, price2)
+                    
                     if abs(correlation) < min_correlation:
                         continue
                     
@@ -271,7 +201,7 @@ class DynamicPairFinder:
                     
                     # 4. Z-Score 계산
                     zscore = self.calculate_spread_zscore(price1, price2, hedge_ratio)
-                    print(symbol1, symbol2, zscore)
+                    
                     # 5. 진입 신호 체크
                     if abs(zscore) > zscore_threshold:
                         signal = {
@@ -394,7 +324,7 @@ def enterPositionPairTrading(client, ticker, total_balance, available_balance,
     
     # 진입 실행
     entered_count = 0
-    entered_symbols = set()  # 이번 사이클에서 진입한 심볼 추적
+    used_symbols = set()  # 이미 사용된 코인 추적
     
     for signal in signals:
         if entered_count >= max_pairs:
@@ -409,9 +339,9 @@ def enterPositionPairTrading(client, ticker, total_balance, available_balance,
             print(f"⏭️  {symbol1}+{symbol2} 이미 포지션 있음")
             continue
         
-        # 중복 체크 (이번 사이클에서 진입한 심볼)
-        if symbol1 in entered_symbols or symbol2 in entered_symbols:
-            print(f"⏭️  {symbol1}+{symbol2} 이미 진입 대기 중")
+        # 중복 체크 (이번 루프에서 이미 사용된 코인)
+        if symbol1 in used_symbols or symbol2 in used_symbols:
+            print(f"⏭️  {symbol1} 또는 {symbol2} 이미 다른 페어에서 사용됨")
             continue
         
         print(f"\n🔵 페어 진입: {symbol1}+{symbol2}")
@@ -463,33 +393,31 @@ def enterPositionPairTrading(client, ticker, total_balance, available_balance,
             
             # 양쪽 모두 성공했는지 확인
             if response1 and response2:
+                # 사용된 코인으로 등록
+                used_symbols.add(symbol1)
+                used_symbols.add(symbol2)
+                
                 # BetController에 등록
                 betController.saveNew(symbol1, 5)
                 betController.saveNew(symbol2, 5)
                 
                 # 포지션 정보 저장
-                # [side, entry_zscore, 'pair', pair_symbol, hedge_ratio, base_symbol]
-                # base_symbol: 스프레드 계산 시 앞에 오는 심볼 (symbol1)
                 position_info[symbol1] = [
                     signal['side1'], 
                     signal['zscore'], 
                     'pair', 
                     symbol2,
-                    signal['hedge_ratio'],
-                    symbol1  # base_symbol
+                    signal['hedge_ratio']
                 ]
                 position_info[symbol2] = [
                     signal['side2'], 
                     signal['zscore'], 
                     'pair', 
                     symbol1,
-                    signal['hedge_ratio'],
-                    symbol1  # base_symbol (같은 값)
+                    signal['hedge_ratio']
                 ]
                 
                 entered_count += 1
-                entered_symbols.add(symbol1)
-                entered_symbols.add(symbol2)
                 
                 print(f"✅ 진입 성공:")
                 print(f"   {symbol1}: {signal['side1']} {amount1}")

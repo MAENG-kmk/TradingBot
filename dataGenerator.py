@@ -7,7 +7,7 @@ client = Client(api_key=BINANCE_API_KEY,
                 api_secret=BINANCE_API_SECRET)
 
 # 데이터 가져오기
-klines = client.futures_klines(symbol='BCHUSDT', interval=client.KLINE_INTERVAL_4HOUR, limit=1000)
+klines = client.futures_klines(symbol='BCHUSDT', interval=client.KLINE_INTERVAL_1DAY, limit=1500)
 
 # DataFrame으로 정리
 df = pd.DataFrame(klines, columns=[
@@ -20,5 +20,5 @@ df.set_index('Date', inplace=True)
 df = df[['Open', 'High', 'Low', 'Close', 'Volume']].astype(float)
 
 # 저장
-dataName = "bchusdt_4h"
+dataName = "bchusdt_1d"
 df.to_csv('backtestDatas/' + dataName + '.csv')

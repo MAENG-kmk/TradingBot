@@ -1,0 +1,65 @@
+{
+  "timestamp": "2025-12-30T21:01:10.914464",
+  "pairs": [
+    {
+      "symbol1": "1000PEPEUSDT",
+      "symbol2": "LINKUSDT",
+      "correlation": 0.9087508297648897,
+      "pvalue": 0.008097165944951513,
+      "strength": "매우 강함",
+      "hedge_ratio": 0.0005642855910006099,
+      "current_zscore": 0.14927222617178218,
+      "is_stationary": true,
+      "adf_pvalue": 0.0016376392939545033,
+      "score": 96.85766659569913
+    },
+    {
+      "symbol1": "SUIUSDT",
+      "symbol2": "LINKUSDT",
+      "correlation": 0.8912569105249099,
+      "pvalue": 0.0070129708881444255,
+      "strength": "매우 강함",
+      "hedge_ratio": 0.21419832568717684,
+      "current_zscore": 0.4468684002217684,
+      "is_stationary": true,
+      "adf_pvalue": 0.0013937755903409908,
+      "score": 96.38705877134008
+    },
+    {
+      "symbol1": "SUIUSDT",
+      "symbol2": "1000PEPEUSDT",
+      "correlation": 0.9004643029500796,
+      "pvalue": 0.03271006734434104,
+      "strength": "보통",
+      "hedge_ratio": 377.28439765024973,
+      "current_zscore": 0.27170422748231193,
+      "is_stationary": true,
+      "adf_pvalue": 0.008159618827410755,
+      "score": 95.37842572128534
+    },
+    {
+      "symbol1": "ETHUSDT",
+      "symbol2": "LINKUSDT",
+      "correlation": 0.8658899180172818,
+      "pvalue": 0.015381970124795941,
+      "strength": "강함",
+      "hedge_ratio": 170.16744473042593,
+      "current_zscore": 0.4509165324217305,
+      "is_stationary": true,
+      "adf_pvalue": 0.003320746420326548,
+      "score": 95.20759903427866
+    },
+    {
+      "symbol1": "ETHUSDT",
+      "symbol2": "SOLUSDT",
+      "correlation": 0.8883266580994668,
+      "pvalue": 0.044143474081378795,
+      "strength": "보통",
+      "hedge_ratio": 15.602574447928035,
+      "current_zscore": 0.9798683854366534,
+      "is_stationary": true,
+      "adf_pvalue": 0.011633602746288102,
+      "score": 94.44262603891507
+    }
+  ]
+}
