@@ -1,0 +1,8 @@
+SecretVariables.py
+test.py
+**/__pycache__/
+*.py[cod]
+*$py.class
+myvenv/
+venv/
+.venv/
