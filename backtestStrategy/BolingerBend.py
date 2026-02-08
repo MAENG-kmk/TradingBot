@@ -23,6 +23,8 @@ class BolingerBend(bt.Strategy):
                 self.targetPrice = self.data.close[0] * (1 - self.targetRor)
                 self.stopPrice = self.data.close[0] * (1 + self.stopRor)
                 self.sell()
+                
+                
         else:
             if self.position.size > 0:
                 if self.data.close[0] >= self.targetPrice:
