@@ -21,13 +21,13 @@ from tools.getBolinger import getBolinger
 from tools.linearRegression import linearRegression
 
 from logics.closePositionPairTrading import closePosition
-from logics.enterPosition import enterPosition
+from logics.enterPosition_original import enterPosition
 
 from MongoDB_python.client import addVersionAndDate
 import asyncio
 import time
 
-logic_list = [getBolinger, getMACD]
+logic_list = [getMa, getMACD]
 
 balance, available = getBalance(client)
 betController = BetController(client, logic_list)
@@ -56,7 +56,7 @@ def run_trading_bot():
         enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get4HData, getVolume, setLeverage, createOrder, betController)
         
       # print("정상 작동 중,,,")
-      time.sleep(300)
+      time.sleep(30)
       
     except Exception as e:
       print('e:', e)
