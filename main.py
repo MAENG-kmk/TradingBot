@@ -43,7 +43,7 @@ def run_trading_bot():
       # 포지션이 있다면 정리할게 있는지 체크
       if len(positions) > 0:
         print("포지션 정리 체크 중,,,") 
-        closePosition(client, createOrder, positions, position_info, getBalance, send_message, betController, get4HData)
+        closePosition(client, createOrder, positions, position_info, getBalance, send_message, betController)
 
       # 포지션이 꽉 찼는지 체크
       # 빈 포지션이 있다면 코인 찾기

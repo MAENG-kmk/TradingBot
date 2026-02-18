@@ -5,7 +5,7 @@ from datetime import datetime
 sys.path.append(os.path.abspath("."))
 from MongoDB_python.client import addDataToMongoDB
 
-def closePosition(client, createOrder, positions, position_info, winnig_history, getBalance, send_message, betController):
+def closePosition(client, createOrder, positions, position_info, getBalance, send_message, betController):
   datas = []
   list_to_close = betController.getClosePositions(positions)
   

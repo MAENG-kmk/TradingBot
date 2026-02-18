@@ -29,7 +29,6 @@ class BetController:
       
     return 'Go'
    
-   
   def bet(self, symbol, side):
     # data = get1HData(self.client, symbol, 50)
     # ma = getMa(data)
