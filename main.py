@@ -20,7 +20,7 @@ from tools.getLarry import getLarry
 from tools.getBolinger import getBolinger
 from tools.linearRegression import linearRegression
 
-from logics.closePositionPairTrading import closePosition
+from logics.closePosition import closePosition
 from logics.enterPosition_original import enterPosition
 
 from MongoDB_python.client import addVersionAndDate
