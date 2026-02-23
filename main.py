@@ -43,7 +43,7 @@ def run_trading_bot():
       # 포지션이 있다면 정리할게 있는지 체크
       if len(positions) > 0:
         print("포지션 정리 체크 중,,,") 
-        closePosition(client, createOrder, positions, position_info, getBalance, send_message, betController)
+        closePosition(client, createOrder, positions, getBalance, betController)
 
       # 포지션이 꽉 찼는지 체크
       # 빈 포지션이 있다면 코인 찾기
@@ -53,7 +53,7 @@ def run_trading_bot():
         print("포지션 진입 체크 중,,,")
         ticker = getTicker(client)
         positions = getPositions(client)
-        enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, get4HData, getVolume, setLeverage, createOrder, betController)
+        enterPosition(client, ticker, total_balance, available_balance, positions, logic_list, get4HData, getVolume, setLeverage, createOrder, betController)
         
       # print("정상 작동 중,,,")
       time.sleep(30)

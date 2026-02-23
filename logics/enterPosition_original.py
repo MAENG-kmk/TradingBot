@@ -29,7 +29,7 @@ def logic_filter(data, logiclist):
   return result
 
 
-def enterPosition(client, ticker, total_balance, available_balance, positions, position_info, logic_list, getData, getVolume, setLeverage, createOrder, betController):
+def enterPosition(client, ticker, total_balance, available_balance, positions, logic_list, getData, getVolume, setLeverage, createOrder, betController):
   revision = 0.99
   bullet = float(total_balance)/10 * revision
   bullets = float(available_balance) // bullet
@@ -77,7 +77,6 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
           black_list.append(symbol)
         else:
           betController.saveNew(symbol, targetRor)
-          position_info[symbol] = [way, 0]
           enter_list.append(symbol)
             
             
@@ -88,7 +87,6 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, p
           black_list.append(symbol)
         else: 
           betController.saveNew(symbol, targetRor)
-          position_info[symbol] = [way, 0]
           enter_list.append(symbol)
             
             

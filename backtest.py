@@ -10,9 +10,11 @@ from backtestStrategy.TurtleStrategy import TurtleStrategy
 from backtestStrategy.OptimizedStrategy import OptimizedStrategy
 from backtestStrategy.SDE_OnlyStrategy import SDE_OnlyStrategy
 from backtestStrategy.LarryStrategy import LarryStrategy
+from backtestStrategy.XGBoostStrategy import XGBoostStrategy
+from backtestStrategy.LSTMStrategy import LSTMStrategy
 
 # ===== 사용할 전략 선택 =====
-STRATEGY = OptimizedStrategy  # OptimizedStrategy, LarryStrategy 등으로 변경 가능
+STRATEGY = LSTMStrategy  # OptimizedStrategy, LarryStrategy, XGBoostStrategy, LSTMStrategy 등으로 변경 가능
 
 # Cerebro 엔진 생성
 cerebro = bt.Cerebro()

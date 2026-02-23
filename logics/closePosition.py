@@ -5,26 +5,22 @@ from datetime import datetime
 sys.path.append(os.path.abspath("."))
 from MongoDB_python.client import addDataToMongoDB
 
-def closePosition(client, createOrder, positions, position_info, getBalance, send_message, betController):
+def closePosition(client, createOrder, positions, getBalance, betController):
   datas = []
   list_to_close = betController.getClosePositions(positions)
-  
+  print(list_to_close)
   for position in list_to_close:
     response = False
     if position['ror'] > 0:
       if position['side'] == 'long': 
         response = createOrder(client, position['symbol'], 'SELL', 'MARKET', position['amount'])
-        check_num = 0
       else:
         response = createOrder(client, position['symbol'], 'BUY', 'MARKET', position['amount'])
-        check_num = 2
     else:
       if position['side'] == 'long':
         response = createOrder(client, position['symbol'], 'SELL', 'MARKET', position['amount'])
-        check_num = 1
       else:
         response = createOrder(client, position['symbol'], 'BUY', 'MARKET', position['amount'])
-        check_num = 3
       
     if response:
       data = position
