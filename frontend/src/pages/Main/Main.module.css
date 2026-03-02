@@ -38,10 +38,42 @@ body {
 
 .modelName {
   display: flex;
-  align-items: end;
+  align-items: center;
+  gap: 10px;
   color: cyan;
   margin-left: 3pt;
   font-size: medium;
+}
+
+.heartbeat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.heartbeat.alive {
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.heartbeat.dead {
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  animation: blink 1s infinite;
+}
+
+.heartbeat.loading {
+  color: #a8a8a8;
+  border: 1px solid rgba(168, 168, 168, 0.2);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .button {

@@ -16,7 +16,7 @@ client = Client(api_key=BINANCE_API_KEY,
 from tools.getBalance import getBalance
 from tools.getPositions import getPositions
 from tools.telegram import send_message
-from MongoDB_python.client import addVersionAndDate
+from MongoDB_python.client import addVersionAndDate, updateHeartbeat
 from coins import STRATEGY_CLASSES
 
 import asyncio
@@ -44,6 +44,7 @@ def run_trading_bot():
               total_balance, available_balance = getBalance(client)
               strategy.run(positions, total_balance, available_balance)
 
+            updateHeartbeat()
             time.sleep(300)
 
         except Exception as e:

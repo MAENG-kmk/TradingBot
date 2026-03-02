@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { getDocuments, deleteVersion } = require("./mongodb");
+const { getDocuments, deleteVersion, connectMongo } = require("./mongodb");
 const Binance = require("binance-api-node").default;
 
 dotenv.config();
@@ -112,6 +112,28 @@ app.delete("/version", async (req, res) => {
     }
     await deleteVersion(id, version);
     res.json({ success: true });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.get("/heartbeat", async (req, res) => {
+  try {
+    const db = await connectMongo("Bot_Status");
+    const doc = await db.collection("heartbeat").findOne({ _id: "heartbeat" });
+    if (!doc) {
+      return res.json({ success: true, alive: false, message: "No heartbeat recorded" });
+    }
+    const lastBeat = doc.timestamp;
+    const now = Date.now() / 1000;
+    const diffMin = (now - lastBeat) / 60;
+    res.json({
+      success: true,
+      alive: diffMin < 10,
+      lastBeat,
+      minutesAgo: Math.round(diffMin),
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ success: false, message: err.message });

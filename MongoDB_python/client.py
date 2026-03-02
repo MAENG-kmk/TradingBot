@@ -48,3 +48,19 @@ def addVersionAndDate(version, balance):
     except Exception as e:
         raise Exception(
             "Unable to find the document due to the following error: ", e)
+
+
+def updateHeartbeat():
+    """하트비트 단일 문서 upsert — 매 사이클마다 호출"""
+    try:
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        db = client.get_database("Bot_Status")
+        col = db.get_collection("heartbeat")
+        col.update_one(
+            {"_id": "heartbeat"},
+            {"$set": {"timestamp": datetime.now().timestamp()}},
+            upsert=True,
+        )
+        client.close()
+    except Exception:
+        pass  # heartbeat 실패가 매매를 멈추면 안 됨

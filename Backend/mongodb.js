@@ -44,4 +44,5 @@ const deleteVersion = async (versionId, versionName) => {
 module.exports = {
   getDocuments,
   deleteVersion,
+  connectMongo,
 };

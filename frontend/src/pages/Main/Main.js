@@ -18,6 +18,7 @@ const Main = () => {
   const [pnlDatas, setPnlDatas] = useState([]);
   const [positionDatas, setPositionDatas] = useState([]);
   const [selectedCoin, setSelectedCoin] = useState('ALL');
+  const [botStatus, setBotStatus] = useState({ alive: null, minutesAgo: null });
 
   const navigate  = useNavigate();
 
@@ -78,7 +79,21 @@ const Main = () => {
       }
     };
 
+    const checkHeartbeat = async () => {
+      try {
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/heartbeat`);
+        if (res.data.success) {
+          setBotStatus({ alive: res.data.alive, minutesAgo: res.data.minutesAgo });
+        }
+      } catch {
+        setBotStatus({ alive: false, minutesAgo: null });
+      }
+    };
+
     getDatas();
+    checkHeartbeat();
+    const interval = setInterval(checkHeartbeat, 60000);
+    return () => clearInterval(interval);
   }, [])
 
   // 코인별 필터링
@@ -139,7 +154,16 @@ const Main = () => {
       <div className={styles.headerContainer}>
         <div className={styles.titleContainer}>
           <div className={`${styles.title} ${styles.glow_text}`}>CRYPTO TRADING BOT</div>
-          <div className={styles.modelName}>Current Model : {version}</div>
+          <div className={styles.modelName}>
+            Current Model : {version}
+            <span className={`${styles.heartbeat} ${
+              botStatus.alive === null ? styles.loading :
+              botStatus.alive ? styles.alive : styles.dead
+            }`}>
+              {botStatus.alive === null ? '⏳' : botStatus.alive ? '🟢 BOT ALIVE' : '🔴 BOT DOWN'}
+              {botStatus.minutesAgo !== null && ` (${botStatus.minutesAgo}m ago)`}
+            </span>
+          </div>
         </div>
         <button className={styles.button} onClick={handleClickButton}>Model History</button>
       </div>
