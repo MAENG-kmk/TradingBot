@@ -25,7 +25,23 @@ const getDocuments = async (dbName, collectionName) => {
   }
 };
 
+const deleteVersion = async (versionId, versionName) => {
+  try {
+    // Version_History에서 해당 문서 삭제
+    const versionDb = await connectMongo('Version_History');
+    const { ObjectId } = require('mongodb');
+    await versionDb.collection('history').deleteOne({ _id: new ObjectId(versionId) });
+    // Trade_History에서 해당 컬렉션 삭제
+    const tradeDb = await connectMongo('Trade_History');
+    await tradeDb.collection(versionName).drop().catch(() => {});
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
 
 module.exports = {
   getDocuments,
+  deleteVersion,
 };

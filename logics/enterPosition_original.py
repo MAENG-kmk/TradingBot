@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath("."))
 from tools.getAtr import getATR
 from tools.checkRisk import checkRisk
 from tools.getRsi import getRsiRisk
+from tools.trendFilter import checkTrendStrength
 
 def checkOverlap(positions, symbol):
   for position in positions:
@@ -52,6 +53,8 @@ def enterPosition(client, ticker, total_balance, available_balance, positions, l
       way = logic_filter(data, logic_list)
       if not getRsiRisk(data, way):
         way = None
+      if way and way != 'None' and not checkTrendStrength(data):
+        way = 'None'
       ######################################## 테스트 시 활성화 #############################################
       # if way != 'None':
       #   print('symbol:', symbol)

@@ -26,6 +26,7 @@ from tools.telegram import send_message
 from tools.getData import get4HData
 from tools.setLeverage import setLeverage
 from tools.createOrder import createOrder
+from tools.trendFilter import checkTrendStrength
 import time
 import asyncio
 
@@ -203,11 +204,13 @@ class ETHAutoTrader:
             atr = self.calculate_atr(klines)
             
             # ===== 롱 신호 (진입) =====
+            # 횡보장 필터: 방향성 없으면 진입 금지
             if (ema_short > ema_long and
                 rsi < self.rsi_overbuy and
                 rsi > self.rsi_oversell and
                 macd is not None and
-                macd > signal_line):
+                macd > signal_line and
+                checkTrendStrength(df)):
                 
                 stop_loss = current_price - (atr * self.atr_multiplier)
                 take_profit = current_price * (1 + self.take_profit_pct)

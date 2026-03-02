@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { getCollection, getDocuments } = require("./mongodb");
+const { getDocuments, deleteVersion } = require("./mongodb");
 const Binance = require("binance-api-node").default;
 
 dotenv.config();
@@ -11,6 +11,7 @@ const app = express();
 
 app.use(cors({ 
   origin: ["http://localhost:3000", "https://trading-bot-black.vercel.app"],
+  methods: ["GET", "POST", "DELETE"],
   credentials: true }));
 
 const client = Binance({
@@ -100,6 +101,20 @@ app.get("/positions", async (req, res) => {
     })
   } catch (err) {
     console.log(err);
+  }
+});
+
+app.delete("/version", async (req, res) => {
+  try {
+    const { id, version } = req.query;
+    if (!id || !version) {
+      return res.status(400).json({ success: false, message: "id and version required" });
+    }
+    await deleteVersion(id, version);
+    res.json({ success: true });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

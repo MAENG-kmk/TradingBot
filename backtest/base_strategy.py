@@ -1,25 +1,16 @@
 import backtrader as bt
-import numpy as np
 
 
-class OptimizedStrategy(bt.Strategy):
+class CoinBacktestStrategy(bt.Strategy):
     """
-    EMA + RSI + MACD 진입 + BetController 고도화 청산로직
+    코인별 백테스트 공통 전략
 
-    진입:
-      롱: EMA(10)>EMA(30) + RSI(20-80) + MACD>Signal
-      숏: EMA(10)<EMA(30) + RSI(20-80) + MACD<Signal
-
-    청산 (BetController 4단계 트레일링):
-      Phase 1 (ROR 0~3%): 고정 ATR 손절 유지
-      Phase 2 (ROR 3~5%): 본전 확보 (손절 → +0.5%)
-      Phase 3 (ROR 5~목표): 트레일링 (최고ROR × 0.6)
-      Phase 4 (ROR > 목표): 타이트 트레일링 (최고ROR × 0.75)
-      + 시간 기반 청산 (봉 수 기준)
-      + 변동성 급변 청산 (ATR 3배)
+    coins/<coin>/strategy.py 의 파라미터를 받아서 백테스트 실행.
+    진입: EMA + RSI + MACD + ADX 추세필터
+    청산: BetController 4단계 트레일링
     """
     params = dict(
-        # 진입 지표
+        # 진입
         ema_short=10,
         ema_long=30,
         rsi_period=14,
@@ -28,7 +19,6 @@ class OptimizedStrategy(bt.Strategy):
         atr_period=14,
         atr_multiplier=2.2,
         risk_percent=0.02,
-        # 추세 강도 필터 (횡보장 진입 방지)
         adx_period=14,
         adx_threshold=20,
         # 청산: 4단계 트레일링
@@ -38,12 +28,10 @@ class OptimizedStrategy(bt.Strategy):
         breakeven_stop=0.5,
         trailing_ratio=0.6,
         tight_trailing_ratio=0.75,
-        # 시간 기반 청산 (4H봉 기준: 6봉=24h, 12봉=48h)
         time_exit_bars1=6,
         time_exit_ror1=1.0,
         time_exit_bars2=12,
         time_exit_ror2=2.0,
-        # 변동성 급변
         volatility_spike=3.0,
     )
 
@@ -53,10 +41,7 @@ class OptimizedStrategy(bt.Strategy):
         self.rsi = bt.ind.RSI(self.data.close, period=self.p.rsi_period)
         self.atr = bt.ind.ATR(self.data, period=self.p.atr_period)
         self.macd = bt.ind.MACD(self.data.close)
-
-        # 추세 강도 필터
         self.dmi = bt.ind.DirectionalMovementIndex(self.data, period=self.p.adx_period)
-
         self._reset()
 
     def _reset(self):
@@ -76,28 +61,22 @@ class OptimizedStrategy(bt.Strategy):
         return (self.entry_price - self.data.close[0]) / self.entry_price * 100
 
     def _update_trailing_stop(self, ror):
-        """BetController _update_trailing_stop 동일 로직"""
         if ror > self.highest_ror:
             self.highest_ror = ror
-
         highest = self.highest_ror
 
         if highest < self.p.phase2_threshold:
             self.phase = 1
             return
-
         if highest < self.p.phase3_threshold:
             self.phase = 2
             self.stop_loss_ror = max(self.stop_loss_ror, self.p.breakeven_stop)
             return
-
         if highest < self.p.target_ror_pct:
             self.phase = 3
             self.trailing_active = True
             self.stop_loss_ror = max(self.stop_loss_ror, highest * self.p.trailing_ratio)
             return
-
-        # 목표 초과 → 타이트 트레일링
         self.phase = 4
         self.trailing_active = True
         self.stop_loss_ror = max(self.stop_loss_ror, highest * self.p.tight_trailing_ratio)
@@ -115,40 +94,24 @@ class OptimizedStrategy(bt.Strategy):
         return False
 
     def _check_trend_strength(self):
-        """
-        횡보장 필터 — ADX 기반 2단계 체크
-        1. ADX > threshold: 확실한 추세 → 진입 허용
-        2. ADX 상승 중 (breakout): 추세 형성 중 → 진입 허용
-        3. 둘 다 아님: 횡보장 → 진입 금지
-        """
         adx = self.dmi.adx[0]
-
-        # 확실한 추세
         if adx >= self.p.adx_threshold:
             return True
-
-        # ADX가 낮지만 연속 상승 중 → breakout (횡보 탈출)
         if adx > 15 and self.dmi.adx[0] > self.dmi.adx[-1] > self.dmi.adx[-2]:
             return True
-
-        # 횡보장
         return False
 
     def _enter(self, direction):
         atr_val = self.atr[0]
         if direction == 'long':
-            stop_price = self.data.close[0] - atr_val * self.p.atr_multiplier
-            risk_per_unit = self.data.close[0] - stop_price
+            risk_per_unit = atr_val * self.p.atr_multiplier
         else:
-            stop_price = self.data.close[0] + atr_val * self.p.atr_multiplier
-            risk_per_unit = stop_price - self.data.close[0]
+            risk_per_unit = atr_val * self.p.atr_multiplier
 
         if risk_per_unit <= 0:
             return
 
-        # ATR 기반 초기 손절 ROR (BetController의 -0.4*targetRor 방식과 동일 개념)
         init_stop_ror = -(atr_val * self.p.atr_multiplier) / self.data.close[0] * 100
-
         size = (self.broker.get_cash() * self.p.risk_percent) / risk_per_unit
         if size <= 0:
             return
@@ -165,17 +128,14 @@ class OptimizedStrategy(bt.Strategy):
 
     def next(self):
         if not self.position:
-            # 횡보장이면 진입 금지
             if not self._check_trend_strength():
                 return
 
-            # ===== 롱 진입 =====
             if (self.ema_short[0] > self.ema_long[0] and
                 self.p.rsi_oversell < self.rsi[0] < self.p.rsi_overbuy and
                 self.macd.lines.macd[0] > self.macd.lines.signal[0]):
                 self._enter('long')
 
-            # ===== 숏 진입 =====
             elif (self.ema_short[0] < self.ema_long[0] and
                   self.p.rsi_oversell < self.rsi[0] < self.p.rsi_overbuy and
                   self.macd.lines.macd[0] < self.macd.lines.signal[0]):
@@ -183,23 +143,16 @@ class OptimizedStrategy(bt.Strategy):
         else:
             self.bars_in_trade += 1
             ror = self._calc_ror()
-
-            # 1. 트레일링 스탑 업데이트
             self._update_trailing_stop(ror)
 
-            # 2. 손절 / 트레일링 스탑 청산
             if ror < self.stop_loss_ror:
                 self.close()
                 self._reset()
                 return
-
-            # 3. 변동성 급변 청산
             if self._check_volatility_exit():
                 self.close()
                 self._reset()
                 return
-
-            # 4. 시간 기반 청산
             if self._check_time_exit():
                 self.close()
                 self._reset()

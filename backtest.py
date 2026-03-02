@@ -14,7 +14,7 @@ from backtestStrategy.XGBoostStrategy import XGBoostStrategy
 from backtestStrategy.LSTMStrategy import LSTMStrategy
 
 # ===== 사용할 전략 선택 =====
-STRATEGY = LSTMStrategy  # OptimizedStrategy, LarryStrategy, XGBoostStrategy, LSTMStrategy 등으로 변경 가능
+STRATEGY = OptimizedStrategy  # OptimizedStrategy, LarryStrategy, XGBoostStrategy, LSTMStrategy 등으로 변경 가능
 
 # Cerebro 엔진 생성
 cerebro = bt.Cerebro()

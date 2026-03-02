@@ -1,65 +1,55 @@
+"""
+10개 코인 맞춤형 자동매매
+
+대상: ETH, BTC, SOL, BNB, XRP, LINK, DOGE, AVAX, ARB, AAVE
+각 코인 strategy.py가 진입/청산을 자체 관리.
+
+사용법:
+  python main.py
+"""
 from binance.client import Client
 from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET, COLLECTION
 
 client = Client(api_key=BINANCE_API_KEY,
                 api_secret=BINANCE_API_SECRET)
 
-from tools.BetController import BetController
 from tools.getBalance import getBalance
-from tools.telegram import send_message
-from tools.getData import getData, getUsaTimeData, get1HData, get4HData
-from tools.getTicker import getTicker
 from tools.getPositions import getPositions
-from tools.createOrder import createOrder
-from tools.isPositionFull import isPositionFull
-from tools.setLeverage import setLeverage
-from tools.getRsi import getRsi
-from tools.getMa import getMa, getMa_diff, getMACD
-from tools.getVolume import getVolume
-from tools.getLarry import getLarry
-from tools.getBolinger import getBolinger
-from tools.linearRegression import linearRegression
-
-from logics.closePosition import closePosition
-from logics.enterPosition_original import enterPosition
-
+from tools.telegram import send_message
 from MongoDB_python.client import addVersionAndDate
+from coins import STRATEGY_CLASSES
+
 import asyncio
 import time
 
-logic_list = [getMa, getMACD]
-
+# 초기화
 balance, available = getBalance(client)
-betController = BetController(client, logic_list)
-# asyncio.run(send_message('Start balance: {}$'.format(round(float(balance)*100)/100)))
 addVersionAndDate(COLLECTION, balance)
+
+# 코인별 전략 인스턴스
+strategies = [cls(client) for cls in STRATEGY_CLASSES]
+
+print("=" * 50)
+print("10코인 맞춤형 자동매매 시작")
+print(f"대상: {', '.join(s.SYMBOL for s in strategies)}")
+print(f"잔고: ${float(balance):,.2f}")
+print("=" * 50)
 
 
 def run_trading_bot():
-  position_info = {}
-  while True:
-    try:
-      positions = getPositions(client)
-      # 포지션이 있다면 정리할게 있는지 체크
-      if len(positions) > 0:
-        print("포지션 정리 체크 중,,,") 
-        closePosition(client, createOrder, positions, getBalance, betController)
+    while True:
+        try:
+            for strategy in strategies:
+              positions = getPositions(client)
+              total_balance, available_balance = getBalance(client)
+              strategy.run(positions, total_balance, available_balance)
 
-      # 포지션이 꽉 찼는지 체크
-      # 빈 포지션이 있다면 코인 찾기
-      total_balance, available_balance = getBalance(client)
-      
-      if not isPositionFull(total_balance, available_balance):
-        print("포지션 진입 체크 중,,,")
-        ticker = getTicker(client)
-        positions = getPositions(client)
-        enterPosition(client, ticker, total_balance, available_balance, positions, logic_list, get4HData, getVolume, setLeverage, createOrder, betController)
-        
-      # print("정상 작동 중,,,")
-      time.sleep(30)
-      
-    except Exception as e:
-      print('e:', e)
-      asyncio.run(send_message(f"Error code: {e}"))
-  
+            time.sleep(300)
+
+        except Exception as e:
+            print(f"❌ 오류: {e}")
+            asyncio.run(send_message(f"Error: {e}"))
+            time.sleep(60)
+
+
 run_trading_bot()
