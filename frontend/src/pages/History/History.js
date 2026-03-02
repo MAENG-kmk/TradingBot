@@ -20,7 +20,7 @@ const History = () => {
   const [version, setVersion] = useState('');
   const [balanceDatas, setBalanceDatas] = useState([]);
   const [pnlDatas, setPnlDatas] = useState([]);
-  const [winningRateData, setWinningRateData] = useState([]);
+  const [, setWinningRateData] = useState([]);
   const [selectedCoin, setSelectedCoin] = useState('ALL');
 
   const navigate  = useNavigate();
