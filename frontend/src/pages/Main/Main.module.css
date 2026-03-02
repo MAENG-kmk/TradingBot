@@ -13,7 +13,8 @@ body {
   flex-direction: column;
   align-items: center;
   width: 100vw;
-  height: 100%;
+  min-height: 100vh;
+  padding-bottom: 4vh;
 }
 
 .headerContainer {
@@ -56,12 +57,43 @@ body {
 
 .button:hover {
   cursor: pointer;
-  background-color: #0D1117;
   color: cyan;
-  border: 1px solid cyan;
   border: 1px solid transparent;
   background: linear-gradient(#0a0a0a, #0a0a0a) padding-box,
               linear-gradient(135deg, #00ffff, #0088ff) border-box;
+}
+
+.coinTabs {
+  display: flex;
+  width: 92vw;
+  gap: 6px;
+  margin-bottom: 2vh;
+  flex-wrap: wrap;
+}
+
+.coinTab {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  color: #a8a8a8;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.coinTab:hover {
+  color: cyan;
+  border-color: rgba(0, 255, 255, 0.4);
+  background-color: rgba(0, 255, 255, 0.08);
+}
+
+.coinTabActive {
+  color: #0D1117;
+  background: linear-gradient(135deg, #00ffff, #0088ff);
+  border-color: transparent;
+  font-weight: bold;
 }
 
 .row {
@@ -77,6 +109,7 @@ body {
   width: 92vw;
   height: 40vh;
   margin-top: 3vh;
+  margin-bottom: 3vh;
 }
 
 .assetContent {
@@ -235,6 +268,15 @@ body {
 
   .button {
     font-size: x-small;
+  }
+
+  .coinTabs {
+    gap: 4px;
+  }
+
+  .coinTab {
+    font-size: 9px;
+    padding: 4px 8px;
   }
 
   .row {

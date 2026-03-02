@@ -10,8 +10,8 @@ const BarGraph = ({datas}) => {
   return(
     <ResponsiveContainer width='100%' height='100%'>
       <BarChart data={datas}>
-        <XAxis dataKey="name" />
-        <YAxis />
+        <XAxis dataKey="name" tick={{ fill: '#a8a8a8', fontSize: 11 }} />
+        <YAxis tick={{ fill: '#a8a8a8', fontSize: 11 }} />
         <Tooltip cursor={false} content={<CustomTooltip />} />
         <Bar dataKey="Profit" 
           fill="#8884d8"  

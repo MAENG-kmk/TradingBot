@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import styles from './Main.module.css'
 import axios from 'axios'
 import LineGraph from '../../components/Graph/LineGraph';
 import formatTimestamp from '../../tools/formatTimeStamp';
 import BarGraph from '../../components/Graph/BarGraph';
+import CoinComparisonChart from '../../components/Graph/CoinComparisonChart';
 import { useNavigate } from 'react-router-dom';
+
+const COINS = ['ALL', 'ETH', 'BTC', 'SOL', 'BNB', 'XRP', 'LINK', 'DOGE', 'AVAX', 'ARB', 'AAVE'];
 
 const Main = () => {
   const [startBalance, setStartBalance] = useState('');
@@ -14,21 +17,11 @@ const Main = () => {
   const [balanceDatas, setBalanceDatas] = useState([]);
   const [pnlDatas, setPnlDatas] = useState([]);
   const [positionDatas, setPositionDatas] = useState([]);
+  const [selectedCoin, setSelectedCoin] = useState('ALL');
 
   const navigate  = useNavigate();
 
   useEffect(() => {
-    // const getBalance = async () => {
-    //   try {
-    //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/balance`);
-    //     if (response.data.success) {
-    //       setBalance(parseFloat(response.data.balance).toFixed(2));
-    //     }
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // };
-
     const getDatas = async () => {
       try {
         const response_0 = await axios.get(`${process.env.REACT_APP_API_URL}/balance`);
@@ -75,7 +68,6 @@ const Main = () => {
 
               return filter;
             });
-            // setPnl(totalPnl.toFixed(2));
             setPnl((parseFloat(response_0.data.balance)-parseFloat(sb)).toFixed(2))
             setBalanceDatas(processed);
             setPnlDatas(processed);
@@ -86,9 +78,49 @@ const Main = () => {
       }
     };
 
-    // getBalance();
     getDatas();
   }, [])
+
+  // 코인별 필터링
+  const filteredBalanceDatas = useMemo(() => {
+    if (selectedCoin === 'ALL') return balanceDatas;
+    return balanceDatas.filter(d => d.symbol === selectedCoin + 'USDT');
+  }, [balanceDatas, selectedCoin]);
+
+  const filteredPnlDatas = useMemo(() => {
+    if (selectedCoin === 'ALL') return pnlDatas;
+    return pnlDatas.filter(d => d.symbol === selectedCoin + 'USDT');
+  }, [pnlDatas, selectedCoin]);
+
+  const filteredPositions = useMemo(() => {
+    if (selectedCoin === 'ALL') return positionDatas;
+    return positionDatas.filter(d => d.symbol === selectedCoin + 'USDT');
+  }, [positionDatas, selectedCoin]);
+
+  const filteredPnl = useMemo(() => {
+    if (selectedCoin === 'ALL') return pnl;
+    const total = filteredPnlDatas.reduce((sum, d) => sum + parseFloat(d.Profit), 0);
+    return total.toFixed(2);
+  }, [selectedCoin, pnl, filteredPnlDatas]);
+
+  // 코인별 손익 비교 데이터
+  const coinSummary = useMemo(() => {
+    const map = {};
+    pnlDatas.forEach(d => {
+      const coin = d.symbol ? d.symbol.replace('USDT', '') : 'UNKNOWN';
+      if (!map[coin]) map[coin] = { coin, profit: 0, trades: 0, wins: 0 };
+      map[coin].profit += parseFloat(d.Profit);
+      map[coin].trades += 1;
+      if (parseFloat(d.Profit) > 0) map[coin].wins += 1;
+    });
+    return Object.values(map)
+      .map(c => ({
+        ...c,
+        profit: parseFloat(c.profit.toFixed(2)),
+        winRate: c.trades > 0 ? (c.wins / c.trades * 100).toFixed(1) : '0.0',
+      }))
+      .sort((a, b) => b.profit - a.profit);
+  }, [pnlDatas]);
 
   const handleClickButton = () => {
     navigate('/history');
@@ -96,6 +128,10 @@ const Main = () => {
 
   const handlePositionClick = (symbol) => {
     window.open(`https://www.binance.com/en/futures/${symbol}`, '_blank');
+  };
+
+  const handleCoinTabClick = (coin) => {
+    setSelectedCoin(coin);
   };
 
   return(
@@ -107,21 +143,35 @@ const Main = () => {
         </div>
         <button className={styles.button} onClick={handleClickButton}>Model History</button>
       </div>
+
+      {/* 코인 탭 */}
+      <div className={styles.coinTabs}>
+        {COINS.map(coin => (
+          <button
+            key={coin}
+            className={`${styles.coinTab} ${selectedCoin === coin ? styles.coinTabActive : ''}`}
+            onClick={() => handleCoinTabClick(coin)}
+          >
+            {coin}
+          </button>
+        ))}
+      </div>
+
       <div className={styles.row}>
         <div className={`${styles.assetContent} ${styles.glow_box} ${styles.gradient_border}`}>
           <div className={styles.header}>
-            <div className={styles.name}>Asset Value</div>
+            <div className={styles.name}>{selectedCoin === 'ALL' ? 'Asset Value' : `${selectedCoin} Trades`}</div>
             <div className={styles.balance}><span className={styles.label}>Current Asset :</span>{balance} $</div>
           </div>
           <div className={styles.graph}>
-            <LineGraph datas={balanceDatas} />
+            <LineGraph datas={filteredBalanceDatas} />
           </div>
         </div>
         <div className={`${styles.rorContent} ${styles.glow_box} ${styles.gradient_border}`}>
           <div className={styles.header}>
             <div className={styles.statistics}>Current Position</div>
           </div>
-          {positionDatas.map((position) => {
+          {filteredPositions.map((position) => {
             return(
               <div className={styles.position} key={position.symbol} onClick={() => {handlePositionClick(position.symbol)}}>
                 <div>{position.symbol}<span>{position.side}</span></div>
@@ -133,13 +183,29 @@ const Main = () => {
       </div>
       <div className={`${styles.secondRow} ${styles.glow_box} ${styles.gradient_border}`}>
         <div className={styles.header}>
-          <div className={styles.name}>Profit and Loss ($)</div>
-          <div className={pnl > 0 ? styles.plus : styles.minus}><span className={styles.label}>Total :</span>{pnl} $ ( {(pnl && pnl/startBalance*100).toFixed(2)} % )</div>
+          <div className={styles.name}>{selectedCoin === 'ALL' ? 'Profit and Loss ($)' : `${selectedCoin} P&L ($)`}</div>
+          <div className={filteredPnl > 0 ? styles.plus : styles.minus}>
+            <span className={styles.label}>Total :</span>
+            {filteredPnl} $
+            {selectedCoin === 'ALL' && startBalance ? ` ( ${(pnl/startBalance*100).toFixed(2)} % )` : ''}
+          </div>
         </div>
         <div className={styles.graph}>
-          <BarGraph datas={pnlDatas} />
+          <BarGraph datas={filteredPnlDatas} />
         </div>
       </div>
+
+      {/* 코인별 손익 비교 차트 */}
+      {selectedCoin === 'ALL' && coinSummary.length > 0 && (
+        <div className={`${styles.secondRow} ${styles.glow_box} ${styles.gradient_border}`}>
+          <div className={styles.header}>
+            <div className={styles.name}>Coin Performance</div>
+          </div>
+          <div className={styles.graph}>
+            <CoinComparisonChart datas={coinSummary} onCoinClick={(coin) => handleCoinTabClick(coin)} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
