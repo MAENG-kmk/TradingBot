@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import styles from './History.module.css'
 import axios from 'axios'
 import LineGraph from '../../components/Graph/LineGraph';
+import CandlestickChart from '../../components/Graph/CandlestickChart';
 import formatTimestamp from '../../tools/formatTimeStamp';
 import BarGraph from '../../components/Graph/BarGraph';
 import PieGraph from '../../components/Graph/PieGraph';
@@ -22,6 +23,7 @@ const History = () => {
   const [pnlDatas, setPnlDatas] = useState([]);
   const [, setWinningRateData] = useState([]);
   const [selectedCoin, setSelectedCoin] = useState('ALL');
+  const [candleData, setCandleData] = useState([]);
 
   const navigate  = useNavigate();
 
@@ -141,6 +143,44 @@ const History = () => {
       .sort((a, b) => b.profit - a.profit);
   }, [pnlDatas]);
 
+  // 캔들차트 마커용 트레이드 데이터
+  const candleTrades = useMemo(() => {
+    if (selectedCoin === 'ALL') return [];
+    return filteredPnlDatas.map(d => {
+      const parseDate = (str) => {
+        if (!str) return null;
+        const date = new Date(str);
+        if (isNaN(date.getTime())) return null;
+        return Math.floor(date.getTime() / 1000);
+      };
+      return {
+        enterTimestamp: parseDate(d.enterTime),
+        closeTimestamp: parseDate(d.name),
+        side: d.side,
+        Profit: d.Profit,
+      };
+    }).filter(d => d.enterTimestamp || d.closeTimestamp);
+  }, [filteredPnlDatas, selectedCoin]);
+
+  const handleCoinTabClick = async (coin) => {
+    setSelectedCoin(coin);
+    if (coin !== 'ALL') {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/klines?symbol=${coin}USDT&interval=1h&limit=200`
+        );
+        if (res.data.success) {
+          setCandleData(res.data.datas);
+        }
+      } catch (err) {
+        console.log('Failed to fetch klines:', err);
+        setCandleData([]);
+      }
+    } else {
+      setCandleData([]);
+    }
+  };
+
   const handleClickButton = () => {
     navigate('/');
   };
@@ -150,6 +190,7 @@ const History = () => {
     setStartBalance(data.balance);
     setDate(data.date);
     setSelectedCoin('ALL');
+    setCandleData([]);
   };
 
   const handleDeleteVersion = async (e, data) => {
@@ -209,7 +250,7 @@ const History = () => {
               <button
                 key={coin}
                 className={`${styles.coinTab} ${selectedCoin === coin ? styles.coinTabActive : ''}`}
-                onClick={() => setSelectedCoin(coin)}
+                onClick={() => handleCoinTabClick(coin)}
               >
                 {coin}
               </button>
@@ -220,10 +261,14 @@ const History = () => {
         <div className={styles.row}>
           <div className={`${styles.assetContent} ${styles.glow_box} ${styles.gradient_border}`}>
             <div className={styles.header}>
-              <div className={styles.name}>{selectedCoin === 'ALL' ? 'Asset Value' : `${selectedCoin} Trades`}</div>
+              <div className={styles.name}>{selectedCoin === 'ALL' ? 'Asset Value' : `${selectedCoin}/USDT`}</div>
             </div>
             <div className={styles.graph}>
-              <LineGraph datas={filteredBalanceDatas} />
+              {selectedCoin === 'ALL' ? (
+                <LineGraph datas={filteredBalanceDatas} />
+              ) : (
+                <CandlestickChart candles={candleData} trades={candleTrades} />
+              )}
             </div>
           </div>
           <div className={`${styles.rorContent} ${styles.glow_box} ${styles.gradient_border}`}>
@@ -261,7 +306,7 @@ const History = () => {
               <div className={styles.name}>Coin Performance</div>
             </div>
             <div className={styles.graph}>
-              <CoinComparisonChart datas={coinSummary} onCoinClick={(coin) => setSelectedCoin(coin)} />
+              <CoinComparisonChart datas={coinSummary} onCoinClick={(coin) => handleCoinTabClick(coin)} />
             </div>
           </div>
         )}

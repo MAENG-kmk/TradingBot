@@ -118,6 +118,32 @@ app.delete("/version", async (req, res) => {
   }
 });
 
+app.get("/klines", async (req, res) => {
+  try {
+    const { symbol, interval = "1h", limit = "200" } = req.query;
+    if (!symbol) {
+      return res.status(400).json({ success: false, message: "symbol required" });
+    }
+    const candles = await client.futuresCandles({
+      symbol,
+      interval,
+      limit: parseInt(limit),
+    });
+    const datas = candles.map((c) => ({
+      time: Math.floor(c.openTime / 1000),
+      open: parseFloat(c.open),
+      high: parseFloat(c.high),
+      low: parseFloat(c.low),
+      close: parseFloat(c.close),
+      volume: parseFloat(c.volume),
+    }));
+    res.json({ success: true, datas });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.get("/heartbeat", async (req, res) => {
   try {
     const db = await connectMongo("Bot_Status");

@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import styles from './Main.module.css'
 import axios from 'axios'
 import LineGraph from '../../components/Graph/LineGraph';
+import CandlestickChart from '../../components/Graph/CandlestickChart';
 import formatTimestamp from '../../tools/formatTimeStamp';
 import BarGraph from '../../components/Graph/BarGraph';
 import CoinComparisonChart from '../../components/Graph/CoinComparisonChart';
@@ -19,6 +20,7 @@ const Main = () => {
   const [positionDatas, setPositionDatas] = useState([]);
   const [selectedCoin, setSelectedCoin] = useState('ALL');
   const [botStatus, setBotStatus] = useState({ alive: null, minutesAgo: null });
+  const [candleData, setCandleData] = useState([]);
 
   const navigate  = useNavigate();
 
@@ -118,6 +120,25 @@ const Main = () => {
     return total.toFixed(2);
   }, [selectedCoin, pnl, filteredPnlDatas]);
 
+  // 캔들차트 마커용 트레이드 데이터 (timestamp → unix seconds)
+  const candleTrades = useMemo(() => {
+    if (selectedCoin === 'ALL') return [];
+    return filteredPnlDatas.map(d => {
+      const parseDate = (str) => {
+        if (!str) return null;
+        const date = new Date(str);
+        if (isNaN(date.getTime())) return null;
+        return Math.floor(date.getTime() / 1000);
+      };
+      return {
+        enterTimestamp: parseDate(d.enterTime),
+        closeTimestamp: parseDate(d.name),
+        side: d.side,
+        Profit: d.Profit,
+      };
+    }).filter(d => d.enterTimestamp || d.closeTimestamp);
+  }, [filteredPnlDatas, selectedCoin]);
+
   // 코인별 손익 비교 데이터
   const coinSummary = useMemo(() => {
     const map = {};
@@ -145,8 +166,23 @@ const Main = () => {
     window.open(`https://www.binance.com/en/futures/${symbol}`, '_blank');
   };
 
-  const handleCoinTabClick = (coin) => {
+  const handleCoinTabClick = async (coin) => {
     setSelectedCoin(coin);
+    if (coin !== 'ALL') {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/klines?symbol=${coin}USDT&interval=1h&limit=200`
+        );
+        if (res.data.success) {
+          setCandleData(res.data.datas);
+        }
+      } catch (err) {
+        console.log('Failed to fetch klines:', err);
+        setCandleData([]);
+      }
+    } else {
+      setCandleData([]);
+    }
   };
 
   return(
@@ -184,11 +220,15 @@ const Main = () => {
       <div className={styles.row}>
         <div className={`${styles.assetContent} ${styles.glow_box} ${styles.gradient_border}`}>
           <div className={styles.header}>
-            <div className={styles.name}>{selectedCoin === 'ALL' ? 'Asset Value' : `${selectedCoin} Trades`}</div>
+            <div className={styles.name}>{selectedCoin === 'ALL' ? 'Asset Value' : `${selectedCoin}/USDT`}</div>
             <div className={styles.balance}><span className={styles.label}>Current Asset :</span>{balance} $</div>
           </div>
           <div className={styles.graph}>
-            <LineGraph datas={filteredBalanceDatas} />
+            {selectedCoin === 'ALL' ? (
+              <LineGraph datas={filteredBalanceDatas} />
+            ) : (
+              <CandlestickChart candles={candleData} trades={candleTrades} />
+            )}
           </div>
         </div>
         <div className={`${styles.rorContent} ${styles.glow_box} ${styles.gradient_border}`}>
