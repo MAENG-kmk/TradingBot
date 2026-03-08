@@ -10,7 +10,7 @@ from datetime import datetime
 
 from tools.getData import get4HData
 from tools.getAtr import getATR
-from tools.trendFilter import checkTrendStrength
+from tools.trendFilter import checkTrendStrength, checkMarketRegime
 from tools.createOrder import createOrder
 from tools.setLeverage import setLeverage
 from tools.getBalance import getBalance
@@ -59,6 +59,17 @@ class BaseCoinStrategy:
     TIME_EXIT_ROR_2 = 2.0
     VOLATILITY_SPIKE = 3.0
 
+    # ===== 평균회귀 파라미터 (횡보장용) =====
+    MR_ENABLED = True               # 평균회귀 활성화 여부
+    MR_BB_PERIOD = 20               # 볼린저밴드 기간
+    MR_BB_STD = 2.0                 # 볼린저밴드 표준편차 배수
+    MR_RSI_OVERBUY = 70             # 평균회귀 RSI 과매수 (숏 진입)
+    MR_RSI_OVERSELL = 30            # 평균회귀 RSI 과매도 (롱 진입)
+    MR_TARGET_ROR = 2.5             # 목표 수익률 (%)
+    MR_STOP_LOSS = -2.0             # 손절 (%)
+    MR_TIME_EXIT_SECONDS = 43200    # 12시간 시간 청산
+    MR_SLOPE_THRESHOLD = 0.05       # 횡보 판단 기울기 임계값 (%)
+
     def __init__(self, client):
         self.client = client
         self._state = None  # 포지션 상태 (진입 시 생성, 청산 시 초기화)
@@ -93,7 +104,7 @@ class BaseCoinStrategy:
         if float(available_balance) < bullet:
             return
 
-        signal, target_ror = self.check_entry_signal()
+        signal, target_ror, mode = self.check_entry_signal()
         if signal is None:
             return
 
@@ -109,8 +120,9 @@ class BaseCoinStrategy:
         response = createOrder(self.client, self.SYMBOL, side, 'MARKET', qty)
 
         if response:
-            self._init_state(target_ror)
-            msg = f"✅ {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%"
+            self._init_state(target_ror, mode=mode)
+            tag = '📊MR' if mode == 'mean_reversion' else '✅TR'
+            msg = f"{tag} {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%"
             print(f"  {msg}")
             try:
                 asyncio.run(send_message(msg))
@@ -121,39 +133,83 @@ class BaseCoinStrategy:
 
     def check_entry_signal(self):
         """
-        진입 시그널 체크 — 서브클래스에서 오버라이드 가능
+        진입 시그널 체크 — 시장 상태에 따라 전략 분기
 
         Returns:
-            tuple: ('long', target_ror) | ('short', target_ror) | (None, 0)
+            tuple: ('long'|'short', target_ror, mode) | (None, 0, None)
+              mode: 'trend_following' | 'mean_reversion'
         """
         df = self.get_data()
         if df is None or len(df) < 50:
-            return None, 0
+            return None, 0, None
 
         closes = df['Close'].values.astype(float)
 
-        if not checkTrendStrength(df, adx_threshold=self.ADX_THRESHOLD):
-            return None, 0
+        # 시장 상태 판단
+        regime, adx, slope = checkMarketRegime(
+            df, adx_threshold=self.ADX_THRESHOLD,
+            slope_threshold=self.MR_SLOPE_THRESHOLD,
+        )
 
+        if regime in ('uptrend', 'downtrend'):
+            return self._trend_following_signal(df, closes)
+        elif self.MR_ENABLED:
+            return self._mean_reversion_signal(df, closes)
+        else:
+            return None, 0, None
+
+    def _trend_following_signal(self, df, closes):
+        """추세추종 진입 (기존 로직)"""
         ema_short = self._ema(closes, self.EMA_SHORT)
         ema_long = self._ema(closes, self.EMA_LONG)
         rsi = self._rsi(closes)
         macd, signal = self._macd(closes)
         if macd is None:
-            return None, 0
+            return None, 0, None
 
         atr = getATR(df)
         target_ror = abs(atr / closes[-1]) * 100
 
         if rsi >= self.RSI_OVERBUY or rsi <= self.RSI_OVERSELL:
-            return None, 0
+            return None, 0, None
 
         if ema_short > ema_long and macd > signal:
-            return 'long', target_ror
+            return 'long', target_ror, 'trend_following'
         if ema_short < ema_long and macd < signal:
-            return 'short', target_ror
+            return 'short', target_ror, 'trend_following'
 
-        return None, 0
+        return None, 0, None
+
+    def _mean_reversion_signal(self, df, closes):
+        """
+        평균회귀 진입 — 횡보장에서 볼린저밴드 + RSI 역진입
+
+        조건:
+          - 가격이 BB 하단 이탈 & RSI 과매도 → 롱 (반등 기대)
+          - 가격이 BB 상단 이탈 & RSI 과매수 → 숏 (하락 기대)
+        """
+        if len(closes) < self.MR_BB_PERIOD:
+            return None, 0, None
+
+        # 볼린저밴드 계산
+        bb_closes = closes[-self.MR_BB_PERIOD:]
+        bb_mid = float(np.mean(bb_closes))
+        bb_std = float(np.std(bb_closes))
+        bb_upper = bb_mid + self.MR_BB_STD * bb_std
+        bb_lower = bb_mid - self.MR_BB_STD * bb_std
+
+        current_price = closes[-1]
+        rsi = self._rsi(closes)
+
+        # 과매도 + BB 하단 이탈 → 롱
+        if current_price <= bb_lower and rsi <= self.MR_RSI_OVERSELL:
+            return 'long', self.MR_TARGET_ROR, 'mean_reversion'
+
+        # 과매수 + BB 상단 이탈 → 숏
+        if current_price >= bb_upper and rsi >= self.MR_RSI_OVERBUY:
+            return 'short', self.MR_TARGET_ROR, 'mean_reversion'
+
+        return None, 0, None
 
     # ================================================================
     #  청산 로직 (BetController 4단계 트레일링 내장)
@@ -166,11 +222,36 @@ class BaseCoinStrategy:
         if self._state is None:
             self._init_state(0)
 
+        mode = self._state.get('mode', 'trend_following')
+
+        # 평균회귀 모드: 목표 도달 즉시 청산 또는 시간 초과
+        if mode == 'mean_reversion':
+            should_close = False
+            reason = ""
+
+            if ror >= self._state['target_ror']:
+                should_close = True
+                reason = f"MR목표달성({ror:.1f}%≥{self._state['target_ror']:.1f}%)"
+            elif ror <= self._state['stop_loss']:
+                should_close = True
+                reason = f"MR손절({ror:.1f}%)"
+            elif time.time() - self._state['entry_time'] > self.MR_TIME_EXIT_SECONDS:
+                should_close = True
+                reason = f"MR시간초과(12h)"
+
+            if should_close:
+                self._close_position(position, reason)
+            else:
+                print(f"  유지: {self.SYMBOL} | MR | ROR:{ror:.1f}% | 목표:{self._state['target_ror']:.1f}% | 손절:{self._state['stop_loss']:.1f}%")
+            return
+
+        # 추세추종 모드: 기존 4단계 트레일링
         # 1. 트레일링 스탑 업데이트
         self._update_trailing(ror)
 
         should_close = False
         reason = ""
+        is_hard_stop = False
 
         # 2. 손절 / 트레일링 스탑
         if ror < self._state['stop_loss']:
@@ -179,6 +260,7 @@ class BaseCoinStrategy:
                 reason = f"트레일링스탑(최고:{self._state['highest_ror']:.1f}%→현재:{ror:.1f}%)"
             else:
                 reason = f"손절({ror:.1f}%)"
+                is_hard_stop = True
 
         # 3. 변동성 급변
         if not should_close:
@@ -189,7 +271,11 @@ class BaseCoinStrategy:
             should_close, reason = self._check_time()
 
         if should_close:
-            self._close_position(position, reason)
+            # 재진입 방지: 하드스탑 외 청산 시, 같은 방향 시그널이면 보류
+            if not is_hard_stop and self._should_hold(position['side']):
+                print(f"  보류: {self.SYMBOL} | {reason} 조건이나 동일방향 시그널 존재 → 홀드")
+            else:
+                self._close_position(position, reason)
         else:
             phase_names = {1: "초기", 2: "본전확보", 3: "트레일링", 4: "타이트"}
             phase = phase_names.get(self._state['phase'], "?")
@@ -223,7 +309,21 @@ class BaseCoinStrategy:
 
     # ===== 4단계 트레일링 스탑 =====
 
-    def _init_state(self, target_ror):
+    def _init_state(self, target_ror, mode='trend_following'):
+        if mode == 'mean_reversion':
+            # 평균회귀: 타이트한 손절, 작은 목표, 빠른 청산
+            self._state = {
+                'target_ror': self.MR_TARGET_ROR,
+                'stop_loss': self.MR_STOP_LOSS,
+                'entry_time': time.time(),
+                'highest_ror': 0,
+                'atr_ratio': 0.03,
+                'trailing_active': False,
+                'phase': 1,
+                'mode': 'mean_reversion',
+            }
+            return
+
         if target_ror <= 5:
             target = self.DEFAULT_TARGET_ROR
             stop = self.DEFAULT_STOP_LOSS
@@ -241,6 +341,7 @@ class BaseCoinStrategy:
             'atr_ratio': atr_ratio,
             'trailing_active': False,
             'phase': 1,
+            'mode': 'trend_following',
         }
 
     def _update_trailing(self, ror):
@@ -299,6 +400,21 @@ class BaseCoinStrategy:
 
     def get_data(self, limit=100):
         return get4HData(self.client, self.SYMBOL, limit)
+
+    def _should_hold(self, current_side):
+        """
+        재진입 방지 — 청산 직전 진입 시그널 확인
+
+        현재 포지션과 같은 방향의 진입 시그널이 있으면 True (홀드)
+        → 청산 후 즉시 재진입하는 낭비를 방지
+        """
+        try:
+            signal, _, _ = self.check_entry_signal()
+            if signal is not None and signal == current_side:
+                return True
+        except Exception:
+            pass
+        return False
 
     def _get_price(self):
         try:

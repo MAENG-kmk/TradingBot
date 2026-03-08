@@ -62,18 +62,41 @@ def calculate_adx(data, period=14):
   return adx
 
 
-def checkTrendStrength(data, adx_threshold=20):
+def calculate_regression_slope(closes, period=20):
   """
-  횡보장 필터 — 확실한 방향성이 있을 때만 True
+  선형 회귀 기울기로 추세 방향 판단
 
-  ADX 기반 2단계 체크:
-    1. ADX > threshold: 확실한 추세 → 진입 허용
-    2. ADX 상승 중 (breakout): 추세 형성 중 → 진입 허용
-    3. 둘 다 아님: 횡보장 → 진입 금지
+  최근 period 봉의 종가에 대해 최소자승법(OLS) 선형회귀를 수행,
+  기울기를 가격 대비 % 변화율로 정규화하여 반환한다.
 
   Args:
-    data: DataFrame (Open, High, Low, Close, Volume)
-    adx_threshold: ADX 기준값 (기본 20)
+    closes: 종가 배열 (numpy array 또는 list)
+    period: 회귀 기간 (기본 20봉)
+
+  Returns:
+    float: 정규화된 기울기 (양수=상승추세, 음수=하락추세, 0 근처=횡보)
+           단위: 1봉당 가격 변화율(%) — 예) 0.5 → 봉당 0.5% 상승
+  """
+  if len(closes) < period:
+    return 0.0
+
+  y = np.array(closes[-period:], dtype=float)
+  x = np.arange(period, dtype=float)
+
+  # OLS: slope = Σ((x-x̄)(y-ȳ)) / Σ((x-x̄)²)
+  x_mean = x.mean()
+  y_mean = y.mean()
+  slope = np.sum((x - x_mean) * (y - y_mean)) / np.sum((x - x_mean) ** 2)
+
+  # 가격 대비 % 정규화
+  if y_mean == 0:
+    return 0.0
+  return (slope / y_mean) * 100
+
+
+def checkTrendStrength(data, adx_threshold=20):
+  """
+  추세 판단 — ADX(강도) + 회귀 기울기(방향) 결합
 
   Returns:
     bool: True = 추세장 (진입 가능), False = 횡보장 (진입 금지)
@@ -81,7 +104,6 @@ def checkTrendStrength(data, adx_threshold=20):
   if len(data) < 50:
     return False
 
-  # ADX 계산 (최근 3개 시점)
   adx_current = calculate_adx(data)
 
   # 확실한 추세
@@ -97,3 +119,39 @@ def checkTrendStrength(data, adx_threshold=20):
 
   # 횡보장
   return False
+
+
+def checkMarketRegime(data, adx_threshold=20, slope_period=20, slope_threshold=0.05):
+  """
+  시장 상태 분류 — 추세 강도 + 방향을 함께 판단
+
+  ADX로 추세 강도를, 회귀 기울기로 방향을 판단하여
+  'uptrend' / 'downtrend' / 'ranging' 중 하나를 반환.
+
+  Args:
+    data: DataFrame (Open, High, Low, Close, Volume)
+    adx_threshold: ADX 추세 기준값
+    slope_period: 회귀 기울기 계산 기간 (봉 수)
+    slope_threshold: 횡보 판단 기울기 임계값 (%)
+
+  Returns:
+    tuple: (regime, adx, slope)
+      - regime: 'uptrend' | 'downtrend' | 'ranging'
+      - adx: 현재 ADX 값
+      - slope: 정규화된 회귀 기울기 (%)
+  """
+  if len(data) < 50:
+    return 'ranging', 0, 0.0
+
+  adx_current = calculate_adx(data)
+  closes = data['Close'].values.astype(float)
+  slope = calculate_regression_slope(closes, slope_period)
+
+  is_trending = checkTrendStrength(data, adx_threshold)
+
+  if is_trending and slope > slope_threshold:
+    return 'uptrend', adx_current, slope
+  elif is_trending and slope < -slope_threshold:
+    return 'downtrend', adx_current, slope
+  else:
+    return 'ranging', adx_current, slope
