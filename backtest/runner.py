@@ -20,7 +20,7 @@ COIN_CONFIGS = {
     'eth': {
         'data_file': 'backtestDatas/ethusdt_4h.csv',
         'params': dict(
-            ema_short=10, ema_long=30,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=70, rsi_oversell=30,
             adx_threshold=15, atr_multiplier=2.0,
             target_ror_pct=15.0, trailing_ratio=0.6,
@@ -30,7 +30,7 @@ COIN_CONFIGS = {
     'btc': {
         'data_file': 'backtestDatas/btcusdt_4h.csv',
         'params': dict(
-            ema_short=5, ema_long=20,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=80, rsi_oversell=30,
             adx_threshold=30, atr_multiplier=3.0,
             target_ror_pct=7.0, trailing_ratio=0.5,
@@ -40,7 +40,7 @@ COIN_CONFIGS = {
     'sol': {
         'data_file': 'backtestDatas/solusdt_4h.csv',
         'params': dict(
-            ema_short=20, ema_long=50,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=70, rsi_oversell=20,
             adx_threshold=25, atr_multiplier=1.5,
             target_ror_pct=15.0, trailing_ratio=0.4,
@@ -50,7 +50,7 @@ COIN_CONFIGS = {
     'bnb': {
         'data_file': 'backtestDatas/bnbusdt_4h.csv',
         'params': dict(
-            ema_short=5, ema_long=50,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=70, rsi_oversell=30,
             adx_threshold=20, atr_multiplier=1.5,
             target_ror_pct=10.0, trailing_ratio=0.4,
@@ -60,7 +60,7 @@ COIN_CONFIGS = {
     'xrp': {
         'data_file': 'backtestDatas/xrpusdt_4h.csv',
         'params': dict(
-            ema_short=10, ema_long=30,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=80, rsi_oversell=30,
             adx_threshold=15, atr_multiplier=3.0,
             target_ror_pct=15.0, trailing_ratio=0.5,
@@ -70,7 +70,7 @@ COIN_CONFIGS = {
     'link': {
         'data_file': 'backtestDatas/linkusdt_4h.csv',
         'params': dict(
-            ema_short=5, ema_long=60,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=70, rsi_oversell=20,
             adx_threshold=30, atr_multiplier=1.5,
             target_ror_pct=15.0, trailing_ratio=0.7,
@@ -80,7 +80,7 @@ COIN_CONFIGS = {
     'doge': {
         'data_file': 'backtestDatas/dogeusdt_4h.csv',
         'params': dict(
-            ema_short=10, ema_long=50,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=80, rsi_oversell=30,
             adx_threshold=20, atr_multiplier=2.0,
             target_ror_pct=15.0, trailing_ratio=0.4,
@@ -90,7 +90,7 @@ COIN_CONFIGS = {
     'avax': {
         'data_file': 'backtestDatas/avaxusdt_4h.csv',
         'params': dict(
-            ema_short=20, ema_long=60,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=80, rsi_oversell=30,
             adx_threshold=15, atr_multiplier=1.5,
             target_ror_pct=15.0, trailing_ratio=0.4,
@@ -100,7 +100,7 @@ COIN_CONFIGS = {
     'arb': {
         'data_file': 'backtestDatas/arbusdt_4h.csv',
         'params': dict(
-            ema_short=20, ema_long=50,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=80, rsi_oversell=30,
             adx_threshold=15, atr_multiplier=1.5,
             target_ror_pct=10.0, trailing_ratio=0.4,
@@ -110,7 +110,7 @@ COIN_CONFIGS = {
     'aave': {
         'data_file': 'backtestDatas/aaveusdt_4h.csv',
         'params': dict(
-            ema_short=15, ema_long=20,
+            tr_bb_period=20, tr_bb_std=2.0,
             rsi_overbuy=80, rsi_oversell=30,
             adx_threshold=15, atr_multiplier=3.0,
             target_ror_pct=7.0, trailing_ratio=0.4,

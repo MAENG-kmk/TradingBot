@@ -8,8 +8,8 @@ class SOLStrategy(BaseCoinStrategy):
     QUANTITY_PRECISION = 1  # SOL: 0.1 단위
 
     # 진입 파라미터 (Robust 최적화)
-    EMA_SHORT = 20
-    EMA_LONG = 50
+    TR_BB_PERIOD = 20
+    TR_BB_STD = 2.0
     RSI_OVERBUY = 70
     RSI_OVERSELL = 20
     ADX_THRESHOLD = 25

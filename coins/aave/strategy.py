@@ -8,8 +8,8 @@ class AAVEStrategy(BaseCoinStrategy):
     QUANTITY_PRECISION = 1  # AAVE: 0.1 단위
 
     # 진입 파라미터 (Robust 최적화)
-    EMA_SHORT = 15
-    EMA_LONG = 20
+    TR_BB_PERIOD = 20
+    TR_BB_STD = 2.0
     RSI_OVERBUY = 80
     RSI_OVERSELL = 30
     ADX_THRESHOLD = 15

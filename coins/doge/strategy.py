@@ -8,8 +8,8 @@ class DOGEStrategy(BaseCoinStrategy):
     QUANTITY_PRECISION = 0  # DOGE: 정수 단위
 
     # 진입 파라미터 (Robust 최적화 - 5개 기간 모두 수익)
-    EMA_SHORT = 10
-    EMA_LONG = 50
+    TR_BB_PERIOD = 20
+    TR_BB_STD = 2.0
     RSI_OVERBUY = 80
     RSI_OVERSELL = 30
     ADX_THRESHOLD = 20

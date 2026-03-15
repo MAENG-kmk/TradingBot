@@ -37,8 +37,8 @@ class BaseCoinStrategy:
     QUANTITY_PRECISION = 3
 
     # ===== 진입 파라미터 =====
-    EMA_SHORT = 10
-    EMA_LONG = 30
+    TR_BB_PERIOD = 20           # 추세추종 볼린저밴드 기간
+    TR_BB_STD = 2.0             # 추세추종 볼린저밴드 표준편차 배수
     RSI_PERIOD = 14
     RSI_OVERBUY = 80
     RSI_OVERSELL = 20
@@ -159,9 +159,18 @@ class BaseCoinStrategy:
             return None, 0, None
 
     def _trend_following_signal(self, df, closes):
-        """추세추종 진입 (기존 로직)"""
-        ema_short = self._ema(closes, self.EMA_SHORT)
-        ema_long = self._ema(closes, self.EMA_LONG)
+        """추세추종 진입 — 볼린저밴드 돌파 + MACD 확인"""
+        if len(closes) < self.TR_BB_PERIOD:
+            return None, 0, None
+
+        # 볼린저밴드 계산
+        bb_closes = closes[-self.TR_BB_PERIOD:]
+        bb_mid = float(np.mean(bb_closes))
+        bb_std = float(np.std(bb_closes))
+        bb_upper = bb_mid + self.TR_BB_STD * bb_std
+        bb_lower = bb_mid - self.TR_BB_STD * bb_std
+
+        current_price = closes[-1]
         rsi = self._rsi(closes)
         macd, signal = self._macd(closes)
         if macd is None:
@@ -173,9 +182,11 @@ class BaseCoinStrategy:
         if rsi >= self.RSI_OVERBUY or rsi <= self.RSI_OVERSELL:
             return None, 0, None
 
-        if ema_short > ema_long and macd > signal:
+        # BB 상단 돌파 + MACD 확인 → 롱
+        if current_price > bb_upper and macd > signal:
             return 'long', target_ror, 'trend_following'
-        if ema_short < ema_long and macd < signal:
+        # BB 하단 돌파 + MACD 확인 → 숏
+        if current_price < bb_lower and macd < signal:
             return 'short', target_ror, 'trend_following'
 
         return None, 0, None

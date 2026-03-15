@@ -12,9 +12,9 @@ class CoinBacktestStrategy(bt.Strategy):
           평균회귀 → 목표/손절/시간 단순 청산
     """
     params = dict(
-        # 진입 (추세추종)
-        ema_short=10,
-        ema_long=30,
+        # 진입 (추세추종 — 볼린저밴드 돌파)
+        tr_bb_period=20,
+        tr_bb_std=2.0,
         rsi_period=14,
         rsi_overbuy=80,
         rsi_oversell=20,
@@ -50,8 +50,6 @@ class CoinBacktestStrategy(bt.Strategy):
     )
 
     def __init__(self):
-        self.ema_short = bt.ind.EMA(self.data.close, period=self.p.ema_short)
-        self.ema_long = bt.ind.EMA(self.data.close, period=self.p.ema_long)
         self.rsi = bt.ind.RSI(self.data.close, period=self.p.rsi_period)
         self.atr = bt.ind.ATR(self.data, period=self.p.atr_period)
         self.macd = bt.ind.MACD(self.data.close)
@@ -142,14 +140,26 @@ class CoinBacktestStrategy(bt.Strategy):
         return 'ranging'
 
     def _check_trend_entry(self):
-        """추세추종 진입 시그널 확인 → 'long'/'short'/None"""
-        if (self.ema_short[0] > self.ema_long[0] and
-            self.p.rsi_oversell < self.rsi[0] < self.p.rsi_overbuy and
-            self.macd.lines.macd[0] > self.macd.lines.signal[0]):
+        """추세추종 진입 — 볼린저밴드 돌파 + MACD 확인"""
+        period = self.p.tr_bb_period
+        if len(self.data) < period:
+            return None
+
+        closes = np.array([self.data.close[-i] for i in range(period - 1, -1, -1)], dtype=float)
+        bb_mid = closes.mean()
+        bb_std = closes.std()
+        bb_upper = bb_mid + self.p.tr_bb_std * bb_std
+        bb_lower = bb_mid - self.p.tr_bb_std * bb_std
+
+        price = self.data.close[0]
+        rsi = self.rsi[0]
+
+        if rsi >= self.p.rsi_overbuy or rsi <= self.p.rsi_oversell:
+            return None
+
+        if price > bb_upper and self.macd.lines.macd[0] > self.macd.lines.signal[0]:
             return 'long'
-        if (self.ema_short[0] < self.ema_long[0] and
-            self.p.rsi_oversell < self.rsi[0] < self.p.rsi_overbuy and
-            self.macd.lines.macd[0] < self.macd.lines.signal[0]):
+        if price < bb_lower and self.macd.lines.macd[0] < self.macd.lines.signal[0]:
             return 'short'
         return None
 
