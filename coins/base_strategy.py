@@ -15,6 +15,7 @@ from tools.createOrder import createOrder
 from tools.setLeverage import setLeverage
 from tools.getBalance import getBalance
 from tools.telegram import send_message
+from tools.ouProcess import fit_ou
 from MongoDB_python.client import addDataToMongoDB
 
 
@@ -44,12 +45,14 @@ class BaseCoinStrategy:
     RSI_OVERSELL = 20
     ATR_MULTIPLIER = 2.2
     ADX_THRESHOLD = 20
+    VOL_PERIOD = 20             # 볼륨 평균 계산 기간
+    VOL_MULT = 1.5              # 현재 볼륨 > 평균 × 배수일 때만 진입
 
     # ===== 청산 파라미터 (4단계 트레일링) =====
-    DEFAULT_TARGET_ROR = 7.0
-    DEFAULT_STOP_LOSS = -4.0
+    DEFAULT_TARGET_ROR = 10.0
+    DEFAULT_STOP_LOSS = -2.5
     PHASE2_THRESHOLD = 3.0    # 본전 확보 진입
-    PHASE3_THRESHOLD = 5.0    # 트레일링 시작
+    PHASE3_THRESHOLD = 6.0    # 트레일링 시작
     BREAKEVEN_STOP = 0.5      # 본전 확보 시 손절선
     TRAILING_RATIO = 0.6      # 일반 트레일링 (최고 ROR의 60%)
     TIGHT_TRAILING_RATIO = 0.75  # 타이트 트레일링 (75%)
@@ -59,16 +62,15 @@ class BaseCoinStrategy:
     TIME_EXIT_ROR_2 = 2.0
     VOLATILITY_SPIKE = 3.0
 
-    # ===== 평균회귀 파라미터 (횡보장용) =====
+    # ===== 평균회귀 파라미터 (OU 프로세스 기반) =====
     MR_ENABLED = True               # 평균회귀 활성화 여부
-    MR_BB_PERIOD = 20               # 볼린저밴드 기간
-    MR_BB_STD = 2.0                 # 볼린저밴드 표준편차 배수
-    MR_RSI_OVERBUY = 70             # 평균회귀 RSI 과매수 (숏 진입)
-    MR_RSI_OVERSELL = 30            # 평균회귀 RSI 과매도 (롱 진입)
-    MR_TARGET_ROR = 2.5             # 목표 수익률 (%)
-    MR_STOP_LOSS = -2.0             # 손절 (%)
-    MR_TIME_EXIT_SECONDS = 43200    # 12시간 시간 청산
     MR_SLOPE_THRESHOLD = 0.05       # 횡보 판단 기울기 임계값 (%)
+    MR_STOP_LOSS = -1.5             # 손절 (%)
+    # OU 파라미터
+    MR_OU_ENTRY_Z = 2.0             # 진입 Z-score 임계값 (|Z| > 2.0 → 진입)
+    MR_OU_EXIT_Z = 0.5              # 청산 Z-score 임계값 (|Z| < 0.5 → 평균 수렴 완료)
+    MR_MAX_HALFLIFE = 12            # 최대 허용 반감기 (봉 단위, 12봉=48h)
+    MR_TIME_HALFLIFE_MULT = 2.5     # 시간청산 = 반감기 × 배수
 
     def __init__(self, client):
         self.client = client
@@ -104,7 +106,7 @@ class BaseCoinStrategy:
         if float(available_balance) < bullet:
             return
 
-        signal, target_ror, mode = self.check_entry_signal()
+        signal, target_ror, mode, meta = self.check_entry_signal()
         if signal is None:
             return
 
@@ -120,9 +122,11 @@ class BaseCoinStrategy:
         response = createOrder(self.client, self.SYMBOL, side, 'MARKET', qty)
 
         if response:
-            self._init_state(target_ror, mode=mode)
+            ou = meta.get('ou') if meta else None
+            self._init_state(target_ror, mode=mode, ou=ou)
             tag = '📊MR' if mode == 'mean_reversion' else '✅TR'
-            msg = f"{tag} {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%"
+            ou_info = f" | HL:{ou['half_life']:.1f}봉 Z:{ou['zscore']:.2f}" if ou else ""
+            msg = f"{tag} {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%{ou_info}"
             print(f"  {msg}")
             try:
                 asyncio.run(send_message(msg))
@@ -136,12 +140,13 @@ class BaseCoinStrategy:
         진입 시그널 체크 — 시장 상태에 따라 전략 분기
 
         Returns:
-            tuple: ('long'|'short', target_ror, mode) | (None, 0, None)
+            tuple: ('long'|'short', target_ror, mode, meta) | (None, 0, None, None)
               mode: 'trend_following' | 'mean_reversion'
+              meta: 추가 정보 dict (ou 파라미터 등)
         """
         df = self.get_data()
         if df is None or len(df) < 50:
-            return None, 0, None
+            return None, 0, None, None
 
         closes = df['Close'].values.astype(float)
 
@@ -156,12 +161,12 @@ class BaseCoinStrategy:
         elif self.MR_ENABLED:
             return self._mean_reversion_signal(df, closes)
         else:
-            return None, 0, None
+            return None, 0, None, None
 
     def _trend_following_signal(self, df, closes):
         """추세추종 진입 — 볼린저밴드 돌파 + MACD 확인"""
         if len(closes) < self.TR_BB_PERIOD:
-            return None, 0, None
+            return None, 0, None, None
 
         # 볼린저밴드 계산
         bb_closes = closes[-self.TR_BB_PERIOD:]
@@ -174,53 +179,62 @@ class BaseCoinStrategy:
         rsi = self._rsi(closes)
         macd, signal = self._macd(closes)
         if macd is None:
-            return None, 0, None
+            return None, 0, None, None
 
         atr = getATR(df)
         target_ror = abs(atr / closes[-1]) * 100
 
         if rsi >= self.RSI_OVERBUY or rsi <= self.RSI_OVERSELL:
-            return None, 0, None
+            return None, 0, None, None
+
+        # 볼륨 필터 — 가짜 돌파 방지
+        volumes = df['Volume'].values.astype(float)
+        avg_vol = float(np.mean(volumes[-self.VOL_PERIOD:]))
+        current_vol = volumes[-1]
+        if avg_vol <= 0 or current_vol < avg_vol * self.VOL_MULT:
+            return None, 0, None, None
 
         # BB 상단 돌파 + MACD 확인 → 롱
         if current_price > bb_upper and macd > signal:
-            return 'long', target_ror, 'trend_following'
+            return 'long', target_ror, 'trend_following', {}
         # BB 하단 돌파 + MACD 확인 → 숏
         if current_price < bb_lower and macd < signal:
-            return 'short', target_ror, 'trend_following'
+            return 'short', target_ror, 'trend_following', {}
 
-        return None, 0, None
+        return None, 0, None, None
 
     def _mean_reversion_signal(self, df, closes):
         """
-        평균회귀 진입 — 횡보장에서 볼린저밴드 + RSI 역진입
+        평균회귀 진입 — OU 프로세스 기반
 
-        조건:
-          - 가격이 BB 하단 이탈 & RSI 과매도 → 롱 (반등 기대)
-          - 가격이 BB 상단 이탈 & RSI 과매수 → 숏 (하락 기대)
+        1. OU 파라미터 추정 (AR(1) OLS)
+        2. 반감기 필터: half_life > MR_MAX_HALFLIFE → 회귀 너무 느림 → 스킵
+        3. Z-score 진입: |Z| > MR_OU_ENTRY_Z
+           Z < -2.0: 로그가격이 장기 평균 아래 → 롱
+           Z > +2.0: 로그가격이 장기 평균 위  → 숏
         """
-        if len(closes) < self.MR_BB_PERIOD:
-            return None, 0, None
+        if len(closes) < 30:
+            return None, 0, None, None
 
-        # 볼린저밴드 계산
-        bb_closes = closes[-self.MR_BB_PERIOD:]
-        bb_mid = float(np.mean(bb_closes))
-        bb_std = float(np.std(bb_closes))
-        bb_upper = bb_mid + self.MR_BB_STD * bb_std
-        bb_lower = bb_mid - self.MR_BB_STD * bb_std
+        ou = fit_ou(closes)
+        if ou is None:
+            return None, 0, None, None
 
-        current_price = closes[-1]
-        rsi = self._rsi(closes)
+        # 반감기 필터 — 회귀가 너무 느리면 진입 안 함
+        if ou['half_life'] > self.MR_MAX_HALFLIFE:
+            return None, 0, None, None
 
-        # 과매도 + BB 하단 이탈 → 롱
-        if current_price <= bb_lower and rsi <= self.MR_RSI_OVERSELL:
-            return 'long', self.MR_TARGET_ROR, 'mean_reversion'
+        z = ou['zscore']
 
-        # 과매수 + BB 상단 이탈 → 숏
-        if current_price >= bb_upper and rsi >= self.MR_RSI_OVERBUY:
-            return 'short', self.MR_TARGET_ROR, 'mean_reversion'
+        # 목표 수익: OU sigma_eq 기반 동적 계산 (Z 진입점 → 평균까지의 80%)
+        target_ror = abs(z) * float(ou['sigma_eq']) * 100 * 0.8
 
-        return None, 0, None
+        if z <= -self.MR_OU_ENTRY_Z:
+            return 'long', max(target_ror, 1.5), 'mean_reversion', {'ou': ou}
+        if z >= self.MR_OU_ENTRY_Z:
+            return 'short', max(target_ror, 1.5), 'mean_reversion', {'ou': ou}
+
+        return None, 0, None, None
 
     # ================================================================
     #  청산 로직 (BetController 4단계 트레일링 내장)
@@ -235,25 +249,49 @@ class BaseCoinStrategy:
 
         mode = self._state.get('mode', 'trend_following')
 
-        # 평균회귀 모드: 목표 도달 즉시 청산 또는 시간 초과
+        # 평균회귀 모드: OU Z-score 수렴 or 목표/손절/시간 청산
         if mode == 'mean_reversion':
             should_close = False
             reason = ""
 
-            if ror >= self._state['target_ror']:
+            # 1. OU Z-score 수렴 청산 (가장 우선)
+            ou_mu       = self._state.get('ou_mu')
+            ou_sigma_eq = self._state.get('ou_sigma_eq')
+            if ou_mu is not None and ou_sigma_eq and ou_sigma_eq > 0:
+                try:
+                    current_price = self._get_price()
+                    if current_price > 0:
+                        import math
+                        current_z = (math.log(current_price) - ou_mu) / ou_sigma_eq
+                        if abs(current_z) < self.MR_OU_EXIT_Z:
+                            should_close = True
+                            reason = f"MR평균수렴(Z:{current_z:.2f})"
+                except Exception:
+                    pass
+
+            # 2. 목표 수익 도달
+            if not should_close and ror >= self._state['target_ror']:
                 should_close = True
                 reason = f"MR목표달성({ror:.1f}%≥{self._state['target_ror']:.1f}%)"
-            elif ror <= self._state['stop_loss']:
+
+            # 3. 손절
+            if not should_close and ror <= self._state['stop_loss']:
                 should_close = True
                 reason = f"MR손절({ror:.1f}%)"
-            elif time.time() - self._state['entry_time'] > self.MR_TIME_EXIT_SECONDS:
-                should_close = True
-                reason = f"MR시간초과(12h)"
+
+            # 4. 시간 청산 (반감기 기반 동적)
+            if not should_close:
+                time_limit = self._state.get('mr_time_exit_sec', 43200)
+                if time.time() - self._state['entry_time'] > time_limit:
+                    should_close = True
+                    hl = self._state.get('ou_half_life', 3)
+                    reason = f"MR시간초과({hl:.1f}봉×{self.MR_TIME_HALFLIFE_MULT}배)"
 
             if should_close:
                 self._close_position(position, reason)
             else:
-                print(f"  유지: {self.SYMBOL} | MR | ROR:{ror:.1f}% | 목표:{self._state['target_ror']:.1f}% | 손절:{self._state['stop_loss']:.1f}%")
+                hl = self._state.get('ou_half_life', '?')
+                print(f"  유지: {self.SYMBOL} | MR | ROR:{ror:.1f}% | 목표:{self._state['target_ror']:.1f}% | HL:{hl:.1f}봉")
             return
 
         # 추세추종 모드: 기존 4단계 트레일링
@@ -320,11 +358,13 @@ class BaseCoinStrategy:
 
     # ===== 4단계 트레일링 스탑 =====
 
-    def _init_state(self, target_ror, mode='trend_following'):
+    def _init_state(self, target_ror, mode='trend_following', ou=None):
         if mode == 'mean_reversion':
-            # 평균회귀: 타이트한 손절, 작은 목표, 빠른 청산
+            half_life = ou['half_life'] if ou else 6.0
+            # 시간청산: 반감기 × 배수 (초 단위, 1봉=4h=14400초)
+            time_exit_sec = half_life * self.MR_TIME_HALFLIFE_MULT * 14400
             self._state = {
-                'target_ror': self.MR_TARGET_ROR,
+                'target_ror': target_ror,
                 'stop_loss': self.MR_STOP_LOSS,
                 'entry_time': time.time(),
                 'highest_ror': 0,
@@ -332,6 +372,11 @@ class BaseCoinStrategy:
                 'trailing_active': False,
                 'phase': 1,
                 'mode': 'mean_reversion',
+                # OU 파라미터 (청산 판단용)
+                'ou_mu'      : ou['mu']       if ou else None,
+                'ou_sigma_eq': ou['sigma_eq'] if ou else None,
+                'ou_half_life': half_life,
+                'mr_time_exit_sec': time_exit_sec,
             }
             return
 
@@ -341,7 +386,7 @@ class BaseCoinStrategy:
             atr_ratio = 0.05
         else:
             target = target_ror
-            stop = -0.4 * target_ror  # 손익비 2.5:1
+            stop = -0.33 * target_ror  # 3:1 손익비
             atr_ratio = target_ror / 100
 
         self._state = {
@@ -420,7 +465,7 @@ class BaseCoinStrategy:
         → 청산 후 즉시 재진입하는 낭비를 방지
         """
         try:
-            signal, _, _ = self.check_entry_signal()
+            signal, _, _, _ = self.check_entry_signal()
             if signal is not None and signal == current_side:
                 return True
         except Exception:

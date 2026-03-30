@@ -20,31 +20,31 @@ from backtest.runner import COIN_CONFIGS
 # 코인별 탐색 범위 정의
 # 2단계 탐색: stage1(진입 파라미터) → stage2(청산 파라미터)
 PARAM_GRIDS = {
-    'xrp': {
-        'stage1': {  # 진입 파라미터 탐색 (~192 조합)
-            'ema_short': [5, 10, 15, 20],
-            'ema_long': [20, 30, 50, 60],
+    'sol': {
+        'stage1': {  # 진입 파라미터 탐색 (432 조합)
+            'tr_bb_period': [15, 20, 25],
+            'tr_bb_std': [1.5, 2.0, 2.5],
             'rsi_overbuy': [70, 80],
             'rsi_oversell': [20, 30],
             'adx_threshold': [15, 20, 25, 30],
             'atr_multiplier': [1.5, 2.0, 3.0],
         },
-        'stage2': {  # 청산 파라미터 탐색 (~48 조합)
+        'stage2': {  # 청산 파라미터 탐색 (48 조합)
             'target_ror_pct': [5.0, 7.0, 10.0, 15.0],
             'trailing_ratio': [0.4, 0.5, 0.6, 0.7],
             'tight_trailing_ratio': [0.65, 0.75, 0.85],
         },
     },
     'default': {
-        'stage1': {
-            'ema_short': [5, 10, 15, 20],
-            'ema_long': [20, 30, 50, 60],
+        'stage1': {  # 진입 파라미터 탐색 (432 조합)
+            'tr_bb_period': [15, 20, 25],
+            'tr_bb_std': [1.5, 2.0, 2.5],
             'rsi_overbuy': [70, 80],
             'rsi_oversell': [20, 30],
             'adx_threshold': [15, 20, 25, 30],
             'atr_multiplier': [1.5, 2.0, 3.0],
         },
-        'stage2': {
+        'stage2': {  # 청산 파라미터 탐색 (48 조합)
             'target_ror_pct': [5.0, 7.0, 10.0, 15.0],
             'trailing_ratio': [0.4, 0.5, 0.6, 0.7],
             'tight_trailing_ratio': [0.65, 0.75, 0.85],
@@ -106,15 +106,10 @@ def run_single(data_path, params, initial_cash=100000.0):
 
 
 def generate_combinations(grid):
-    """파라미터 그리드에서 모든 조합 생성 (EMA short < long 필터 포함)"""
+    """파라미터 그리드에서 모든 조합 생성"""
     keys = list(grid.keys())
     values = list(grid.values())
-    combos = []
-    for combo in itertools.product(*values):
-        p = dict(zip(keys, combo))
-        if 'ema_short' in p and 'ema_long' in p and p['ema_short'] >= p['ema_long']:
-            continue
-        combos.append(p)
+    combos = [dict(zip(keys, combo)) for combo in itertools.product(*values)]
     return combos
 
 
@@ -196,9 +191,9 @@ def optimize(coin_name, top_n=10, initial_cash=100000.0):
     print(f"🏅 Stage 1 상위 3개 진입 파라미터:")
     for i, ep in enumerate(top_entry_params):
         r = s1_results[i]
-        print(f"   {i+1}. EMA={ep['ema_short']}/{ep['ema_long']} "
-              f"RSI={ep['rsi_oversell']}/{ep['rsi_overbuy']} "
-              f"ADX≥{ep['adx_threshold']} ATR×{ep['atr_multiplier']} "
+        print(f"   {i+1}. BB={ep.get('tr_bb_period','?')}×{ep.get('tr_bb_std','?')} "
+              f"RSI={ep.get('rsi_oversell','?')}/{ep.get('rsi_overbuy','?')} "
+              f"ADX≥{ep.get('adx_threshold','?')} ATR×{ep.get('atr_multiplier','?')} "
               f"→ ROR={r['ror']:.1f}% Sharpe={r['sharpe']:.2f}\n")
 
     # === Stage 2: 각 상위 진입 파라미터에 대해 청산 파라미터 최적화 ===
@@ -228,12 +223,12 @@ def optimize(coin_name, top_n=10, initial_cash=100000.0):
     for i, r in enumerate(results[:top_n]):
         p = r['params']
         params_str = (
-            f"EMA={p['ema_short']}/{p['ema_long']} "
-            f"RSI={p['rsi_oversell']}/{p['rsi_overbuy']} "
-            f"ADX≥{p['adx_threshold']} "
-            f"ATR×{p['atr_multiplier']} "
-            f"목표={p['target_ror_pct']}% "
-            f"트레일={p['trailing_ratio']}/{p['tight_trailing_ratio']}"
+            f"BB={p.get('tr_bb_period','?')}×{p.get('tr_bb_std','?')} "
+            f"RSI={p.get('rsi_oversell','?')}/{p.get('rsi_overbuy','?')} "
+            f"ADX≥{p.get('adx_threshold','?')} "
+            f"ATR×{p.get('atr_multiplier','?')} "
+            f"목표={p.get('target_ror_pct','?')}% "
+            f"트레일={p.get('trailing_ratio','?')}/{p.get('tight_trailing_ratio','?')}"
         )
         print(f"  {i+1:>2}. {r['ror']:>7.1f}% {r['sharpe']:>6.2f} {r['mdd']:>5.1f}% "
               f"{r['win_rate']:>5.1f}% {r['trades']:>5} {r['score']:>5.3f} | {params_str}")
@@ -245,13 +240,13 @@ def optimize(coin_name, top_n=10, initial_cash=100000.0):
     print(f"{'='*60}")
     bp = best['params']
     print(f"  진입:")
-    print(f"    EMA: {bp['ema_short']} / {bp['ema_long']}")
-    print(f"    RSI: {bp['rsi_oversell']} ~ {bp['rsi_overbuy']}")
-    print(f"    ADX ≥ {bp['adx_threshold']}")
-    print(f"    ATR 배수: {bp['atr_multiplier']}")
+    print(f"    BB 기간: {bp.get('tr_bb_period','?')} / std: {bp.get('tr_bb_std','?')}")
+    print(f"    RSI: {bp.get('rsi_oversell','?')} ~ {bp.get('rsi_overbuy','?')}")
+    print(f"    ADX ≥ {bp.get('adx_threshold','?')}")
+    print(f"    ATR 배수: {bp.get('atr_multiplier','?')}")
     print(f"  청산:")
-    print(f"    목표 ROR: {bp['target_ror_pct']}%")
-    print(f"    트레일링: {bp['trailing_ratio']} / {bp['tight_trailing_ratio']}")
+    print(f"    목표 ROR: {bp.get('target_ror_pct','?')}%")
+    print(f"    트레일링: {bp.get('trailing_ratio','?')} / {bp.get('tight_trailing_ratio','?')}")
     print(f"  성과:")
     print(f"    ROR: {best['ror']:.2f}%")
     print(f"    Sharpe: {best['sharpe']:.2f}")
@@ -261,15 +256,15 @@ def optimize(coin_name, top_n=10, initial_cash=100000.0):
 
     # 적용 코드 출력
     print(f"\n📋 coins/{coin_name}/strategy.py 에 적용할 파라미터:")
-    print(f"    EMA_SHORT = {bp['ema_short']}")
-    print(f"    EMA_LONG = {bp['ema_long']}")
-    print(f"    RSI_OVERBUY = {bp['rsi_overbuy']}")
-    print(f"    RSI_OVERSELL = {bp['rsi_oversell']}")
-    print(f"    ADX_THRESHOLD = {bp['adx_threshold']}")
-    print(f"    ATR_MULTIPLIER = {bp['atr_multiplier']}")
-    print(f"    TARGET_ROR_PCT = {bp['target_ror_pct']}")
-    print(f"    TRAILING_RATIO = {bp['trailing_ratio']}")
-    print(f"    TIGHT_TRAILING_RATIO = {bp['tight_trailing_ratio']}")
+    print(f"    TR_BB_PERIOD = {bp.get('tr_bb_period','?')}")
+    print(f"    TR_BB_STD = {bp.get('tr_bb_std','?')}")
+    print(f"    RSI_OVERBUY = {bp.get('rsi_overbuy','?')}")
+    print(f"    RSI_OVERSELL = {bp.get('rsi_oversell','?')}")
+    print(f"    ADX_THRESHOLD = {bp.get('adx_threshold','?')}")
+    print(f"    ATR_MULTIPLIER = {bp.get('atr_multiplier','?')}")
+    print(f"    DEFAULT_TARGET_ROR = {bp.get('target_ror_pct','?')}")
+    print(f"    TRAILING_RATIO = {bp.get('trailing_ratio','?')}")
+    print(f"    TIGHT_TRAILING_RATIO = {bp.get('tight_trailing_ratio','?')}")
 
     return results
 

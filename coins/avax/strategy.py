@@ -19,3 +19,10 @@ class AVAXStrategy(BaseCoinStrategy):
     TARGET_ROR_PCT = 15.0
     TRAILING_RATIO = 0.4
     TIGHT_TRAILING_RATIO = 0.85
+
+    # OU 평균회귀 파라미터 (2026-03-22)
+    MR_ENABLED = True
+    MR_OU_ENTRY_Z = 1.8       # AVAX 회귀 빠름, 조금 낮게 설정
+    MR_OU_EXIT_Z = 0.5
+    MR_MAX_HALFLIFE = 12
+    MR_TIME_HALFLIFE_MULT = 2.5

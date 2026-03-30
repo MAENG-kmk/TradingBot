@@ -54,6 +54,7 @@ class CoinBacktestStrategy(bt.Strategy):
         self.atr = bt.ind.ATR(self.data, period=self.p.atr_period)
         self.macd = bt.ind.MACD(self.data.close)
         self.dmi = bt.ind.DirectionalMovementIndex(self.data, period=self.p.adx_period)
+        self._pending_entry = None  # 진입 주문 체결 대기 정보
         self._reset()
 
     def _reset(self):
@@ -202,7 +203,6 @@ class CoinBacktestStrategy(bt.Strategy):
         if risk_per_unit <= 0:
             return
 
-        init_stop_ror = -(atr_val * self.p.atr_multiplier) / self.data.close[0] * 100
         size = (self.broker.get_cash() * self.p.risk_percent) / risk_per_unit
         if size <= 0:
             return
@@ -212,15 +212,28 @@ class CoinBacktestStrategy(bt.Strategy):
         else:
             self.sell(size=size)
 
-        self._reset()
-        self.entry_price = self.data.close[0]
-        self.entry_atr = atr_val
-        self.trade_mode = mode
+        # 체결가는 다음 봉 시가 → notify_order에서 실제 체결가로 기록
+        self._pending_entry = {
+            'atr_val': atr_val,
+            'mode': mode,
+        }
 
-        if mode == 'mean_reversion':
-            self.stop_loss_ror = self.p.mr_stop_loss
-        else:
-            self.stop_loss_ror = init_stop_ror
+    def notify_order(self, order):
+        if order.status == order.Completed and self._pending_entry is not None:
+            info = self._pending_entry
+            self._pending_entry = None
+            fill_price = order.executed.price
+            self._reset()
+            self.entry_price = fill_price
+            self.entry_atr = info['atr_val']
+            self.trade_mode = info['mode']
+            if info['mode'] == 'mean_reversion':
+                self.stop_loss_ror = self.p.mr_stop_loss
+            else:
+                # 실제 체결가 기준으로 손절 비율 계산
+                self.stop_loss_ror = -(info['atr_val'] * self.p.atr_multiplier) / fill_price * 100
+        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
+            self._pending_entry = None
 
     def next(self):
         if not self.position:

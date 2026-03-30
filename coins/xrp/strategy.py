@@ -2,7 +2,7 @@ from coins.base_strategy import BaseCoinStrategy
 
 
 class XRPStrategy(BaseCoinStrategy):
-    """XRP 전용 전략 — Robust 최적화 완료 (2026-03-02)"""
+    """XRP 전용 전략 — Robust 최적화 완료 (2026-03-02) | MR 비활성화 (2026-03-22)"""
     SYMBOL = "XRPUSDT"
     LEVERAGE = 1
     QUANTITY_PRECISION = 0  # XRP: 정수 단위
@@ -19,3 +19,6 @@ class XRPStrategy(BaseCoinStrategy):
     TARGET_ROR_PCT = 15.0
     TRAILING_RATIO = 0.5
     TIGHT_TRAILING_RATIO = 0.85
+
+    # 평균회귀 비활성화 — BB/OU 모두 손실, 추세추종만 운용
+    MR_ENABLED = False

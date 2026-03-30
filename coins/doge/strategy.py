@@ -2,7 +2,7 @@ from coins.base_strategy import BaseCoinStrategy
 
 
 class DOGEStrategy(BaseCoinStrategy):
-    """DOGE 전용 전략 — Robust 최적화 완료 (2026-03-01)"""
+    """DOGE 전용 전략 — Robust 최적화 완료 (2026-03-01) | MR 비활성화 (2026-03-22)"""
     SYMBOL = "DOGEUSDT"
     LEVERAGE = 1
     QUANTITY_PRECISION = 0  # DOGE: 정수 단위
@@ -19,3 +19,6 @@ class DOGEStrategy(BaseCoinStrategy):
     TARGET_ROR_PCT = 15.0
     TRAILING_RATIO = 0.4
     TIGHT_TRAILING_RATIO = 0.85
+
+    # 평균회귀 비활성화 — 고변동성/불규칙 움직임, OU 파라미터 불안정
+    MR_ENABLED = False

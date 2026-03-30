@@ -40,11 +40,11 @@ COIN_CONFIGS = {
     'sol': {
         'data_file': 'backtestDatas/solusdt_4h.csv',
         'params': dict(
-            tr_bb_period=20, tr_bb_std=2.0,
-            rsi_overbuy=70, rsi_oversell=20,
-            adx_threshold=25, atr_multiplier=1.5,
-            target_ror_pct=15.0, trailing_ratio=0.4,
-            tight_trailing_ratio=0.75,
+            tr_bb_period=15, tr_bb_std=2.5,
+            rsi_overbuy=80, rsi_oversell=20,
+            adx_threshold=15, atr_multiplier=1.5,
+            target_ror_pct=7.0, trailing_ratio=0.4,
+            tight_trailing_ratio=0.85,
         ),
     },
     'bnb': {
@@ -70,11 +70,11 @@ COIN_CONFIGS = {
     'link': {
         'data_file': 'backtestDatas/linkusdt_4h.csv',
         'params': dict(
-            tr_bb_period=20, tr_bb_std=2.0,
-            rsi_overbuy=70, rsi_oversell=20,
-            adx_threshold=30, atr_multiplier=1.5,
-            target_ror_pct=15.0, trailing_ratio=0.7,
-            tight_trailing_ratio=0.65,
+            tr_bb_period=20, tr_bb_std=2.5,
+            rsi_overbuy=80, rsi_oversell=30,
+            adx_threshold=20, atr_multiplier=1.5,
+            target_ror_pct=7.0, trailing_ratio=0.5,
+            tight_trailing_ratio=0.85,
         ),
     },
     'doge': {

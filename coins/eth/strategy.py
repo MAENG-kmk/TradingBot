@@ -26,3 +26,10 @@ class ETHStrategy(BaseCoinStrategy):
     TARGET_ROR_PCT = 15.0
     TRAILING_RATIO = 0.6
     TIGHT_TRAILING_RATIO = 0.65
+
+    # OU 평균회귀 파라미터 (2026-03-22)
+    MR_ENABLED = True
+    MR_OU_ENTRY_Z = 2.0
+    MR_OU_EXIT_Z = 0.5
+    MR_MAX_HALFLIFE = 12      # 최대 반감기 12봉(48h)
+    MR_TIME_HALFLIFE_MULT = 2.5
