@@ -38,6 +38,13 @@ def addVersionAndDate(version, balance):
         client = MongoClient(uri, server_api=ServerApi('1'))
         database = client.get_database("Version_History")
         collects = database.get_collection("history")
+
+        # 가장 최근 버전과 동일하면 삽입하지 않음
+        latest = collects.find_one(sort=[("date", -1)])
+        if latest and latest.get("version") == version:
+            client.close()
+            return
+
         data = {
           'version': version,
           'date': datetime.now().timestamp(),

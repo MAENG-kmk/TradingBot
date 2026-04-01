@@ -13,9 +13,10 @@ import time
 
 sys.path.append(os.path.abspath("."))
 
+import pandas as pd
 import backtrader as bt
 from backtest.base_strategy import CoinBacktestStrategy
-from backtest.runner import COIN_CONFIGS
+from backtest.runner import COIN_CONFIGS, _load_intrabar
 
 # 코인별 탐색 범위 정의
 # 2단계 탐색: stage1(진입 파라미터) → stage2(청산 파라미터)
@@ -53,10 +54,10 @@ PARAM_GRIDS = {
 }
 
 
-def run_single(data_path, params, initial_cash=100000.0):
+def run_single(data_path, params, initial_cash=100000.0, intrabar_df=None):
     """단일 파라미터 조합으로 백테스트 실행, 결과 dict 반환"""
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(CoinBacktestStrategy, **params)
+    cerebro.addstrategy(CoinBacktestStrategy, intrabar_data=intrabar_df, **params)
 
     data = bt.feeds.GenericCSVData(
         dataname=data_path,
@@ -125,7 +126,7 @@ def score_result(r, all_results):
     return sharpe_norm * 0.4 + ror_score * 0.3 + mdd_score * 0.3
 
 
-def run_stage(data_path, combos, base_params, stage_name, initial_cash=100000.0):
+def run_stage(data_path, combos, base_params, stage_name, initial_cash=100000.0, intrabar_df=None):
     """하나의 스테이지 Grid Search 실행"""
     total = len(combos)
     results = []
@@ -133,7 +134,7 @@ def run_stage(data_path, combos, base_params, stage_name, initial_cash=100000.0)
 
     for i, params in enumerate(combos):
         merged = {**base_params, **params}
-        r = run_single(data_path, merged, initial_cash)
+        r = run_single(data_path, merged, initial_cash, intrabar_df=intrabar_df)
         if r and r['trades'] >= 30:
             results.append(r)
 
@@ -165,14 +166,17 @@ def optimize(coin_name, top_n=10, initial_cash=100000.0):
     stage1_combos = generate_combinations(grid['stage1'])
     stage2_combos = generate_combinations(grid['stage2'])
 
+    intrabar_df = _load_intrabar(coin_name)
+
     print(f"🔍 {coin_name.upper()} 2단계 파라미터 최적화")
     print(f"   Stage 1 (진입): {len(stage1_combos)} 조합")
     print(f"   Stage 2 (청산): {len(stage2_combos)} 조합")
-    print(f"   데이터: {data_path}\n")
+    print(f"   데이터: {data_path}")
+    print(f"   1h 정밀 데이터: {'있음 (' + str(len(intrabar_df)) + '봉)' if intrabar_df is not None else '없음'}\n")
 
     # === Stage 1: 진입 파라미터 최적화 (기본 청산 파라미터 사용) ===
     print("━━━ Stage 1: 진입 파라미터 탐색 ━━━")
-    s1_results = run_stage(data_path, stage1_combos, {}, "S1", initial_cash)
+    s1_results = run_stage(data_path, stage1_combos, {}, "S1", initial_cash, intrabar_df=intrabar_df)
 
     if not s1_results:
         print("❌ Stage 1 유효한 결과 없음")
@@ -200,7 +204,7 @@ def optimize(coin_name, top_n=10, initial_cash=100000.0):
     print("━━━ Stage 2: 청산 파라미터 탐색 ━━━")
     all_results = []
     for i, entry_p in enumerate(top_entry_params):
-        s2_results = run_stage(data_path, stage2_combos, entry_p, f"S2-{i+1}", initial_cash)
+        s2_results = run_stage(data_path, stage2_combos, entry_p, f"S2-{i+1}", initial_cash, intrabar_df=intrabar_df)
         all_results.extend(s2_results)
 
     if not all_results:

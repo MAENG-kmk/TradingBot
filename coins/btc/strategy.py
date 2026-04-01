@@ -28,7 +28,7 @@ class BTCStrategy(BaseCoinStrategy):
     """
 
     SYMBOL = "BTCUSDT"
-    LEVERAGE = 3
+    LEVERAGE = 5
     QUANTITY_PRECISION = 3  # BTC: 0.001 단위
 
     # ── GBM 파라미터 추정 ──────────────────────────────

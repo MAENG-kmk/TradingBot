@@ -68,7 +68,20 @@ COINS = [
 ]
 
 if __name__ == '__main__':
-    for symbol in COINS:
-        generate_data(symbol, client.KLINE_INTERVAL_4HOUR, '4h')
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--interval', choices=['4h', '1h', 'both'], default='both')
+    args = parser.parse_args()
+
+    if args.interval in ('4h', 'both'):
+        print("\n▶ 4h 캔들 수집")
+        for symbol in COINS:
+            generate_data(symbol, client.KLINE_INTERVAL_4HOUR, '4h', max_requests=40)
+
+    if args.interval in ('1h', 'both'):
+        print("\n▶ 1h 캔들 수집")
+        for symbol in COINS:
+            generate_data(symbol, client.KLINE_INTERVAL_1HOUR, '1h', max_requests=35)
+
     print(f"\n{'='*50}")
     print("전체 수집 완료!")

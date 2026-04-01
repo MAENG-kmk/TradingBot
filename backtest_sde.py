@@ -18,8 +18,20 @@ import sys
 import os
 sys.path.append(os.path.abspath("."))
 
+import pandas as pd
 import backtrader as bt
 from backtestStrategy.SDEStrategy import SDEStrategy
+
+
+def _load_intrabar(symbol):
+    path = f'backtestDatas/{symbol.lower()}usdt_1h.csv'
+    if not os.path.exists(path):
+        return None
+    df = pd.read_csv(path, index_col='Date', parse_dates=True)
+    df.index = df.index.tz_localize(None)
+    return df
+
+_BTC_1H = _load_intrabar('btc')
 
 # ── 공통 최적 파라미터 ─────────────────────────────────────────────
 BASE_PARAMS = dict(
@@ -40,6 +52,7 @@ def run_one(data_path, compression, est_window, max_bars, leverage, params):
         est_window=est_window,
         max_bars=max_bars,
         leverage=leverage,
+        intrabar_data=_BTC_1H,
         **params,
     )
 

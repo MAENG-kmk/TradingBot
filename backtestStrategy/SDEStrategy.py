@@ -24,6 +24,7 @@ sys.path.append(os.path.abspath("."))
 
 import backtrader as bt
 import numpy as np
+import pandas as pd
 
 from tools.sdeTools import barrier_prob, estimate_gbm, sde_entry_probs
 
@@ -51,6 +52,7 @@ class SDEStrategy(bt.Strategy):
         max_bars=48,
         risk_percent=0.02,
         leverage=1,          # 레버리지 (P&L 배수, 포지션 크기는 동일)
+        intrabar_data=None,  # 1h pandas DataFrame (정밀 백테스트용)
     )
 
     def __init__(self):
@@ -63,6 +65,34 @@ class SDEStrategy(bt.Strategy):
         self.sde_target  = 0.0
         self.sde_stop    = 0.0
         self.bars_held   = 0
+
+    def _resolve_sde_conflict(self):
+        """
+        4h 캔들 내 목표가·손절가 동시 터치 시 1h로 선후 판별.
+        Returns: (at_target, at_stop) — 먼저 터치된 쪽만 True
+        """
+        if self.p.intrabar_data is None:
+            return False, True  # 보수적: 손절 우선
+
+        bar_dt = pd.Timestamp(bt.num2date(self.data.datetime[0]).replace(tzinfo=None))
+        end_dt = bar_dt + pd.Timedelta(hours=4)
+        df = self.p.intrabar_data
+        sub = df[(df.index >= bar_dt) & (df.index < end_dt)].sort_index()
+
+        is_long = self.direction == 'long'
+        for _, row in sub.iterrows():
+            if is_long:
+                if row['High'] >= self.sde_target:
+                    return True, False   # 목표 먼저
+                if row['Low']  <= self.sde_stop:
+                    return False, True   # 손절 먼저
+            else:
+                if row['Low']  <= self.sde_target:
+                    return True, False
+                if row['High'] >= self.sde_stop:
+                    return False, True
+
+        return False, True  # 판별 불가: 보수적
 
     def _get_prices(self):
         n = self.p.est_window + 1
@@ -129,23 +159,26 @@ class SDEStrategy(bt.Strategy):
             self.bars_held += 1
 
             if self.direction == 'long':
-                # 현재가에서 원래 목표/손절까지 확률 재계산
-                p_cont   = barrier_prob(S, self.sde_target, self.sde_stop, mu, sigma)
-                at_target = S >= self.sde_target
-                at_stop   = S <= self.sde_stop
+                # 캔들 고가/저가로 터치 여부 판단
+                at_target = self.data.high[0]  >= self.sde_target
+                at_stop   = self.data.low[0]   <= self.sde_stop
+                p_cont    = barrier_prob(S, self.sde_target, self.sde_stop, mu, sigma)
             else:
-                # 숏: P(hit lower target before upper stop)
-                p_cont   = 1.0 - barrier_prob(
+                at_target = self.data.low[0]   <= self.sde_target
+                at_stop   = self.data.high[0]  >= self.sde_stop
+                p_cont    = 1.0 - barrier_prob(
                     S, self.sde_stop, self.sde_target, mu, sigma
                 )
-                at_target = S <= self.sde_target
-                at_stop   = S >= self.sde_stop
+
+            # 목표/손절 동시 터치 → 1h로 선후 판별
+            if at_target and at_stop:
+                at_target, at_stop = self._resolve_sde_conflict()
 
             should_close = (
-                at_stop                             # 하드스탑
-                or at_target                        # 목표 달성
-                or p_cont < self.p.exit_prob        # 확률 역전
-                or self.bars_held >= self.p.max_bars  # 시간 청산
+                at_stop
+                or at_target
+                or p_cont < self.p.exit_prob
+                or self.bars_held >= self.p.max_bars
             )
 
             if should_close:

@@ -12,8 +12,19 @@ import sys
 import os
 sys.path.append(os.path.abspath("."))
 
+import pandas as pd
 import backtrader as bt
 from backtest.base_strategy import CoinBacktestStrategy
+
+
+def _load_intrabar(coin_name):
+    """코인의 1h CSV를 로드해 datetime 인덱스 DataFrame으로 반환 (없으면 None)"""
+    path = f'backtestDatas/{coin_name.lower()}usdt_1h.csv'
+    if not os.path.exists(path):
+        return None
+    df = pd.read_csv(path, index_col='Date', parse_dates=True)
+    df.index = df.index.tz_localize(None)
+    return df
 
 # 코인별 설정: 백테스트 파라미터 + 데이터 파일
 COIN_CONFIGS = {
@@ -21,9 +32,9 @@ COIN_CONFIGS = {
         'data_file': 'backtestDatas/ethusdt_4h.csv',
         'params': dict(
             tr_bb_period=20, tr_bb_std=2.0,
-            rsi_overbuy=70, rsi_oversell=30,
-            adx_threshold=15, atr_multiplier=2.0,
-            target_ror_pct=15.0, trailing_ratio=0.6,
+            rsi_overbuy=80, rsi_oversell=20,
+            adx_threshold=20, atr_multiplier=3.0,
+            target_ror_pct=15.0, trailing_ratio=0.4,
             tight_trailing_ratio=0.65,
         ),
     },
@@ -133,8 +144,12 @@ def run_backtest(coin_name, data_file=None, initial_cash=100000.0):
         print(f"⏭️  {coin_name.upper()}: 백테스트 데이터 없음 ({data_path})")
         return None
 
+    intrabar_df = _load_intrabar(coin_name)
+    if intrabar_df is not None:
+        print(f"  📊 1h 정밀 데이터 로드: {len(intrabar_df)}봉")
+
     cerebro = bt.Cerebro()
-    cerebro.addstrategy(CoinBacktestStrategy, **config['params'])
+    cerebro.addstrategy(CoinBacktestStrategy, intrabar_data=intrabar_df, **config['params'])
 
     data = bt.feeds.GenericCSVData(
         dataname=data_path,

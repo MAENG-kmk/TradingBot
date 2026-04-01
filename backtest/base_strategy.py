@@ -1,5 +1,6 @@
 import backtrader as bt
 import numpy as np
+import pandas as pd
 
 
 class CoinBacktestStrategy(bt.Strategy):
@@ -10,6 +11,11 @@ class CoinBacktestStrategy(bt.Strategy):
           횡보장 → 볼린저밴드 + RSI 평균회귀
     청산: 추세추종 → 4단계 트레일링 (재진입 방지 포함)
           평균회귀 → 목표/손절/시간 단순 청산
+
+    정밀 백테스트:
+      - 손절·목표 체크를 종가가 아닌 캔들 고가/저가 기준으로 수행
+      - 4h 캔들 내 고가/저가가 동시에 손절·목표를 터치할 때
+        1h 데이터(intrabar_data)로 선후를 판별
     """
     params = dict(
         # 진입 (추세추종 — 볼린저밴드 돌파)
@@ -47,6 +53,8 @@ class CoinBacktestStrategy(bt.Strategy):
         # 회귀 기울기
         slope_period=20,
         slope_threshold=0.05,
+        # 정밀 백테스트용 1h 데이터 (pandas DataFrame, Date 인덱스)
+        intrabar_data=None,
     )
 
     def __init__(self):
@@ -54,7 +62,7 @@ class CoinBacktestStrategy(bt.Strategy):
         self.atr = bt.ind.ATR(self.data, period=self.p.atr_period)
         self.macd = bt.ind.MACD(self.data.close)
         self.dmi = bt.ind.DirectionalMovementIndex(self.data, period=self.p.adx_period)
-        self._pending_entry = None  # 진입 주문 체결 대기 정보
+        self._pending_entry = None
         self._reset()
 
     def _reset(self):
@@ -67,12 +75,98 @@ class CoinBacktestStrategy(bt.Strategy):
         self.trailing_active = False
         self.trade_mode = 'trend_following'
 
-    def _calc_ror(self):
+    def _calc_ror(self, price=None):
         if self.entry_price == 0:
             return 0
+        p = price if price is not None else self.data.close[0]
         if self.position.size > 0:
-            return (self.data.close[0] - self.entry_price) / self.entry_price * 100
-        return (self.entry_price - self.data.close[0]) / self.entry_price * 100
+            return (p - self.entry_price) / self.entry_price * 100
+        return (self.entry_price - p) / self.entry_price * 100
+
+    def _incandle_rors(self):
+        """캔들 고가/저가 기반 최고·최저 수익률 반환"""
+        if self.position.size > 0:  # long
+            best  = (self.data.high[0]  - self.entry_price) / self.entry_price * 100
+            worst = (self.data.low[0]   - self.entry_price) / self.entry_price * 100
+        else:  # short
+            best  = (self.entry_price - self.data.low[0])  / self.entry_price * 100
+            worst = (self.entry_price - self.data.high[0]) / self.entry_price * 100
+        return best, worst
+
+    def _bar_datetime(self):
+        """현재 4h 봉의 시작 datetime 반환"""
+        return bt.num2date(self.data.datetime[0]).replace(tzinfo=None)
+
+    def _get_intrabar_sub(self):
+        """현재 4h 봉에 해당하는 1h 서브 봉 DataFrame 반환 (없으면 None)"""
+        if self.p.intrabar_data is None:
+            return None
+        bar_dt = pd.Timestamp(self._bar_datetime())
+        end_dt = bar_dt + pd.Timedelta(hours=4)
+        df = self.p.intrabar_data
+        mask = (df.index >= bar_dt) & (df.index < end_dt)
+        sub = df[mask].sort_index()
+        return sub if len(sub) > 0 else None
+
+    def _resolve_trend_stop(self, old_stop_ror):
+        """
+        추세추종: 4h 캔들 내 고가가 트레일링 스탑을 올리기 전에
+        저가가 구 손절선을 먼저 터치했는지 1h로 판별.
+
+        Returns: 'stop_first' | 'high_first'
+        """
+        sub = self._get_intrabar_sub()
+        if sub is None:
+            return 'stop_first'  # 1h 데이터 없으면 보수적으로 손절 우선
+
+        old_stop_price = self.entry_price * (1 + old_stop_ror / 100)
+        is_long = self.position.size > 0
+
+        for _, row in sub.iterrows():
+            if is_long:
+                if row['Low'] <= old_stop_price:
+                    return 'stop_first'
+                # 고가가 highest_ror를 새로 경신하면 high_first
+                cur_high_ror = (row['High'] - self.entry_price) / self.entry_price * 100
+                if cur_high_ror > self.highest_ror:
+                    return 'high_first'
+            else:
+                if row['High'] >= old_stop_price:
+                    return 'stop_first'
+                cur_low_ror = (self.entry_price - row['Low']) / self.entry_price * 100
+                if cur_low_ror > self.highest_ror:
+                    return 'high_first'
+
+        return 'stop_first'
+
+    def _resolve_mr_exit(self, target_ror, stop_ror):
+        """
+        평균회귀: 4h 캔들 내 목표가와 손절가가 동시에 터치될 때
+        1h로 선후 판별.
+
+        Returns: 'target_first' | 'stop_first'
+        """
+        sub = self._get_intrabar_sub()
+        if sub is None:
+            return 'stop_first'  # 보수적
+
+        is_long = self.position.size > 0
+        target_price = self.entry_price * (1 + target_ror / 100)
+        stop_price   = self.entry_price * (1 + stop_ror   / 100)
+
+        for _, row in sub.iterrows():
+            if is_long:
+                if row['High'] >= target_price:
+                    return 'target_first'
+                if row['Low'] <= stop_price:
+                    return 'stop_first'
+            else:
+                if row['Low'] <= target_price:
+                    return 'target_first'
+                if row['High'] >= stop_price:
+                    return 'stop_first'
+
+        return 'stop_first'
 
     def _update_trailing_stop(self, ror):
         if ror > self.highest_ror:
@@ -116,7 +210,6 @@ class CoinBacktestStrategy(bt.Strategy):
         return False
 
     def _calc_regression_slope(self):
-        """최근 N봉의 종가 선형회귀 기울기 (% 정규화)"""
         period = self.p.slope_period
         if len(self.data) < period:
             return 0.0
@@ -130,7 +223,6 @@ class CoinBacktestStrategy(bt.Strategy):
         return (slope / y_mean) * 100
 
     def _get_market_regime(self):
-        """시장 상태 판단: uptrend / downtrend / ranging"""
         is_trending = self._check_trend_strength()
         slope = self._calc_regression_slope()
 
@@ -141,7 +233,6 @@ class CoinBacktestStrategy(bt.Strategy):
         return 'ranging'
 
     def _check_trend_entry(self):
-        """추세추종 진입 — 볼린저밴드 돌파 + MACD 확인"""
         period = self.p.tr_bb_period
         if len(self.data) < period:
             return None
@@ -165,7 +256,6 @@ class CoinBacktestStrategy(bt.Strategy):
         return None
 
     def _check_mr_entry(self):
-        """평균회귀 진입 시그널 확인 → 'long'/'short'/None"""
         period = self.p.mr_bb_period
         if len(self.data) < period:
             return None
@@ -186,7 +276,6 @@ class CoinBacktestStrategy(bt.Strategy):
         return None
 
     def _should_hold(self):
-        """재진입 방지: 같은 방향 시그널이 있으면 True"""
         current_side = 'long' if self.position.size > 0 else 'short'
         regime = self._get_market_regime()
 
@@ -212,7 +301,6 @@ class CoinBacktestStrategy(bt.Strategy):
         else:
             self.sell(size=size)
 
-        # 체결가는 다음 봉 시가 → notify_order에서 실제 체결가로 기록
         self._pending_entry = {
             'atr_val': atr_val,
             'mode': mode,
@@ -230,7 +318,6 @@ class CoinBacktestStrategy(bt.Strategy):
             if info['mode'] == 'mean_reversion':
                 self.stop_loss_ror = self.p.mr_stop_loss
             else:
-                # 실제 체결가 기준으로 손절 비율 계산
                 self.stop_loss_ror = -(info['atr_val'] * self.p.atr_multiplier) / fill_price * 100
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self._pending_entry = None
@@ -249,14 +336,22 @@ class CoinBacktestStrategy(bt.Strategy):
                     self._enter(signal, 'mean_reversion')
         else:
             self.bars_in_trade += 1
-            ror = self._calc_ror()
 
-            # === 평균회귀 모드 청산 ===
+            # 캔들 고가/저가 기반 최고·최저 수익률
+            incandle_best, incandle_worst = self._incandle_rors()
+
+            # ── 평균회귀 모드 청산 ────────────────────────────────
             if self.trade_mode == 'mean_reversion':
-                if ror >= self.p.mr_target_ror:
-                    self.close()
-                    self._reset()
-                elif ror <= self.p.mr_stop_loss:
+                target_hit = incandle_best  >= self.p.mr_target_ror
+                stop_hit   = incandle_worst <= self.p.mr_stop_loss
+
+                if target_hit and stop_hit:
+                    # 캔들 내 동시 터치 → 1h로 선후 판별
+                    result = self._resolve_mr_exit(self.p.mr_target_ror, self.p.mr_stop_loss)
+                    if result in ('target_first', 'stop_first'):
+                        self.close()
+                        self._reset()
+                elif target_hit or stop_hit:
                     self.close()
                     self._reset()
                 elif self.bars_in_trade > self.p.mr_time_exit_bars:
@@ -264,16 +359,30 @@ class CoinBacktestStrategy(bt.Strategy):
                     self._reset()
                 return
 
-            # === 추세추종 모드 청산 ===
-            self._update_trailing_stop(ror)
+            # ── 추세추종 모드 청산 ────────────────────────────────
+            old_stop_ror = self.stop_loss_ror
+
+            # 트레일링 스탑 업데이트: 캔들 내 고가(최고 수익) 기준
+            self._update_trailing_stop(incandle_best)
+            new_stop_ror = self.stop_loss_ror
 
             should_close = False
             is_hard_stop = False
 
-            if ror < self.stop_loss_ror:
+            if incandle_worst < old_stop_ror:
+                # 구 손절선 아래로 저가가 내려감 → 무조건 청산
                 should_close = True
                 if not self.trailing_active:
                     is_hard_stop = True
+
+            elif incandle_worst < new_stop_ror and new_stop_ror > old_stop_ror:
+                # 저가가 구 손절선 위 / 신 손절선 아래 → 1h로 고점 vs 저점 선후 판별
+                result = self._resolve_trend_stop(old_stop_ror)
+                if result == 'stop_first':
+                    # 저가가 먼저 → 구 손절선 기준 청산, 트레일링 되돌리기
+                    self.stop_loss_ror = old_stop_ror
+                    should_close = True
+                # else: 고점이 먼저 → 신 손절선 적용, 저가는 그 위 → 청산 안 함
 
             if not should_close and self._check_volatility_exit():
                 should_close = True
@@ -281,7 +390,6 @@ class CoinBacktestStrategy(bt.Strategy):
                 should_close = True
 
             if should_close:
-                # 재진입 방지: 하드스탑 외에는 같은 방향 시그널 시 홀드
                 if not is_hard_stop and self._should_hold():
                     return
                 self.close()
