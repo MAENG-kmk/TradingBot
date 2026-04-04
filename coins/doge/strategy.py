@@ -1,5 +1,6 @@
 import math
 import time
+import calendar
 import asyncio
 import pandas as pd
 import numpy as np
@@ -54,9 +55,15 @@ class DOGEStrategy(BaseCoinStrategy):
             ('long'|'short', 0, 'vb_close', meta) | (None, 0, None, None)
             meta: {'candle_close_ts': float}  # 현재 캔들 종료 Unix timestamp
         """
-        df = self.get_data(limit=50)
+        df = self.get_data(limit=300)
         if df is None or len(df) < self.VB_MA_PERIOD + 2:
             return None, 0, None, None
+
+        # XGBoost 레짐 필터
+        if self._rf is not None:
+            prob = self._rf.predict(df)
+            if prob < 0.55:
+                return None, 0, None, None
 
         # 직전 완료 캔들
         prev_high  = float(df.iloc[-2]['High'])
@@ -102,8 +109,10 @@ class DOGEStrategy(BaseCoinStrategy):
             return None, 0, None, None
 
         # 현재 캔들 종료 시각 계산
-        # Binance 4H 캔들: 인덱스 = 캔들 시작 시각
-        candle_open_ts  = df.index[-1].timestamp()
+        # Binance 4H 캔들 인덱스는 UTC 기준 naive datetime
+        # .timestamp()는 로컬 타임존으로 해석 → KST 서버에서 9시간 오차 발생
+        # calendar.timegm()으로 UTC 기준 명시적 변환
+        candle_open_ts  = calendar.timegm(df.index[-1].timetuple())
         candle_close_ts = candle_open_ts + 4 * 3600  # 4시간 후 = 캔들 종료
 
         meta = {

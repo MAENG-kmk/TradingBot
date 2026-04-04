@@ -3,15 +3,18 @@ def getPositions(client):
   position_list = []
   for position in positions:
     positionAmt = position['positionAmt']
+    if float(positionAmt) == 0:
+      continue
     if float(positionAmt) > 0:
       side = 'long'
     else:
       side = 'short'
     profit = float(position['unRealizedProfit'])
-    ror = profit / float(position['initialMargin']) * 100
-    
+    initialMargin = float(position['initialMargin'])
+    ror = profit / initialMargin * 100 if initialMargin > 0 else 0.0
+
     amount = positionAmt[1:] if positionAmt[0] == '-' else positionAmt
-    
+
     position_list.append({
       'symbol': position['symbol'],
       'side': side,

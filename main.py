@@ -39,13 +39,14 @@ print("=" * 50)
 def run_trading_bot():
     while True:
         try:
+            positions = getPositions(client)
+            total_balance, available_balance = getBalance(client)
+
             for strategy in strategies:
-              positions = getPositions(client)
-              total_balance, available_balance = getBalance(client)
               strategy.run(positions, total_balance, available_balance)
 
             updateHeartbeat()
-            time.sleep(300)
+            time.sleep(60)
 
         except Exception as e:
             print(f"❌ 오류: {e}")

@@ -76,6 +76,13 @@ class BaseCoinStrategy:
         self.client = client
         self._state = None  # 포지션 상태 (진입 시 생성, 청산 시 초기화)
 
+        # XGBoost 레짐 필터 로드 (models/ 에 없으면 None → 기존 로직 폴백)
+        try:
+            from tools.regime_filter import RegimeFilter
+            self._rf = RegimeFilter.load(f'models/regime_{self.SYMBOL}.pkl')
+        except Exception:
+            self._rf = None
+
     # ================================================================
     #  main.py에서 호출하는 유일한 메서드
     # ================================================================
@@ -144,24 +151,35 @@ class BaseCoinStrategy:
               mode: 'trend_following' | 'mean_reversion'
               meta: 추가 정보 dict (ou 파라미터 등)
         """
-        df = self.get_data()
+        df = self.get_data(limit=300)
         if df is None or len(df) < 50:
             return None, 0, None, None
 
         closes = df['Close'].values.astype(float)
 
-        # 시장 상태 판단
-        regime, adx, slope = checkMarketRegime(
-            df, adx_threshold=self.ADX_THRESHOLD,
-            slope_threshold=self.MR_SLOPE_THRESHOLD,
-        )
-
-        if regime in ('uptrend', 'downtrend'):
-            return self._trend_following_signal(df, closes)
-        elif self.MR_ENABLED:
-            return self._mean_reversion_signal(df, closes)
+        if self._rf is not None:
+            # XGBoost 레짐 분류
+            # prob >= 0.55 → 추세장 → 추세추종
+            # prob <  0.55 → 횡보장 → 평균회귀
+            prob = self._rf.predict(df)
+            if prob >= 0.55:
+                return self._trend_following_signal(df, closes)
+            elif self.MR_ENABLED:
+                return self._mean_reversion_signal(df, closes)
+            else:
+                return None, 0, None, None
         else:
-            return None, 0, None, None
+            # 폴백: 기존 checkMarketRegime
+            regime, adx, slope = checkMarketRegime(
+                df, adx_threshold=self.ADX_THRESHOLD,
+                slope_threshold=self.MR_SLOPE_THRESHOLD,
+            )
+            if regime in ('uptrend', 'downtrend'):
+                return self._trend_following_signal(df, closes)
+            elif self.MR_ENABLED:
+                return self._mean_reversion_signal(df, closes)
+            else:
+                return None, 0, None, None
 
     def _trend_following_signal(self, df, closes):
         """추세추종 진입 — 볼린저밴드 돌파 + MACD 확인"""

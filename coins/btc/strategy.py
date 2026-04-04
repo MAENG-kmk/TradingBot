@@ -57,9 +57,15 @@ class BTCStrategy(BaseCoinStrategy):
         Returns:
             ('long'|'short', target_ror_pct, 'sde', meta) | (None, 0, None, None)
         """
-        df = self.get_data(limit=self.SDE_EST_WINDOW + 5)
+        df = self.get_data(limit=300)
         if df is None or len(df) < self.SDE_EST_WINDOW + 1:
             return None, 0, None, None
+
+        # XGBoost 레짐 필터
+        if self._rf is not None:
+            prob = self._rf.predict(df)
+            if prob < 0.55:
+                return None, 0, None, None
 
         closes = df['Close'].values.astype(float)
         mu, sigma = estimate_gbm(closes, window=self.SDE_EST_WINDOW)
