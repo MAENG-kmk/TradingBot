@@ -74,9 +74,7 @@ class BaseCoinStrategy:
 
     # ===== VB (Volatility Breakout) 파라미터 - 횡보장 진입 =====
     VB_K = 0.3                   # 트리거: open ± k × prev_range
-    VB_MIN_RANGE_PCT = 0.3       # 최소 이전 봉 범위 (%)
-    VB_STOP_LOSS = -2.0          # 손절 (%)
-    VB_TIME_EXIT_SEC = 14400     # 시간청산 (4H = 14400초)
+    VB_MIN_RANGE_PCT = 0.3       # 최소 이전 봉 범위 (%) - 노이즈 필터
 
     def __init__(self, client):
         self.client = client
@@ -293,9 +291,9 @@ class BaseCoinStrategy:
             return None, 0, None, None
 
         if long_ok:
-            return 'long', abs(self.VB_STOP_LOSS) * 1.5, 'vb', {}
+            return 'long', 0, 'vb', {}
         if short_ok:
-            return 'short', abs(self.VB_STOP_LOSS) * 1.5, 'vb', {}
+            return 'short', 0, 'vb', {}
 
         return None, 0, None, None
 
@@ -312,31 +310,9 @@ class BaseCoinStrategy:
 
         mode = self._state.get('mode', 'trend_following')
 
-        # VB 모드: 손절 / 목표 / 4H 시간청산
+        # VB 모드: 다음 봉 즉시 청산 (백테스트와 동일 로직)
         if mode == 'vb':
-            should_close = False
-            reason = ""
-
-            # 1. 손절
-            if ror <= self._state['stop_loss']:
-                should_close = True
-                reason = f"VB손절({ror:.1f}%)"
-
-            # 2. 목표 수익
-            if not should_close and ror >= self._state['target_ror']:
-                should_close = True
-                reason = f"VB목표달성({ror:.1f}%≥{self._state['target_ror']:.1f}%)"
-
-            # 3. 시간 청산 (4H)
-            if not should_close:
-                if time.time() - self._state['entry_time'] > self.VB_TIME_EXIT_SEC:
-                    should_close = True
-                    reason = f"VB시간초과(4H, ROR:{ror:.1f}%)"
-
-            if should_close:
-                self._close_position(position, reason)
-            else:
-                print(f"  유지: {self.SYMBOL} | VB | ROR:{ror:.1f}% | 목표:{self._state['target_ror']:.1f}% | 손절:{self._state['stop_loss']:.1f}%")
+            self._close_position(position, f"VB다음봉청산(ROR:{ror:.1f}%)")
             return
 
         # 평균회귀 모드: OU Z-score 수렴 or 목표/손절/시간 청산
@@ -451,8 +427,8 @@ class BaseCoinStrategy:
     def _init_state(self, target_ror, mode='trend_following', ou=None):
         if mode == 'vb':
             self._state = {
-                'target_ror': target_ror,
-                'stop_loss': self.VB_STOP_LOSS,
+                'target_ror': 0,
+                'stop_loss': 0,
                 'entry_time': time.time(),
                 'highest_ror': 0,
                 'atr_ratio': 0.03,
