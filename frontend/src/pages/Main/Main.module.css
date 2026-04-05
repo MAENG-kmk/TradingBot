@@ -156,6 +156,21 @@ body {
   flex-direction: column;
   align-items: center;
   width: 20vw;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.rorContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.rorContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rorContent::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.3);
+  border-radius: 2px;
 }
 
 .header {
@@ -169,25 +184,27 @@ body {
 .positionWrapper {
   position: relative;
   width: 90%;
+  padding: 10px 0;
+  border-bottom: 1px solid #a8a8a8;
 }
 
 .positionWrapper:hover .positionTooltip {
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(0);
+  transform: translateY(0);
 }
 
 .positionTooltip {
   position: absolute;
-  left: 105%;
-  top: 50%;
-  transform: translateY(-50%) translateX(-8px);
+  top: 100%;
+  left: 0;
+  right: 0;
+  transform: translateY(-4px);
   background: linear-gradient(135deg, rgba(10,10,10,0.97), rgba(20,30,40,0.97));
   border: 1px solid rgba(0, 255, 255, 0.4);
   border-radius: 10px;
   box-shadow: 0 0 18px rgba(0, 255, 255, 0.25);
   padding: 10px 14px;
-  min-width: 220px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.18s ease, transform 0.18s ease;
@@ -201,7 +218,7 @@ body {
 .tooltipRow {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 }
 
 .tooltipLabel {
@@ -215,8 +232,6 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 7.5%;
-  border-bottom: 1px solid #a8a8a8;
   cursor: pointer;
 }
 
