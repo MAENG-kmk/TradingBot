@@ -380,21 +380,21 @@ def _print_summary(coin_name, results):
 
     # 파라미터 안정성 분석
     print(f"\n{'─'*50}")
-    print(f"🔩 파라미터 안정성 (윈도우별 최적 파라미터)")
-    ema_shorts = [r['best_params']['ema_short'] for r in results]
-    ema_longs  = [r['best_params']['ema_long']  for r in results]
-    adx_thrs   = [r['best_params']['adx_threshold'] for r in results]
-    atrs       = [r['best_params']['atr_multiplier'] for r in results]
+    print(f"파라미터 안정성 (윈도우별 최적 파라미터)")
+    bb_periods = [r['best_params'].get('tr_bb_period', '?') for r in results]
+    bb_stds    = [r['best_params'].get('tr_bb_std', '?')    for r in results]
+    adx_thrs   = [r['best_params'].get('adx_threshold', '?') for r in results]
+    atrs       = [r['best_params'].get('atr_multiplier', '?') for r in results]
     for i, r in enumerate(results):
         p = r['best_params']
-        print(f"  Window {i+1}: EMA={p['ema_short']}/{p['ema_long']} "
-              f"ADX≥{p['adx_threshold']} ATR×{p['atr_multiplier']} "
-              f"Target={p['target_ror_pct']}% Trail={p['trailing_ratio']}/{p['tight_trailing_ratio']}")
+        print(f"  Window {i+1}: BB={p.get('tr_bb_period','?')}×{p.get('tr_bb_std','?')} "
+              f"ADX≥{p.get('adx_threshold','?')} ATR×{p.get('atr_multiplier','?')} "
+              f"Target={p.get('target_ror_pct','?')}% Trail={p.get('trailing_ratio','?')}/{p.get('tight_trailing_ratio','?')}")
 
-    if len(set(ema_shorts)) == 1 and len(set(ema_longs)) == 1:
-        print(f"\n  → EMA 파라미터 일관됨 ({ema_shorts[0]}/{ema_longs[0]}) ✅")
+    if len(set(str(x) for x in bb_periods)) == 1 and len(set(str(x) for x in bb_stds)) == 1:
+        print(f"\n  BB 파라미터 일관됨 ({bb_periods[0]}×{bb_stds[0]}) OK")
     else:
-        print(f"\n  → EMA 파라미터 불일치 ⚠️  (윈도우마다 달라짐 = 불안정)")
+        print(f"\n  BB 파라미터 불일치 (윈도우마다 달라짐 = 불안정)")
 
 
 if __name__ == '__main__':

@@ -54,7 +54,7 @@ PARAM_GRIDS = {
 }
 
 
-def run_single(data_path, params, initial_cash=100000.0, intrabar_df=None):
+def run_single(data_path, params, initial_cash=100000.0, intrabar_df=None, slippage_pct=0.0003):
     """단일 파라미터 조합으로 백테스트 실행, 결과 dict 반환"""
     cerebro = bt.Cerebro()
     cerebro.addstrategy(CoinBacktestStrategy, intrabar_data=intrabar_df, **params)
@@ -70,6 +70,10 @@ def run_single(data_path, params, initial_cash=100000.0, intrabar_df=None):
     cerebro.adddata(data)
     cerebro.broker.setcash(initial_cash)
     cerebro.broker.setcommission(commission=0.0005)
+    cerebro.broker.set_slippage_perc(
+        perc=slippage_pct,
+        slip_open=True, slip_limit=True, slip_match=True, slip_out=False,
+    )
     cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='sharpe')
     cerebro.addanalyzer(bt.analyzers.DrawDown, _name='drawdown')
     cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='trades')
@@ -126,7 +130,7 @@ def score_result(r, all_results):
     return sharpe_norm * 0.4 + ror_score * 0.3 + mdd_score * 0.3
 
 
-def run_stage(data_path, combos, base_params, stage_name, initial_cash=100000.0, intrabar_df=None):
+def run_stage(data_path, combos, base_params, stage_name, initial_cash=100000.0, intrabar_df=None, slippage_pct=0.0003):
     """하나의 스테이지 Grid Search 실행"""
     total = len(combos)
     results = []
@@ -134,7 +138,7 @@ def run_stage(data_path, combos, base_params, stage_name, initial_cash=100000.0,
 
     for i, params in enumerate(combos):
         merged = {**base_params, **params}
-        r = run_single(data_path, merged, initial_cash, intrabar_df=intrabar_df)
+        r = run_single(data_path, merged, initial_cash, intrabar_df=intrabar_df, slippage_pct=slippage_pct)
         if r and r['trades'] >= 30:
             results.append(r)
 

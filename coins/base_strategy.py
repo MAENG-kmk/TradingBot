@@ -72,6 +72,12 @@ class BaseCoinStrategy:
     MR_MAX_HALFLIFE = 12            # 최대 허용 반감기 (봉 단위, 12봉=48h)
     MR_TIME_HALFLIFE_MULT = 2.5     # 시간청산 = 반감기 × 배수
 
+    # ===== VB (Volatility Breakout) 파라미터 - 횡보장 진입 =====
+    VB_K = 0.3                   # 트리거: open ± k × prev_range
+    VB_MIN_RANGE_PCT = 0.3       # 최소 이전 봉 범위 (%)
+    VB_STOP_LOSS = -2.0          # 손절 (%)
+    VB_TIME_EXIT_SEC = 14400     # 시간청산 (4H = 14400초)
+
     def __init__(self, client):
         self.client = client
         self._state = None  # 포지션 상태 (진입 시 생성, 청산 시 초기화)
@@ -131,7 +137,7 @@ class BaseCoinStrategy:
         if response:
             ou = meta.get('ou') if meta else None
             self._init_state(target_ror, mode=mode, ou=ou)
-            tag = '📊MR' if mode == 'mean_reversion' else '✅TR'
+            tag = '📊MR' if mode == 'mean_reversion' else ('📈VB' if mode == 'vb' else '✅TR')
             ou_info = f" | HL:{ou['half_life']:.1f}봉 Z:{ou['zscore']:.2f}" if ou else ""
             msg = f"{tag} {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%{ou_info}"
             print(f"  {msg}")
@@ -160,14 +166,12 @@ class BaseCoinStrategy:
         if self._rf is not None:
             # XGBoost 레짐 분류
             # prob >= 0.55 → 추세장 → 추세추종
-            # prob <  0.55 → 횡보장 → 평균회귀
+            # prob <  0.55 → 횡보장 → VB
             prob = self._rf.predict(df)
             if prob >= 0.55:
                 return self._trend_following_signal(df, closes)
-            elif self.MR_ENABLED:
-                return self._mean_reversion_signal(df, closes)
             else:
-                return None, 0, None, None
+                return self._vb_signal(df, closes)
         else:
             # 폴백: 기존 checkMarketRegime
             regime, adx, slope = checkMarketRegime(
@@ -176,10 +180,8 @@ class BaseCoinStrategy:
             )
             if regime in ('uptrend', 'downtrend'):
                 return self._trend_following_signal(df, closes)
-            elif self.MR_ENABLED:
-                return self._mean_reversion_signal(df, closes)
             else:
-                return None, 0, None, None
+                return self._vb_signal(df, closes)
 
     def _trend_following_signal(self, df, closes):
         """추세추종 진입 — 볼린저밴드 돌파 + MACD 확인"""
@@ -254,6 +256,49 @@ class BaseCoinStrategy:
 
         return None, 0, None, None
 
+    def _vb_signal(self, df, closes):
+        """
+        변동성 돌파 진입 — 횡보장 전용 (같은 봉 내 진입/청산)
+
+        트리거: open + k × prev_range (롱) / open - k × prev_range (숏)
+        현재 봉이 트리거를 터치했으면 시그널 발생
+        """
+        if len(df) < 2:
+            return None, 0, None, None
+
+        prev = df.iloc[-2]
+        cur = df.iloc[-1]
+
+        prev_range = float(prev['High'] - prev['Low'])
+        prev_close = float(prev['Close'])
+        if prev_close <= 0 or prev_range <= 0:
+            return None, 0, None, None
+
+        # 이전 봉 범위가 너무 작으면 노이즈 — 스킵
+        if prev_range / prev_close * 100 < self.VB_MIN_RANGE_PCT:
+            return None, 0, None, None
+
+        cur_open = float(cur['Open'])
+        cur_high = float(cur['High'])
+        cur_low = float(cur['Low'])
+
+        long_trig = cur_open + self.VB_K * prev_range
+        short_trig = cur_open - self.VB_K * prev_range
+
+        long_ok = cur_high >= long_trig and long_trig > cur_open
+        short_ok = cur_low <= short_trig and short_trig < cur_open
+
+        # 양방향 동시 돌파 → 노이즈
+        if long_ok and short_ok:
+            return None, 0, None, None
+
+        if long_ok:
+            return 'long', abs(self.VB_STOP_LOSS) * 1.5, 'vb', {}
+        if short_ok:
+            return 'short', abs(self.VB_STOP_LOSS) * 1.5, 'vb', {}
+
+        return None, 0, None, None
+
     # ================================================================
     #  청산 로직 (BetController 4단계 트레일링 내장)
     # ================================================================
@@ -266,6 +311,33 @@ class BaseCoinStrategy:
             self._init_state(0)
 
         mode = self._state.get('mode', 'trend_following')
+
+        # VB 모드: 손절 / 목표 / 4H 시간청산
+        if mode == 'vb':
+            should_close = False
+            reason = ""
+
+            # 1. 손절
+            if ror <= self._state['stop_loss']:
+                should_close = True
+                reason = f"VB손절({ror:.1f}%)"
+
+            # 2. 목표 수익
+            if not should_close and ror >= self._state['target_ror']:
+                should_close = True
+                reason = f"VB목표달성({ror:.1f}%≥{self._state['target_ror']:.1f}%)"
+
+            # 3. 시간 청산 (4H)
+            if not should_close:
+                if time.time() - self._state['entry_time'] > self.VB_TIME_EXIT_SEC:
+                    should_close = True
+                    reason = f"VB시간초과(4H, ROR:{ror:.1f}%)"
+
+            if should_close:
+                self._close_position(position, reason)
+            else:
+                print(f"  유지: {self.SYMBOL} | VB | ROR:{ror:.1f}% | 목표:{self._state['target_ror']:.1f}% | 손절:{self._state['stop_loss']:.1f}%")
+            return
 
         # 평균회귀 모드: OU Z-score 수렴 or 목표/손절/시간 청산
         if mode == 'mean_reversion':
@@ -377,6 +449,19 @@ class BaseCoinStrategy:
     # ===== 4단계 트레일링 스탑 =====
 
     def _init_state(self, target_ror, mode='trend_following', ou=None):
+        if mode == 'vb':
+            self._state = {
+                'target_ror': target_ror,
+                'stop_loss': self.VB_STOP_LOSS,
+                'entry_time': time.time(),
+                'highest_ror': 0,
+                'atr_ratio': 0.03,
+                'trailing_active': False,
+                'phase': 1,
+                'mode': 'vb',
+            }
+            return
+
         if mode == 'mean_reversion':
             half_life = ou['half_life'] if ou else 6.0
             # 시간청산: 반감기 × 배수 (초 단위, 1봉=4h=14400초)

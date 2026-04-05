@@ -212,13 +212,13 @@ def robust_optimize(coin_name, n_periods=5, top_n=10, initial_cash=100000.0):
         normalize_and_score(s1_results)
         s1_results.sort(key=lambda x: x['robust_score'], reverse=True)
 
-        print(f"🏅 Stage 1 상위 3개 진입 파라미터 (Robust 기준):")
+        print(f"Stage 1 상위 3개 진입 파라미터 (Robust 기준):")
         for i, r in enumerate(s1_results[:3]):
             p = r['params']
             rors_str = " / ".join(f"{v:.1f}%" for v in r['period_rors'])
-            print(f"   {i+1}. EMA={p['ema_short']}/{p['ema_long']} "
-                  f"RSI={p['rsi_oversell']}/{p['rsi_overbuy']} "
-                  f"ADX≥{p['adx_threshold']} ATR×{p['atr_multiplier']}")
+            print(f"   {i+1}. BB={p.get('tr_bb_period','?')}×{p.get('tr_bb_std','?')} "
+                  f"RSI={p.get('rsi_oversell','?')}/{p.get('rsi_overbuy','?')} "
+                  f"ADX≥{p.get('adx_threshold','?')} ATR×{p.get('atr_multiplier','?')}")
             print(f"      기간별 ROR: [{rors_str}]  "
                   f"avg={r['stats']['avg_ror']:.1f}%  "
                   f"min={r['stats']['min_ror']:.1f}%  "
@@ -258,11 +258,11 @@ def robust_optimize(coin_name, n_periods=5, top_n=10, initial_cash=100000.0):
             p = r['params']
             s = r['stats']
             params_str = (
-                f"EMA={p['ema_short']}/{p['ema_long']} "
-                f"RSI={p['rsi_oversell']}/{p['rsi_overbuy']} "
-                f"ADX≥{p['adx_threshold']} ATR×{p['atr_multiplier']} "
-                f"목표={p['target_ror_pct']}% "
-                f"Trail={p['trailing_ratio']}/{p['tight_trailing_ratio']}"
+                f"BB={p.get('tr_bb_period','?')}x{p.get('tr_bb_std','?')} "
+                f"RSI={p.get('rsi_oversell','?')}/{p.get('rsi_overbuy','?')} "
+                f"ADX>={p.get('adx_threshold','?')} ATR*{p.get('atr_multiplier','?')} "
+                f"목표={p.get('target_ror_pct','?')}% "
+                f"Trail={p.get('trailing_ratio','?')}/{p.get('tight_trailing_ratio','?')}"
             )
             rors_str = "  ".join(f"{v:>+7.1f}%" for v in r['period_rors'])
             print(f"{idx+1:>3}. {s['avg_ror']:>6.1f}% {s['min_ror']:>6.1f}% "
@@ -275,13 +275,13 @@ def robust_optimize(coin_name, n_periods=5, top_n=10, initial_cash=100000.0):
         bp = best['params']
         bs = best['stats']
         print(f"\n{'='*60}")
-        print(f"🥇 Robust 최적 파라미터")
+        print(f"Robust 최적 파라미터")
         print(f"{'='*60}")
         print(f"  진입:")
-        print(f"    EMA: {bp['ema_short']} / {bp['ema_long']}")
-        print(f"    RSI: {bp['rsi_oversell']} ~ {bp['rsi_overbuy']}")
-        print(f"    ADX ≥ {bp['adx_threshold']}")
-        print(f"    ATR 배수: {bp['atr_multiplier']}")
+        print(f"    BB: {bp.get('tr_bb_period','?')} / std: {bp.get('tr_bb_std','?')}")
+        print(f"    RSI: {bp.get('rsi_oversell','?')} ~ {bp.get('rsi_overbuy','?')}")
+        print(f"    ADX >= {bp.get('adx_threshold','?')}")
+        print(f"    ATR 배수: {bp.get('atr_multiplier','?')}")
         print(f"  청산:")
         print(f"    목표 ROR: {bp['target_ror_pct']}%")
         print(f"    트레일링: {bp['trailing_ratio']} / {bp['tight_trailing_ratio']}")
@@ -306,16 +306,16 @@ def robust_optimize(coin_name, n_periods=5, top_n=10, initial_cash=100000.0):
         print(f"  평균: {old_avg:+.2f}%  최소: {old_min:+.2f}%")
         print(f"\n  Robust 파라미터 평균: {bs['avg_ror']:+.2f}%  최소: {bs['min_ror']:+.2f}%")
 
-        print(f"\n📋 coins/{coin_name}/strategy.py 에 적용할 파라미터:")
-        print(f"    EMA_SHORT = {bp['ema_short']}")
-        print(f"    EMA_LONG = {bp['ema_long']}")
-        print(f"    RSI_OVERBUY = {bp['rsi_overbuy']}")
-        print(f"    RSI_OVERSELL = {bp['rsi_oversell']}")
-        print(f"    ADX_THRESHOLD = {bp['adx_threshold']}")
-        print(f"    ATR_MULTIPLIER = {bp['atr_multiplier']}")
-        print(f"    TARGET_ROR_PCT = {bp['target_ror_pct']}")
-        print(f"    TRAILING_RATIO = {bp['trailing_ratio']}")
-        print(f"    TIGHT_TRAILING_RATIO = {bp['tight_trailing_ratio']}")
+        print(f"\ncoins/{coin_name}/strategy.py 에 적용할 파라미터:")
+        print(f"    TR_BB_PERIOD = {bp.get('tr_bb_period','?')}")
+        print(f"    TR_BB_STD = {bp.get('tr_bb_std','?')}")
+        print(f"    RSI_OVERBUY = {bp.get('rsi_overbuy','?')}")
+        print(f"    RSI_OVERSELL = {bp.get('rsi_oversell','?')}")
+        print(f"    ADX_THRESHOLD = {bp.get('adx_threshold','?')}")
+        print(f"    ATR_MULTIPLIER = {bp.get('atr_multiplier','?')}")
+        print(f"    DEFAULT_TARGET_ROR = {bp.get('target_ror_pct','?')}")
+        print(f"    TRAILING_RATIO = {bp.get('trailing_ratio','?')}")
+        print(f"    TIGHT_TRAILING_RATIO = {bp.get('tight_trailing_ratio','?')}")
 
         return all_s2
 
