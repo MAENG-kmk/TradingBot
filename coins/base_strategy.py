@@ -16,7 +16,7 @@ from tools.setLeverage import setLeverage
 from tools.getBalance import getBalance
 from tools.telegram import send_message
 from tools.ouProcess import fit_ou
-from MongoDB_python.client import addDataToMongoDB
+from MongoDB_python.client import addDataToMongoDB, saveEntryDetails, deleteEntryDetails
 
 
 class BaseCoinStrategy:
@@ -134,7 +134,9 @@ class BaseCoinStrategy:
 
         if response:
             ou = meta.get('ou') if meta else None
-            self._init_state(target_ror, mode=mode, ou=ou)
+            vb_meta = meta if mode == 'vb' else None
+            self._init_state(target_ror, mode=mode, ou=ou, vb_meta=vb_meta)
+            saveEntryDetails(self.SYMBOL, mode, signal, price)
             tag = '📊MR' if mode == 'mean_reversion' else ('📈VB' if mode == 'vb' else '✅TR')
             ou_info = f" | HL:{ou['half_life']:.1f}봉 Z:{ou['zscore']:.2f}" if ou else ""
             msg = f"{tag} {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%{ou_info}"
@@ -290,10 +292,15 @@ class BaseCoinStrategy:
         if long_ok and short_ok:
             return None, 0, None, None
 
+        # 진입 봉 캔들 종료 시각 계산 (UTC 기준, 4H 캔들)
+        import calendar
+        candle_open_ts  = calendar.timegm(df.index[-1].timetuple())
+        candle_close_ts = candle_open_ts + 4 * 3600
+
         if long_ok:
-            return 'long', 0, 'vb', {}
+            return 'long', 0, 'vb', {'candle_close_ts': candle_close_ts}
         if short_ok:
-            return 'short', 0, 'vb', {}
+            return 'short', 0, 'vb', {'candle_close_ts': candle_close_ts}
 
         return None, 0, None, None
 
@@ -310,9 +317,15 @@ class BaseCoinStrategy:
 
         mode = self._state.get('mode', 'trend_following')
 
-        # VB 모드: 다음 봉 즉시 청산 (백테스트와 동일 로직)
+        # VB 모드: 진입 봉 캔들이 닫힌 후 첫 run()에서 청산
         if mode == 'vb':
-            self._close_position(position, f"VB다음봉청산(ROR:{ror:.1f}%)")
+            candle_close_ts = self._state.get('candle_close_ts', 0)
+            now = time.time()
+            if now >= candle_close_ts:
+                self._close_position(position, f"VB다음봉청산(ROR:{ror:.1f}%)")
+            else:
+                remaining_min = (candle_close_ts - now) / 60
+                print(f"  유지: {self.SYMBOL} | VB | ROR:{ror:.1f}% | 청산까지: {remaining_min:.0f}분")
             return
 
         # 평균회귀 모드: OU Z-score 수렴 or 목표/손절/시간 청산
@@ -411,6 +424,7 @@ class BaseCoinStrategy:
             except Exception:
                 pass
 
+            deleteEntryDetails(self.SYMBOL)
             msg = f"🔴 {self.SYMBOL} 청산 ({reason}) | ROR:{position['ror']:.1f}% | 손익:{position['profit']:.2f}$"
             print(f"  {msg}")
             try:
@@ -424,12 +438,21 @@ class BaseCoinStrategy:
 
     # ===== 4단계 트레일링 스탑 =====
 
-    def _init_state(self, target_ror, mode='trend_following', ou=None):
+    def _init_state(self, target_ror, mode='trend_following', ou=None, vb_meta=None):
         if mode == 'vb':
+            # 캔들 종료 시각: meta에서 가져오거나, 현재 4H 캔들 기준으로 추정
+            if vb_meta and vb_meta.get('candle_close_ts'):
+                candle_close_ts = vb_meta['candle_close_ts']
+            else:
+                # 폴백: 현재 시각 기준 다음 4H 캔들 경계 계산
+                now = time.time()
+                candle_sec = 4 * 3600
+                candle_close_ts = (now // candle_sec + 1) * candle_sec
             self._state = {
                 'target_ror': 0,
                 'stop_loss': 0,
                 'entry_time': time.time(),
+                'candle_close_ts': candle_close_ts,
                 'highest_ror': 0,
                 'atr_ratio': 0.03,
                 'trailing_active': False,

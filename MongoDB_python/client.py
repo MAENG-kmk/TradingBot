@@ -57,6 +57,40 @@ def addVersionAndDate(version, balance):
             "Unable to find the document due to the following error: ", e)
 
 
+def saveEntryDetails(symbol, mode, side, entry_price):
+    """진입 시 상세 정보 저장 (프론트 hover 표시용)"""
+    try:
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        db = client.get_database("Bot_Status")
+        col = db.get_collection("open_positions")
+        col.update_one(
+            {"symbol": symbol},
+            {"$set": {
+                "symbol": symbol,
+                "mode": mode,
+                "side": side,
+                "entry_price": entry_price,
+                "enter_time": datetime.now().timestamp(),
+            }},
+            upsert=True,
+        )
+        client.close()
+    except Exception:
+        pass
+
+
+def deleteEntryDetails(symbol):
+    """포지션 청산 시 진입 기록 삭제"""
+    try:
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        db = client.get_database("Bot_Status")
+        col = db.get_collection("open_positions")
+        col.delete_one({"symbol": symbol})
+        client.close()
+    except Exception:
+        pass
+
+
 def updateHeartbeat():
     """하트비트 단일 문서 upsert — 매 사이클마다 호출"""
     try:

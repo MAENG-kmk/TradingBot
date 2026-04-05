@@ -144,6 +144,17 @@ app.get("/klines", async (req, res) => {
   }
 });
 
+app.get("/entry-details", async (req, res) => {
+  try {
+    const db = await connectMongo("Bot_Status");
+    const docs = await db.collection("open_positions").find({}).toArray();
+    res.json({ success: true, datas: docs });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.get("/heartbeat", async (req, res) => {
   try {
     const db = await connectMongo("Bot_Status");

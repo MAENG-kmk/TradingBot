@@ -16,7 +16,7 @@ class BNBStrategy(BaseCoinStrategy):
     ATR_MULTIPLIER = 1.5
 
     # 청산 파라미터 (Robust 최적화)
-    TARGET_ROR_PCT = 10.0
+    DEFAULT_TARGET_ROR = 10.0
     TRAILING_RATIO = 0.4
     TIGHT_TRAILING_RATIO = 0.85
 

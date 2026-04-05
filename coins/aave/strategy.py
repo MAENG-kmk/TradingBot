@@ -16,7 +16,7 @@ class AAVEStrategy(BaseCoinStrategy):
     ATR_MULTIPLIER = 3.0
 
     # 청산 파라미터 (Robust 최적화)
-    TARGET_ROR_PCT = 7.0
+    DEFAULT_TARGET_ROR = 7.0
     TRAILING_RATIO = 0.4
     TIGHT_TRAILING_RATIO = 0.65
 

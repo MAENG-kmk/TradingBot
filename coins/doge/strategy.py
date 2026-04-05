@@ -9,7 +9,7 @@ from coins.base_strategy import BaseCoinStrategy
 from tools.createOrder import createOrder
 from tools.setLeverage import setLeverage
 from tools.telegram import send_message
-from MongoDB_python.client import addDataToMongoDB
+from MongoDB_python.client import addDataToMongoDB, saveEntryDetails, deleteEntryDetails
 from tools.getBalance import getBalance
 from datetime import datetime
 
@@ -191,6 +191,7 @@ class DOGEStrategy(BaseCoinStrategy):
             if mode == 'vb_close':
                 # meta 전체를 그대로 _init_state에 전달
                 self._init_state(target_ror, mode=mode, ou=meta)
+                saveEntryDetails(self.SYMBOL, mode, signal, price)
                 candle_close_ts = meta.get('candle_close_ts', 0) if meta else 0
                 close_dt = datetime.utcfromtimestamp(candle_close_ts).strftime('%H:%M UTC')
                 msg = (f"✅VB {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} "

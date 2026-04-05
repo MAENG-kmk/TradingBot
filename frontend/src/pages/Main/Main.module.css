@@ -166,11 +166,55 @@ body {
   height: 8vh;
 }
 
+.positionWrapper {
+  position: relative;
+  width: 90%;
+}
+
+.positionWrapper:hover .positionTooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.positionTooltip {
+  position: absolute;
+  left: 105%;
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  background: linear-gradient(135deg, rgba(10,10,10,0.97), rgba(20,30,40,0.97));
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgba(0, 255, 255, 0.25);
+  padding: 10px 14px;
+  min-width: 220px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 100;
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tooltipLabel {
+  color: #00ffff;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
 .position {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 90%;
+  width: 100%;
   height: 7.5%;
   border-bottom: 1px solid #a8a8a8;
   cursor: pointer;

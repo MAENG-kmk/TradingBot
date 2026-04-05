@@ -21,6 +21,7 @@ const Main = () => {
   const [selectedCoin, setSelectedCoin] = useState('ALL');
   const [botStatus, setBotStatus] = useState({ alive: null, minutesAgo: null });
   const [candleData, setCandleData] = useState([]);
+  const [entryDetails, setEntryDetails] = useState({});
 
   const navigate  = useNavigate();
 
@@ -49,10 +50,18 @@ const Main = () => {
                 symbol: data.symbol,
                 ror: ror,
                 side: side,
+                entryPrice: parseFloat(data.entryPrice).toFixed(4),
               };
               return cur;
             });
             setPositionDatas(positionList);
+          };
+
+          const entryRes = await axios.get(`${process.env.REACT_APP_API_URL}/entry-details`);
+          if (entryRes.data.success) {
+            const map = {};
+            entryRes.data.datas.forEach(d => { map[d.symbol] = d; });
+            setEntryDetails(map);
           };
 
           const incodig = encodeURIComponent(vers);
@@ -236,10 +245,28 @@ const Main = () => {
             <div className={styles.statistics}>Current Position</div>
           </div>
           {filteredPositions.map((position) => {
+            const detail = entryDetails[position.symbol];
+            const modeLabel = {
+              'trend_following': '✅ 추세추종 (TR)',
+              'mean_reversion':  '📊 평균회귀 (MR)',
+              'vb':              '📈 변동성 돌파 (VB)',
+              'vb_close':        '📈 변동성 돌파 (VB)',
+              'sde':             '🔬 GBM 확률 (SDE)',
+            }[detail?.mode] || '—';
+            const enterTimeStr = detail?.enter_time
+              ? new Date(detail.enter_time * 1000).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false })
+              : '—';
             return(
-              <div className={styles.position} key={position.symbol} onClick={() => {handlePositionClick(position.symbol)}}>
-                <div>{position.symbol}<span>{position.side}</span></div>
-                <div style={position.ror > 0 ? {color: 'rgb(35, 255, 35)'} : {color: '#F44336'}}>{position.ror}%</div>
+              <div className={styles.positionWrapper} key={position.symbol}>
+                <div className={styles.position} onClick={() => {handlePositionClick(position.symbol)}}>
+                  <div>{position.symbol}<span>{position.side}</span></div>
+                  <div style={position.ror > 0 ? {color: 'rgb(35, 255, 35)'} : {color: '#F44336'}}>{position.ror}%</div>
+                </div>
+                <div className={styles.positionTooltip}>
+                  <div className={styles.tooltipRow}><span className={styles.tooltipLabel}>진입 시각</span><span>{enterTimeStr}</span></div>
+                  <div className={styles.tooltipRow}><span className={styles.tooltipLabel}>진입 전략</span><span>{modeLabel}</span></div>
+                  <div className={styles.tooltipRow}><span className={styles.tooltipLabel}>진입가</span><span>{position.entryPrice}</span></div>
+                </div>
               </div>
             )
           })}
