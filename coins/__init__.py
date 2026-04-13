@@ -1,5 +1,5 @@
 from coins.eth.strategy import ETHStrategy
-from coins.btc.strategy import BTCStrategy
+from coins.sui.strategy import SUIStrategy
 from coins.sol.strategy import SOLStrategy
 from coins.bnb.strategy import BNBStrategy
 from coins.xrp.strategy import XRPStrategy
@@ -11,7 +11,7 @@ from coins.aave.strategy import AAVEStrategy
 
 STRATEGY_CLASSES = [
     ETHStrategy,
-    BTCStrategy,
+    SUIStrategy,
     SOLStrategy,
     BNBStrategy,
     XRPStrategy,

@@ -147,6 +147,15 @@ COIN_CONFIGS = {
         mr_enabled=True,  mr_entry_z=2.0, mr_exit_z=0.5,
         mr_max_hl=10, mr_time_mult=2.0,
     ),
+    'sui': dict(
+        path='backtestDatas/suiusdt_4h.csv', symbol='SUIUSDT',
+        slippage_pct=0.0005,
+        bb_period=20, bb_std=2.0, rsi_overbuy=80, rsi_oversell=20,
+        adx_threshold=20, default_target=10.0,
+        trailing=0.5, tight_trailing=0.75,
+        mr_enabled=True,  mr_entry_z=2.0, mr_exit_z=0.5,
+        mr_max_hl=12, mr_time_mult=2.5,
+    ),
 }
 
 
@@ -837,6 +846,48 @@ def plot_results(coin: str, adx_r, xgb_r,
         plt.show()
 
 
+def _print_vb_comparison(coin: str, mr_r, vb_r):
+    """단일 코인 MR vs VB 상세 비교"""
+    print(f"\n{'='*68}")
+    print(f"  {coin.upper()}  —  횡보 전략 비교 (XGB 라우팅 기준)")
+    print(f"{'='*68}")
+    print(f"  {'':>10}  {'거래':>5}  {'TR':>4}  {'MR/VB':>5}  {'승률':>6}  "
+          f"{'ROR':>8}  {'Sharpe':>7}  {'MDD':>6}  {'P/L':>5}")
+    print(f"  {'-'*65}")
+    for label, r, sub_key in [('XGB+MR', mr_r, 'mr_count'), ('XGB+VB', vb_r, 'vb_count')]:
+        if r is None:
+            print(f"  {label:>10}  결과없음"); continue
+        sub_n = r.get(sub_key, 0)
+        print(f"  {label:>10}  {r['total']:>5}  {r['tr_count']:>4}  {sub_n:>5}  "
+              f"{r['win_rate']:>5.1f}%  {r['ror']:>+7.1f}%  "
+              f"{r['sharpe']:>6.2f}  {r['mdd']:>5.1f}%  {r['pl_ratio']:>4.2f}")
+    print(f"{'='*68}")
+
+    if mr_r and vb_r:
+        dr = vb_r['ror']    - mr_r['ror']
+        ds = vb_r['sharpe'] - mr_r['sharpe']
+        dm = vb_r['mdd']    - mr_r['mdd']
+        print(f"  VB vs MR:  ROR {dr:>+.1f}%  Sharpe {ds:>+.2f}  MDD {dm:>+.1f}%")
+
+    r = vb_r or mr_r
+    if r:
+        label = 'VB' if vb_r else 'MR'
+        td = r['trades'].copy()
+        td['year'] = td['dt'].dt.year
+        print(f"\n  연도별 성과 (XGB+{label}):")
+        print(f"  {'년':>4}  {'거래':>5}  {'TR':>4}  {'VB/MR':>5}  {'승률':>6}  {'ROR':>8}")
+        print(f"  {'-'*44}")
+        cb = INITIAL
+        for yr in sorted(td['year'].unique()):
+            g   = td[td['year'] == yr]
+            rb  = g['pnl'].sum() / cb * 100
+            cb += g['pnl'].sum()
+            tr  = (g['mode'] == 'trend_following').sum()
+            sw  = ((g['mode'] == 'vb') | (g['mode'] == 'mean_reversion')).sum()
+            wr  = (g['pnl'] > 0).mean() * 100
+            print(f"  {yr:>4}  {len(g):>5}  {tr:>4}  {sw:>5}  {wr:>5.1f}%  {rb:>+7.1f}%")
+
+
 # ── main ─────────────────────────────────────────────────────────
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -927,44 +978,3 @@ if __name__ == '__main__':
         print(f"\n  VB > MR: {improved}/{len(summary_rows)}코인  |  평균 Δ ROR: {avg_delta:+.1f}%")
 
 
-def _print_vb_comparison(coin: str, mr_r, vb_r):
-    """단일 코인 MR vs VB 상세 비교"""
-    print(f"\n{'='*68}")
-    print(f"  {coin.upper()}  —  횡보 전략 비교 (XGB 라우팅 기준)")
-    print(f"{'='*68}")
-    print(f"  {'':>10}  {'거래':>5}  {'TR':>4}  {'MR/VB':>5}  {'승률':>6}  "
-          f"{'ROR':>8}  {'Sharpe':>7}  {'MDD':>6}  {'P/L':>5}")
-    print(f"  {'-'*65}")
-    for label, r, sub_key in [('XGB+MR', mr_r, 'mr_count'), ('XGB+VB', vb_r, 'vb_count')]:
-        if r is None:
-            print(f"  {label:>10}  결과없음"); continue
-        sub_n = r.get(sub_key, 0)
-        print(f"  {label:>10}  {r['total']:>5}  {r['tr_count']:>4}  {sub_n:>5}  "
-              f"{r['win_rate']:>5.1f}%  {r['ror']:>+7.1f}%  "
-              f"{r['sharpe']:>6.2f}  {r['mdd']:>5.1f}%  {r['pl_ratio']:>4.2f}")
-    print(f"{'='*68}")
-
-    if mr_r and vb_r:
-        dr = vb_r['ror']    - mr_r['ror']
-        ds = vb_r['sharpe'] - mr_r['sharpe']
-        dm = vb_r['mdd']    - mr_r['mdd']
-        print(f"  VB vs MR:  ROR {dr:>+.1f}%  Sharpe {ds:>+.2f}  MDD {dm:>+.1f}%")
-
-    # 연도별 (VB 기준)
-    r = vb_r or mr_r
-    if r:
-        label = 'VB' if vb_r else 'MR'
-        td = r['trades'].copy()
-        td['year'] = td['dt'].dt.year
-        print(f"\n  연도별 성과 (XGB+{label}):")
-        print(f"  {'년':>4}  {'거래':>5}  {'TR':>4}  {'VB/MR':>5}  {'승률':>6}  {'ROR':>8}")
-        print(f"  {'-'*44}")
-        cb = INITIAL
-        for yr in sorted(td['year'].unique()):
-            g   = td[td['year'] == yr]
-            rb  = g['pnl'].sum() / cb * 100
-            cb += g['pnl'].sum()
-            tr  = (g['mode'] == 'trend_following').sum()
-            sw  = ((g['mode'] == 'vb') | (g['mode'] == 'mean_reversion')).sum()
-            wr  = (g['pnl'] > 0).mean() * 100
-            print(f"  {yr:>4}  {len(g):>5}  {tr:>4}  {sw:>5}  {wr:>5.1f}%  {rb:>+7.1f}%")
