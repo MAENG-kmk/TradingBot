@@ -57,26 +57,38 @@ def addVersionAndDate(version, balance):
             "Unable to find the document due to the following error: ", e)
 
 
-def saveEntryDetails(symbol, mode, side, entry_price):
-    """진입 시 상세 정보 저장 (프론트 hover 표시용)"""
+def saveEntryDetails(symbol, mode, side, entry_price, candle_close_ts=None):
+    """진입 시 상세 정보 저장 (프론트 hover 표시용 + 재시작 복구용)"""
     try:
         client = MongoClient(uri, server_api=ServerApi('1'))
         db = client.get_database("Bot_Status")
         col = db.get_collection("open_positions")
-        col.update_one(
-            {"symbol": symbol},
-            {"$set": {
-                "symbol": symbol,
-                "mode": mode,
-                "side": side,
-                "entry_price": entry_price,
-                "enter_time": datetime.now().timestamp(),
-            }},
-            upsert=True,
-        )
+        doc = {
+            "symbol": symbol,
+            "mode": mode,
+            "side": side,
+            "entry_price": entry_price,
+            "enter_time": datetime.now().timestamp(),
+        }
+        if candle_close_ts is not None:
+            doc["candle_close_ts"] = candle_close_ts
+        col.update_one({"symbol": symbol}, {"$set": doc}, upsert=True)
         client.close()
     except Exception:
         pass
+
+
+def getEntryDetails(symbol):
+    """재시작 시 진입 기록 복구용"""
+    try:
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        db = client.get_database("Bot_Status")
+        col = db.get_collection("open_positions")
+        doc = col.find_one({"symbol": symbol})
+        client.close()
+        return doc
+    except Exception:
+        return None
 
 
 def deleteEntryDetails(symbol):

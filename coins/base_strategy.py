@@ -16,7 +16,7 @@ from tools.setLeverage import setLeverage
 from tools.getBalance import getBalance
 from tools.telegram import send_message
 from tools.ouProcess import fit_ou
-from MongoDB_python.client import addDataToMongoDB, saveEntryDetails, deleteEntryDetails
+from MongoDB_python.client import addDataToMongoDB, saveEntryDetails, getEntryDetails, deleteEntryDetails
 
 
 class BaseCoinStrategy:
@@ -136,7 +136,8 @@ class BaseCoinStrategy:
             ou = meta.get('ou') if meta else None
             vb_meta = meta if mode == 'vb' else None
             self._init_state(target_ror, mode=mode, ou=ou, vb_meta=vb_meta)
-            saveEntryDetails(self.SYMBOL, mode, signal, price)
+            candle_close_ts = self._state.get('candle_close_ts') if mode == 'vb' else None
+            saveEntryDetails(self.SYMBOL, mode, signal, price, candle_close_ts)
             tag = '📊MR' if mode == 'mean_reversion' else ('📈VB' if mode == 'vb' else '✅TR')
             ou_info = f" | HL:{ou['half_life']:.1f}봉 Z:{ou['zscore']:.2f}" if ou else ""
             msg = f"{tag} {self.SYMBOL} {signal.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%{ou_info}"
@@ -311,18 +312,37 @@ class BaseCoinStrategy:
     def _manage_exit(self, position):
         ror = position['ror']
 
-        # 재시작 복구: state 없으면 기본값으로 초기화
+        # 재시작 복구: MongoDB에서 진입 기록 읽어 mode 복원
         if self._state is None:
-            self._init_state(0)
+            entry_doc = getEntryDetails(self.SYMBOL)
+            recovered_mode = entry_doc.get('mode', 'trend_following') if entry_doc else 'trend_following'
+
+            if recovered_mode == 'vb':
+                candle_close_ts = entry_doc.get('candle_close_ts', 0)
+                if not candle_close_ts:
+                    # candle_close_ts 누락 시: 진입 시각 기준 다음 4H 경계 추정
+                    enter_time = entry_doc.get('enter_time', time.time())
+                    candle_sec = 4 * 3600
+                    candle_close_ts = (enter_time // candle_sec + 1) * candle_sec
+                self._init_state(0, mode='vb', vb_meta={'candle_close_ts': candle_close_ts})
+                print(f"  [복구] {self.SYMBOL} VB 모드 재시작 복구 (청산예정: {candle_close_ts})")
+            else:
+                self._init_state(0)
 
         mode = self._state.get('mode', 'trend_following')
 
         # VB 모드: 진입 봉 캔들이 닫힌 후 첫 run()에서 청산
         if mode == 'vb':
             candle_close_ts = self._state.get('candle_close_ts', 0)
+            entry_time = self._state.get('entry_time', 0)
             now = time.time()
-            if now >= candle_close_ts:
-                self._close_position(position, f"VB다음봉청산(ROR:{ror:.1f}%)")
+            # 안전장치: 캔들 종료 후 미청산이거나 진입 후 8H 초과 시 강제 청산
+            vb_timeout = now >= candle_close_ts or (entry_time and now - entry_time > 8 * 3600)
+            if vb_timeout:
+                reason = f"VB다음봉청산(ROR:{ror:.1f}%)"
+                if entry_time and now - entry_time > 8 * 3600:
+                    reason = f"VB안전장치강제청산(8H초과, ROR:{ror:.1f}%)"
+                self._close_position(position, reason)
             else:
                 remaining_min = (candle_close_ts - now) / 60
                 print(f"  유지: {self.SYMBOL} | VB | ROR:{ror:.1f}% | 청산까지: {remaining_min:.0f}분")
@@ -434,7 +454,12 @@ class BaseCoinStrategy:
 
             self._state = None
         else:
-            print(f"  ❌ {self.SYMBOL} 청산 주문 실패")
+            msg = f"❌ {self.SYMBOL} 청산 주문 실패 — 수동 확인 필요 ({reason})"
+            print(f"  {msg}")
+            try:
+                asyncio.run(send_message(msg))
+            except Exception:
+                pass
 
     # ===== 4단계 트레일링 스탑 =====
 

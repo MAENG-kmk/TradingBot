@@ -132,20 +132,20 @@ COIN_CONFIGS = {
     'arb': dict(
         path='backtestDatas/arbusdt_4h.csv', symbol='ARBUSDT',
         slippage_pct=0.0005,
-        bb_period=20, bb_std=2.0, rsi_overbuy=80, rsi_oversell=30,
-        adx_threshold=15, default_target=10.0,
-        trailing=0.4, tight_trailing=0.65,
-        mr_enabled=True,  mr_entry_z=2.0, mr_exit_z=0.5,
-        mr_max_hl=12, mr_time_mult=2.5,
+        bb_period=20, bb_std=1.5, rsi_overbuy=80, rsi_oversell=20,
+        adx_threshold=10, default_target=7.0,
+        trailing=0.6, tight_trailing=0.65,
+        mr_enabled=False,
+        vb_k=0.2, vb_min_range_pct=0.2,
     ),
     'aave': dict(
         path='backtestDatas/aaveusdt_4h.csv', symbol='AAVEUSDT',
         slippage_pct=0.0005,
-        bb_period=20, bb_std=2.0, rsi_overbuy=80, rsi_oversell=30,
-        adx_threshold=15, default_target=10.0,
+        bb_period=25, bb_std=1.5, rsi_overbuy=80, rsi_oversell=20,
+        adx_threshold=15, default_target=7.0,
         trailing=0.4, tight_trailing=0.65,
-        mr_enabled=True,  mr_entry_z=2.0, mr_exit_z=0.5,
-        mr_max_hl=10, mr_time_mult=2.0,
+        mr_enabled=False,
+        vb_k=0.2, vb_min_range_pct=0.3,
     ),
     'sui': dict(
         path='backtestDatas/suiusdt_4h.csv', symbol='SUIUSDT',
@@ -269,7 +269,7 @@ def _trend_signal(df_slice, cfg):
     return None, 0.0
 
 
-def _vb_signal(df_slice):
+def _vb_signal(df_slice, cfg=None):
     """
     VB 시그널 — open + k × prev_range 돌파 시 진입
     반환: ('long'|'short'|None, trigger_price)
@@ -278,6 +278,9 @@ def _vb_signal(df_slice):
     if len(df_slice) < 2:
         return None, 0.0
 
+    vb_k           = cfg.get('vb_k', VB_K)             if cfg else VB_K
+    vb_min_range   = cfg.get('vb_min_range_pct', VB_MIN_RANGE_PCT) if cfg else VB_MIN_RANGE_PCT
+
     prev = df_slice.iloc[-2]
     cur  = df_slice.iloc[-1]
 
@@ -285,15 +288,15 @@ def _vb_signal(df_slice):
     prev_close = float(prev['Close'])
     if prev_close <= 0 or prev_range <= 0:
         return None, 0.0
-    if prev_range / prev_close * 100 < VB_MIN_RANGE_PCT:
+    if prev_range / prev_close * 100 < vb_min_range:
         return None, 0.0
 
     cur_open  = float(cur['Open'])
     cur_high  = float(cur['High'])
     cur_low   = float(cur['Low'])
 
-    long_trig  = cur_open + VB_K * prev_range
-    short_trig = cur_open - VB_K * prev_range
+    long_trig  = cur_open + vb_k * prev_range
+    short_trig = cur_open - vb_k * prev_range
 
     long_ok  = cur_high >= long_trig  and long_trig  > cur_open
     short_ok = cur_low  <= short_trig and short_trig < cur_open
@@ -478,7 +481,7 @@ def _wf_retrain(wf_X: list, wf_y: list):
 
 # ── 시뮬레이션 ───────────────────────────────────────────────────
 def simulate(df: pd.DataFrame, cfg: dict, use_xgb: bool = False,
-             sideways_mode: str = 'mr'):
+             sideways_mode: str = 'mr', time_filter: bool = False):
     """
     단일 코인 시뮬레이션
 
@@ -487,6 +490,7 @@ def simulate(df: pd.DataFrame, cfg: dict, use_xgb: bool = False,
                          (학습 전 구간은 ADX 폴백)
     sideways_mode='mr' : 횡보장 → OU 평균회귀 (기존)
     sideways_mode='vb' : 횡보장 → VB 전략 (동일 봉 종가 청산)
+    time_filter=True   : UTC 16~22시 캔들만 진입 허용 (KST 새벽 01~07시)
 
     반환: (stats_dict | None, equity_series, trades_list)
     """
@@ -571,6 +575,10 @@ def simulate(df: pd.DataFrame, cfg: dict, use_xgb: bool = False,
         if pos is not None:
             continue
 
+        # UTC 16~22시 진입 시간 필터 (KST 01~07시)
+        if time_filter and not (16 <= df.index[i].hour < 22):
+            continue
+
         feat_row  = feat_df.iloc[i]
         feat_vals = feat_row[list(FEATURE_NAMES[:-1])].values.astype(float)
         if np.isnan(feat_vals).any():
@@ -602,7 +610,7 @@ def simulate(df: pd.DataFrame, cfg: dict, use_xgb: bool = False,
         if signal is None and use_sideways:
             if sideways_mode == 'vb':
                 # VB: 진입+청산을 같은 봉에서 즉시 처리 (슬리피지 양방향 적용)
-                sig, entry_p = _vb_signal(df_slice)
+                sig, entry_p = _vb_signal(df_slice, cfg)
                 if sig:
                     if sig == 'long':
                         entry_eff = entry_p * (1 + slip)
@@ -628,7 +636,7 @@ def simulate(df: pd.DataFrame, cfg: dict, use_xgb: bool = False,
                         'bars':   0,
                     })
                     equity[-1] = cash   # 같은 봉에서 발생한 수익 반영
-            elif cfg['mr_enabled']:
+            elif cfg.get('mr_enabled', False):
                 sig, tr, ou_params = _mr_signal(df_slice, cfg)
                 if sig:
                     signal, target_ror, mode, ou = sig, tr, 'mean_reversion', ou_params
@@ -891,9 +899,10 @@ def _print_vb_comparison(coin: str, mr_r, vb_r):
 # ── main ─────────────────────────────────────────────────────────
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--coin',       default='all', help='코인 선택 (eth/sol/.../all)')
-    parser.add_argument('--plot',       action='store_true', help='차트 표시 (단일 코인)')
-    parser.add_argument('--chart-save', action='store_true', help='차트 PNG 저장')
+    parser.add_argument('--coin',        default='all', help='코인 선택 (eth/sol/.../all)')
+    parser.add_argument('--plot',        action='store_true', help='차트 표시 (단일 코인)')
+    parser.add_argument('--chart-save',  action='store_true', help='차트 PNG 저장')
+    parser.add_argument('--time-filter', action='store_true', help='UTC 16~22시 진입 시간 필터 비교 모드')
     args = parser.parse_args()
 
     coins = ({args.coin: COIN_CONFIGS[args.coin]} if args.coin != 'all'
@@ -914,67 +923,123 @@ if __name__ == '__main__':
         df = load_ohlcv(path)
         print(f"  데이터: {df.index[0].date()} ~ {df.index[-1].date()} ({len(df):,}봉)")
 
-        print(f"  XGB+MR(기존)...", end=' ', flush=True)
-        xgb_mr_r, eq_xgb_mr, _ = simulate(df, cfg, use_xgb=True,  sideways_mode='mr')
-        print(f"완료 — {xgb_mr_r['total']}거래(TR:{xgb_mr_r['tr_count']}/MR:{xgb_mr_r['mr_count']})  ROR {xgb_mr_r['ror']:+.1f}%"
-              if xgb_mr_r else "결과없음")
+        if args.time_filter:
+            # ── 시간 필터 비교 모드 ─────────────────────────────────
+            print(f"  XGB+VB (필터없음)...", end=' ', flush=True)
+            r_base, _, _ = simulate(df, cfg, use_xgb=True, sideways_mode='vb', time_filter=False)
+            print(f"완료 — {r_base['total']}거래  ROR {r_base['ror']:+.1f}%" if r_base else "결과없음")
 
-        print(f"  XGB+VB(신규)...", end=' ', flush=True)
-        xgb_vb_r, eq_xgb_vb, _ = simulate(df, cfg, use_xgb=True,  sideways_mode='vb')
-        print(f"완료 — {xgb_vb_r['total']}거래(TR:{xgb_vb_r['tr_count']}/VB:{xgb_vb_r['vb_count']})  ROR {xgb_vb_r['ror']:+.1f}%"
-              if xgb_vb_r else "결과없음")
+            print(f"  XGB+VB (UTC16~22필터)...", end=' ', flush=True)
+            r_filt, _, _ = simulate(df, cfg, use_xgb=True, sideways_mode='vb', time_filter=True)
+            print(f"완료 — {r_filt['total']}거래  ROR {r_filt['ror']:+.1f}%" if r_filt else "결과없음")
 
-        summary_rows.append(dict(
-            coin=coin.upper(),
-            mr_ror=xgb_mr_r['ror']       if xgb_mr_r else 0,
-            vb_ror=xgb_vb_r['ror']       if xgb_vb_r else 0,
-            mr_sh=xgb_mr_r['sharpe']     if xgb_mr_r else 0,
-            vb_sh=xgb_vb_r['sharpe']     if xgb_vb_r else 0,
-            mr_mdd=xgb_mr_r['mdd']       if xgb_mr_r else 0,
-            vb_mdd=xgb_vb_r['mdd']       if xgb_vb_r else 0,
-            mr_tot=xgb_mr_r['total']     if xgb_mr_r else 0,
-            vb_tot=xgb_vb_r['total']     if xgb_vb_r else 0,
-            mr_wr=xgb_mr_r['win_rate']   if xgb_mr_r else 0,
-            vb_wr=xgb_vb_r['win_rate']   if xgb_vb_r else 0,
-            mr_tr=xgb_mr_r['tr_count']   if xgb_mr_r else 0,
-            mr_mr=xgb_mr_r['mr_count']   if xgb_mr_r else 0,
-            vb_tr=xgb_vb_r['tr_count']   if xgb_vb_r else 0,
-            vb_vb=xgb_vb_r['vb_count']   if xgb_vb_r else 0,
-        ))
+            summary_rows.append(dict(
+                coin=coin.upper(),
+                base_ror=r_base['ror']      if r_base else 0,
+                filt_ror=r_filt['ror']      if r_filt else 0,
+                base_sh=r_base['sharpe']    if r_base else 0,
+                filt_sh=r_filt['sharpe']    if r_filt else 0,
+                base_mdd=r_base['mdd']      if r_base else 0,
+                filt_mdd=r_filt['mdd']      if r_filt else 0,
+                base_tot=r_base['total']    if r_base else 0,
+                filt_tot=r_filt['total']    if r_filt else 0,
+                base_wr=r_base['win_rate']  if r_base else 0,
+                filt_wr=r_filt['win_rate']  if r_filt else 0,
+            ))
+        else:
+            # ── 기존 MR vs VB 비교 모드 ────────────────────────────
+            print(f"  XGB+MR(기존)...", end=' ', flush=True)
+            xgb_mr_r, eq_xgb_mr, _ = simulate(df, cfg, use_xgb=True, sideways_mode='mr')
+            print(f"완료 — {xgb_mr_r['total']}거래(TR:{xgb_mr_r['tr_count']}/MR:{xgb_mr_r['mr_count']})  ROR {xgb_mr_r['ror']:+.1f}%"
+                  if xgb_mr_r else "결과없음")
 
-        if args.coin != 'all':
-            _print_vb_comparison(coin, xgb_mr_r, xgb_vb_r)
-            if args.plot or args.chart_save:
-                plot_results(coin, xgb_mr_r, xgb_vb_r, eq_xgb_mr, eq_xgb_vb, df,
-                             save=args.chart_save)
+            print(f"  XGB+VB(신규)...", end=' ', flush=True)
+            xgb_vb_r, eq_xgb_vb, _ = simulate(df, cfg, use_xgb=True, sideways_mode='vb')
+            print(f"완료 — {xgb_vb_r['total']}거래(TR:{xgb_vb_r['tr_count']}/VB:{xgb_vb_r['vb_count']})  ROR {xgb_vb_r['ror']:+.1f}%"
+                  if xgb_vb_r else "결과없음")
+
+            summary_rows.append(dict(
+                coin=coin.upper(),
+                mr_ror=xgb_mr_r['ror']       if xgb_mr_r else 0,
+                vb_ror=xgb_vb_r['ror']       if xgb_vb_r else 0,
+                mr_sh=xgb_mr_r['sharpe']     if xgb_mr_r else 0,
+                vb_sh=xgb_vb_r['sharpe']     if xgb_vb_r else 0,
+                mr_mdd=xgb_mr_r['mdd']       if xgb_mr_r else 0,
+                vb_mdd=xgb_vb_r['mdd']       if xgb_vb_r else 0,
+                mr_tot=xgb_mr_r['total']     if xgb_mr_r else 0,
+                vb_tot=xgb_vb_r['total']     if xgb_vb_r else 0,
+                mr_wr=xgb_mr_r['win_rate']   if xgb_mr_r else 0,
+                vb_wr=xgb_vb_r['win_rate']   if xgb_vb_r else 0,
+                mr_tr=xgb_mr_r['tr_count']   if xgb_mr_r else 0,
+                mr_mr=xgb_mr_r['mr_count']   if xgb_mr_r else 0,
+                vb_tr=xgb_vb_r['tr_count']   if xgb_vb_r else 0,
+                vb_vb=xgb_vb_r['vb_count']   if xgb_vb_r else 0,
+            ))
+
+            if args.coin != 'all':
+                _print_vb_comparison(coin, xgb_mr_r, xgb_vb_r)
+                if args.plot or args.chart_save:
+                    plot_results(coin, xgb_mr_r, xgb_vb_r, eq_xgb_mr, eq_xgb_vb, df,
+                                 save=args.chart_save)
 
     # ── 전체 요약 ─────────────────────────────────────────────────
     if len(summary_rows) > 1 or args.coin == 'all':
-        print(f"\n{'='*95}")
-        print(f"  XGB 라우팅 — 횡보 전략 비교:  MR(OU 평균회귀)  vs  VB(변동성 돌파)")
-        print(f"{'='*95}")
-        print(f"  {'코인':<5}  "
-              f"{'MR_ROR':>8}  {'VB_ROR':>8}  {'Δ':>7}  "
-              f"{'MR_Sh':>6}  {'VB_Sh':>6}  "
-              f"{'MR_MDD':>7}  {'VB_MDD':>7}  "
-              f"{'MR거래':>6}(TR/MR)  {'VB거래':>6}(TR/VB)  "
-              f"{'MR승률':>6}  {'VB승률':>6}")
-        print(f"  {'-'*93}")
-        for r in summary_rows:
-            delta = r['vb_ror'] - r['mr_ror']
-            mark  = '▲' if delta > 0 else '▼'
-            print(f"  {r['coin']:<5}  "
-                  f"{r['mr_ror']:>+7.1f}%  {r['vb_ror']:>+7.1f}%  "
-                  f"{mark}{abs(delta):>5.1f}%  "
-                  f"{r['mr_sh']:>6.2f}  {r['vb_sh']:>6.2f}  "
-                  f"{r['mr_mdd']:>6.1f}%  {r['vb_mdd']:>6.1f}%  "
-                  f"{r['mr_tot']:>6}({r['mr_tr']}/{r['mr_mr']})  "
-                  f"{r['vb_tot']:>6}({r['vb_tr']}/{r['vb_vb']})  "
-                  f"{r['mr_wr']:>5.1f}%  {r['vb_wr']:>5.1f}%")
-        print(f"{'='*95}")
+        if args.time_filter:
+            print(f"\n{'='*85}")
+            print(f"  XGB+VB — 시간 필터 비교:  필터없음  vs  UTC 16~22시 진입 (KST 01~07시)")
+            print(f"{'='*85}")
+            print(f"  {'코인':<5}  "
+                  f"{'BASE_ROR':>9}  {'FILT_ROR':>9}  {'Δ':>7}  "
+                  f"{'BASE_Sh':>7}  {'FILT_Sh':>7}  "
+                  f"{'BASE_MDD':>8}  {'FILT_MDD':>8}  "
+                  f"{'BASE_N':>6}  {'FILT_N':>6}  "
+                  f"{'BASE_WR':>7}  {'FILT_WR':>7}")
+            print(f"  {'-'*83}")
+            for r in summary_rows:
+                delta = r['filt_ror'] - r['base_ror']
+                mark  = '▲' if delta > 0 else '▼'
+                print(f"  {r['coin']:<5}  "
+                      f"{r['base_ror']:>+8.1f}%  {r['filt_ror']:>+8.1f}%  "
+                      f"{mark}{abs(delta):>5.1f}%  "
+                      f"{r['base_sh']:>7.2f}  {r['filt_sh']:>7.2f}  "
+                      f"{r['base_mdd']:>7.1f}%  {r['filt_mdd']:>7.1f}%  "
+                      f"{r['base_tot']:>6}  {r['filt_tot']:>6}  "
+                      f"{r['base_wr']:>6.1f}%  {r['filt_wr']:>6.1f}%")
+            print(f"{'='*85}")
 
-        improved  = sum(1 for r in summary_rows if r['vb_ror'] > r['mr_ror'])
-        avg_delta = np.mean([r['vb_ror'] - r['mr_ror'] for r in summary_rows])
-        print(f"\n  VB > MR: {improved}/{len(summary_rows)}코인  |  평균 Δ ROR: {avg_delta:+.1f}%")
+            improved  = sum(1 for r in summary_rows if r['filt_ror'] > r['base_ror'])
+            avg_delta = np.mean([r['filt_ror'] - r['base_ror'] for r in summary_rows])
+            avg_trade_ratio = np.mean([r['filt_tot'] / r['base_tot'] if r['base_tot'] > 0 else 0
+                                       for r in summary_rows])
+            print(f"\n  필터 적용 후 개선: {improved}/{len(summary_rows)}코인  "
+                  f"|  평균 Δ ROR: {avg_delta:+.1f}%  "
+                  f"|  평균 거래수 비율: {avg_trade_ratio:.1%}")
+        else:
+            print(f"\n{'='*95}")
+            print(f"  XGB 라우팅 — 횡보 전략 비교:  MR(OU 평균회귀)  vs  VB(변동성 돌파)")
+            print(f"{'='*95}")
+            print(f"  {'코인':<5}  "
+                  f"{'MR_ROR':>8}  {'VB_ROR':>8}  {'Δ':>7}  "
+                  f"{'MR_Sh':>6}  {'VB_Sh':>6}  "
+                  f"{'MR_MDD':>7}  {'VB_MDD':>7}  "
+                  f"{'MR거래':>6}(TR/MR)  {'VB거래':>6}(TR/VB)  "
+                  f"{'MR승률':>6}  {'VB승률':>6}")
+            print(f"  {'-'*93}")
+            for r in summary_rows:
+                delta = r['vb_ror'] - r['mr_ror']
+                mark  = '▲' if delta > 0 else '▼'
+                print(f"  {r['coin']:<5}  "
+                      f"{r['mr_ror']:>+7.1f}%  {r['vb_ror']:>+7.1f}%  "
+                      f"{mark}{abs(delta):>5.1f}%  "
+                      f"{r['mr_sh']:>6.2f}  {r['vb_sh']:>6.2f}  "
+                      f"{r['mr_mdd']:>6.1f}%  {r['vb_mdd']:>6.1f}%  "
+                      f"{r['mr_tot']:>6}({r['mr_tr']}/{r['mr_mr']})  "
+                      f"{r['vb_tot']:>6}({r['vb_tr']}/{r['vb_vb']})  "
+                      f"{r['mr_wr']:>5.1f}%  {r['vb_wr']:>5.1f}%")
+            print(f"{'='*95}")
+
+            improved  = sum(1 for r in summary_rows if r['vb_ror'] > r['mr_ror'])
+            avg_delta = np.mean([r['vb_ror'] - r['mr_ror'] for r in summary_rows])
+            print(f"\n  VB > MR: {improved}/{len(summary_rows)}코인  |  평균 Δ ROR: {avg_delta:+.1f}%")
 
 

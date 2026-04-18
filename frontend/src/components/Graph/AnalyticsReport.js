@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  Cell, PieChart, Pie, Legend,
+  Cell, PieChart, Pie, Legend, ComposedChart, Line,
 } from 'recharts';
 
 const tooltipStyle = {
@@ -167,6 +167,115 @@ const AnalyticsReport = ({ trades, selectedCoin, startBalance }) => {
     }));
   }, [trades]);
 
+  // KST 시간 추출 헬퍼
+  const getKSTHour = (rawEnterTime) => {
+    if (!rawEnterTime) return null;
+    const ms = rawEnterTime > 1e12 ? rawEnterTime : rawEnterTime * 1000;
+    return (new Date(ms).getUTCHours() + 9) % 24;
+  };
+
+  const getKSTWeekday = (rawEnterTime) => {
+    if (!rawEnterTime) return null;
+    const ms = rawEnterTime > 1e12 ? rawEnterTime : rawEnterTime * 1000;
+    return new Date(ms + 9 * 3600 * 1000).getUTCDay(); // 0=일, 1=월 ... 6=토
+  };
+
+  // 시간대별 패턴 데이터
+  const hourlyData = useMemo(() => {
+    if (!trades || trades.length === 0) return [];
+    const map = {};
+    for (let h = 0; h < 24; h++) map[h] = { hour: `${String(h).padStart(2, '0')}시`, profit: 0, trades: 0, wins: 0 };
+    trades.forEach(t => {
+      const h = getKSTHour(t.rawEnterTime);
+      if (h === null) return;
+      map[h].profit += parseFloat(t.Profit);
+      map[h].trades += 1;
+      if (parseFloat(t.Profit) > 0) map[h].wins += 1;
+    });
+    return Object.values(map)
+      .filter(d => d.trades > 0)
+      .map(d => ({ ...d, profit: parseFloat(d.profit.toFixed(2)), winRate: parseFloat((d.wins / d.trades * 100).toFixed(1)) }));
+  }, [trades]);
+
+  // 요일별 패턴 데이터
+  const weekdayData = useMemo(() => {
+    if (!trades || trades.length === 0) return [];
+    const labels = ['일', '월', '화', '수', '목', '금', '토'];
+    const map = {};
+    labels.forEach((l, i) => { map[i] = { day: l, profit: 0, trades: 0, wins: 0 }; });
+    trades.forEach(t => {
+      const d = getKSTWeekday(t.rawEnterTime);
+      if (d === null) return;
+      map[d].profit += parseFloat(t.Profit);
+      map[d].trades += 1;
+      if (parseFloat(t.Profit) > 0) map[d].wins += 1;
+    });
+    const order = [1, 2, 3, 4, 5, 6, 0]; // 월~일 순서
+    return order
+      .filter(i => map[i].trades > 0)
+      .map(i => ({ ...map[i], profit: parseFloat(map[i].profit.toFixed(2)), winRate: parseFloat((map[i].wins / map[i].trades * 100).toFixed(1)) }));
+  }, [trades]);
+
+  // 보유 시간별 패턴 데이터
+  const holdBinData = useMemo(() => {
+    if (!trades || trades.length === 0) return [];
+    const bins = [
+      { label: '~4h', min: 0, max: 4, profit: 0, trades: 0, wins: 0 },
+      { label: '4~8h', min: 4, max: 8, profit: 0, trades: 0, wins: 0 },
+      { label: '8~24h', min: 8, max: 24, profit: 0, trades: 0, wins: 0 },
+      { label: '24~48h', min: 24, max: 48, profit: 0, trades: 0, wins: 0 },
+      { label: '48h+', min: 48, max: Infinity, profit: 0, trades: 0, wins: 0 },
+    ];
+    trades.forEach(t => {
+      const enter = t.rawEnterTime > 1e12 ? t.rawEnterTime : t.rawEnterTime * 1000;
+      const close = t.rawCloseTime > 1e12 ? t.rawCloseTime : t.rawCloseTime * 1000;
+      if (!enter || !close) return;
+      const hours = (close - enter) / (1000 * 3600);
+      const bin = bins.find(b => hours >= b.min && hours < b.max);
+      if (!bin) return;
+      bin.profit += parseFloat(t.Profit);
+      bin.trades += 1;
+      if (parseFloat(t.Profit) > 0) bin.wins += 1;
+    });
+    return bins
+      .filter(b => b.trades > 0)
+      .map(b => ({ label: b.label, profit: parseFloat(b.profit.toFixed(2)), trades: b.trades, wins: b.wins, winRate: parseFloat((b.wins / b.trades * 100).toFixed(1)) }));
+  }, [trades]);
+
+  // 핵심 인사이트 계산
+  const insights = useMemo(() => {
+    if (!trades || trades.length === 0) return null;
+    const winTrades = trades.filter(t => parseFloat(t.Profit) > 0);
+    const loseTrades = trades.filter(t => parseFloat(t.Profit) <= 0);
+
+    const avgHold = (arr) => {
+      const times = arr.map(t => {
+        const enter = t.rawEnterTime > 1e12 ? t.rawEnterTime : t.rawEnterTime * 1000;
+        const close = t.rawCloseTime > 1e12 ? t.rawCloseTime : t.rawCloseTime * 1000;
+        return enter && close ? (close - enter) / (1000 * 3600) : null;
+      }).filter(h => h !== null && h >= 0);
+      return times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : null;
+    };
+
+    const avgHour = (arr) => {
+      const hours = arr.map(t => getKSTHour(t.rawEnterTime)).filter(h => h !== null);
+      return hours.length > 0 ? (hours.reduce((a, b) => a + b, 0) / hours.length).toFixed(1) : null;
+    };
+
+    const bestHour = hourlyData.length > 0 ? hourlyData.reduce((a, b) => a.profit > b.profit ? a : b) : null;
+    const worstHour = hourlyData.length > 0 ? hourlyData.reduce((a, b) => a.profit < b.profit ? a : b) : null;
+    const bestDay = weekdayData.length > 0 ? weekdayData.reduce((a, b) => a.profit > b.profit ? a : b) : null;
+    const worstDay = weekdayData.length > 0 ? weekdayData.reduce((a, b) => a.profit < b.profit ? a : b) : null;
+
+    return {
+      winAvgHold: avgHold(winTrades),
+      loseAvgHold: avgHold(loseTrades),
+      winAvgHour: avgHour(winTrades),
+      loseAvgHour: avgHour(loseTrades),
+      bestHour, worstHour, bestDay, worstDay,
+    };
+  }, [trades, hourlyData, weekdayData]);
+
   if (!stats) return null;
 
   const formatHoldTime = (hours) => {
@@ -249,6 +358,201 @@ const AnalyticsReport = ({ trades, selectedCoin, startBalance }) => {
             </ResponsiveContainer>
           </div>
         </div>
+      )}
+
+      {/* ── Pattern Analysis ─────────────────────────────────── */}
+      {insights && (
+        <>
+          {/* 구분선 */}
+          <div style={{ width: '95%', margin: '4vh auto 0', borderTop: '1px solid rgba(0,255,255,0.15)' }} />
+          <div style={{ width: '95%', margin: '2.5vh auto 0' }}>
+            <div style={{ textShadow: '0 0 5px rgba(0,255,255,0.7)', fontSize: 'large', marginBottom: '2vh', fontFamily: 'Orbitron, sans-serif' }}>
+              Pattern Analysis
+            </div>
+
+            {/* 핵심 인사이트 카드 */}
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '3vh' }}>
+              {insights.bestHour && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>BEST HOUR (KST)</div>
+                  <div style={{ ...cardValue, color: '#4CAF50' }}>{insights.bestHour.hour}</div>
+                  <div style={{ fontSize: '10px', color: '#a8a8a8', marginTop: '4px', fontFamily: 'Orbitron, sans-serif' }}>
+                    {insights.bestHour.winRate}% WR · {insights.bestHour.profit > 0 ? '+' : ''}{insights.bestHour.profit}$
+                  </div>
+                </div>
+              )}
+              {insights.worstHour && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>WORST HOUR (KST)</div>
+                  <div style={{ ...cardValue, color: '#F44336' }}>{insights.worstHour.hour}</div>
+                  <div style={{ fontSize: '10px', color: '#a8a8a8', marginTop: '4px', fontFamily: 'Orbitron, sans-serif' }}>
+                    {insights.worstHour.winRate}% WR · {insights.worstHour.profit}$
+                  </div>
+                </div>
+              )}
+              {insights.bestDay && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>BEST DAY</div>
+                  <div style={{ ...cardValue, color: '#4CAF50' }}>{insights.bestDay.day}요일</div>
+                  <div style={{ fontSize: '10px', color: '#a8a8a8', marginTop: '4px', fontFamily: 'Orbitron, sans-serif' }}>
+                    {insights.bestDay.winRate}% WR · +{insights.bestDay.profit}$
+                  </div>
+                </div>
+              )}
+              {insights.worstDay && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>WORST DAY</div>
+                  <div style={{ ...cardValue, color: '#F44336' }}>{insights.worstDay.day}요일</div>
+                  <div style={{ fontSize: '10px', color: '#a8a8a8', marginTop: '4px', fontFamily: 'Orbitron, sans-serif' }}>
+                    {insights.worstDay.winRate}% WR · {insights.worstDay.profit}$
+                  </div>
+                </div>
+              )}
+              {insights.winAvgHold !== null && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>WIN AVG HOLD</div>
+                  <div style={{ ...cardValue, color: '#4CAF50' }}>{formatHoldTime(insights.winAvgHold)}</div>
+                </div>
+              )}
+              {insights.loseAvgHold !== null && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>LOSE AVG HOLD</div>
+                  <div style={{ ...cardValue, color: '#F44336' }}>{formatHoldTime(insights.loseAvgHold)}</div>
+                </div>
+              )}
+              {insights.winAvgHour !== null && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>WIN AVG HOUR (KST)</div>
+                  <div style={{ ...cardValue, color: '#4CAF50' }}>{insights.winAvgHour}시</div>
+                </div>
+              )}
+              {insights.loseAvgHour !== null && (
+                <div style={{ ...cardStyle, flex: 1, minWidth: '140px' }}>
+                  <div style={cardLabel}>LOSE AVG HOUR (KST)</div>
+                  <div style={{ ...cardValue, color: '#F44336' }}>{insights.loseAvgHour}시</div>
+                </div>
+              )}
+            </div>
+
+            {/* 시간대별 성과 */}
+            {hourlyData.length > 0 && (
+              <div style={{ marginBottom: '3vh' }}>
+                <div style={{ textShadow: '0 0 5px rgba(0,255,255,0.7)', fontSize: 'large', marginBottom: '1.5vh', fontFamily: 'Orbitron, sans-serif' }}>
+                  Hourly Pattern (KST)
+                </div>
+                <div style={{ width: '100%', height: '26vh' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={hourlyData}>
+                      <XAxis dataKey="hour" tick={{ fill: '#a8a8a8', fontSize: 9 }} />
+                      <YAxis yAxisId="left" tick={{ fill: '#a8a8a8', fontSize: 10 }} />
+                      <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fill: '#a8a8a8', fontSize: 10 }} unit="%" />
+                      <Tooltip
+                        cursor={false}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload;
+                          return (
+                            <div style={tooltipStyle}>
+                              <p style={{ color: 'cyan', fontWeight: 'bold', margin: '0 0 4px' }}>{d.hour}</p>
+                              <p style={{ margin: '2px 0' }}>Trades: {d.trades}</p>
+                              <p style={{ margin: '2px 0' }}>Win Rate: {d.winRate}%</p>
+                              <p style={{ color: d.profit >= 0 ? '#4CAF50' : '#F44336', margin: '2px 0' }}>Profit: {d.profit}$</p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar yAxisId="left" dataKey="profit" radius={[3, 3, 0, 0]}>
+                        {hourlyData.map((entry, i) => (
+                          <Cell key={i} fill={entry.profit >= 0 ? 'rgba(76,175,80,0.75)' : 'rgba(244,67,54,0.75)'} />
+                        ))}
+                      </Bar>
+                      <Line yAxisId="right" type="monotone" dataKey="winRate" stroke="cyan" dot={false} strokeWidth={1.5} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* 요일별 성과 + 보유시간별 성과 */}
+            <div style={{ display: 'flex', gap: '3%' }}>
+              {weekdayData.length > 0 && (
+                <div style={{ flex: 1 }}>
+                  <div style={{ textShadow: '0 0 5px rgba(0,255,255,0.7)', fontSize: 'large', marginBottom: '1.5vh', fontFamily: 'Orbitron, sans-serif' }}>
+                    Weekday Pattern
+                  </div>
+                  <div style={{ width: '100%', height: '24vh' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={weekdayData}>
+                        <XAxis dataKey="day" tick={{ fill: '#a8a8a8', fontSize: 11 }} />
+                        <YAxis yAxisId="left" tick={{ fill: '#a8a8a8', fontSize: 10 }} />
+                        <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fill: '#a8a8a8', fontSize: 10 }} unit="%" />
+                        <Tooltip
+                          cursor={false}
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            return (
+                              <div style={tooltipStyle}>
+                                <p style={{ color: 'cyan', fontWeight: 'bold', margin: '0 0 4px' }}>{d.day}요일</p>
+                                <p style={{ margin: '2px 0' }}>Trades: {d.trades}</p>
+                                <p style={{ margin: '2px 0' }}>Win Rate: {d.winRate}%</p>
+                                <p style={{ color: d.profit >= 0 ? '#4CAF50' : '#F44336', margin: '2px 0' }}>Profit: {d.profit}$</p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Bar yAxisId="left" dataKey="profit" radius={[4, 4, 0, 0]}>
+                          {weekdayData.map((entry, i) => (
+                            <Cell key={i} fill={entry.profit >= 0 ? 'rgba(76,175,80,0.75)' : 'rgba(244,67,54,0.75)'} />
+                          ))}
+                        </Bar>
+                        <Line yAxisId="right" type="monotone" dataKey="winRate" stroke="cyan" dot={false} strokeWidth={1.5} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+
+              {holdBinData.length > 0 && (
+                <div style={{ flex: 1 }}>
+                  <div style={{ textShadow: '0 0 5px rgba(0,255,255,0.7)', fontSize: 'large', marginBottom: '1.5vh', fontFamily: 'Orbitron, sans-serif' }}>
+                    Hold Time Pattern
+                  </div>
+                  <div style={{ width: '100%', height: '24vh' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={holdBinData}>
+                        <XAxis dataKey="label" tick={{ fill: '#a8a8a8', fontSize: 10 }} />
+                        <YAxis yAxisId="left" tick={{ fill: '#a8a8a8', fontSize: 10 }} />
+                        <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fill: '#a8a8a8', fontSize: 10 }} unit="%" />
+                        <Tooltip
+                          cursor={false}
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            return (
+                              <div style={tooltipStyle}>
+                                <p style={{ color: 'cyan', fontWeight: 'bold', margin: '0 0 4px' }}>{d.label}</p>
+                                <p style={{ margin: '2px 0' }}>Trades: {d.trades} ({d.wins}W / {d.trades - d.wins}L)</p>
+                                <p style={{ margin: '2px 0' }}>Win Rate: {d.winRate}%</p>
+                                <p style={{ color: d.profit >= 0 ? '#4CAF50' : '#F44336', margin: '2px 0' }}>Profit: {d.profit}$</p>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Bar yAxisId="left" dataKey="profit" radius={[4, 4, 0, 0]}>
+                          {holdBinData.map((entry, i) => (
+                            <Cell key={i} fill={entry.profit >= 0 ? 'rgba(76,175,80,0.75)' : 'rgba(244,67,54,0.75)'} />
+                          ))}
+                        </Bar>
+                        <Line yAxisId="right" type="monotone" dataKey="winRate" stroke="cyan" dot={false} strokeWidth={1.5} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       {/* ROR Distribution + Long vs Short */}

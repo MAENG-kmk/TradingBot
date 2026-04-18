@@ -8,7 +8,7 @@ import BarGraph from '../../components/Graph/BarGraph';
 import CoinComparisonChart from '../../components/Graph/CoinComparisonChart';
 import { useNavigate } from 'react-router-dom';
 
-const COINS = ['ALL', 'ETH', 'BTC', 'SOL', 'BNB', 'XRP', 'LINK', 'DOGE', 'AVAX', 'ARB', 'AAVE'];
+const COINS = ['ALL', 'ETH', 'SUI', 'SOL', 'BNB', 'XRP', 'LINK', 'DOGE', 'AVAX', 'ARB', 'AAVE'];
 
 const Main = () => {
   const [startBalance, setStartBalance] = useState('');
