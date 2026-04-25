@@ -27,14 +27,16 @@ class EMACrossStrategy(bt.Strategy):
     def _full_size(self):
         return self.broker.get_cash() / self.data.close[0]
 
-    def _update_trail(self, price):
+    def _update_trail(self):
         if self._side == 'long':
-            if price > self._extreme:
-                self._extreme    = price
+            bar_high = self.data.high[0]
+            if bar_high > self._extreme:
+                self._extreme    = bar_high
                 self._trail_stop = self._extreme - self.atr[0] * self.p.trail_mult
         elif self._side == 'short':
-            if price < self._extreme:
-                self._extreme    = price
+            bar_low = self.data.low[0]
+            if bar_low < self._extreme:
+                self._extreme    = bar_low
                 self._trail_stop = self._extreme + self.atr[0] * self.p.trail_mult
 
     def next(self):
@@ -53,7 +55,7 @@ class EMACrossStrategy(bt.Strategy):
                 self._trail_stop = price + self.atr[0] * self.p.trail_mult
             return
 
-        self._update_trail(price)
+        self._update_trail()
 
         if self._side == 'long' and price < self._trail_stop:
             self.close()
