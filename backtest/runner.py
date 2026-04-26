@@ -173,6 +173,17 @@ COIN_CONFIGS = {
             tight_trailing_ratio=0.65,
         ),
     },
+    'sui': {
+        'data_file': 'backtestDatas/suiusdt_4h.csv',
+        'slippage_pct': 0.0005,   # 0.05% — 소형주 변동성
+        'params': dict(
+            tr_bb_period=15, tr_bb_std=1.5,
+            rsi_overbuy=70, rsi_oversell=20,
+            adx_threshold=15, atr_multiplier=2.0,
+            target_ror_pct=15.0, trailing_ratio=0.4,
+            tight_trailing_ratio=0.85,
+        ),
+    },
 }
 
 

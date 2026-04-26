@@ -41,15 +41,19 @@ class CoinBacktestStrategy(bt.Strategy):
         time_exit_bars2=12,
         time_exit_ror2=2.0,
         volatility_spike=3.0,
-        # 평균회귀 파라미터
-        mr_enabled=True,
+        # 평균회귀 파라미터 (VB 사용 시 비활성화)
+        mr_enabled=False,
         mr_bb_period=20,
         mr_bb_std=2.0,
         mr_rsi_overbuy=70,
         mr_rsi_oversell=30,
         mr_target_ror=2.5,
         mr_stop_loss=-2.0,
-        mr_time_exit_bars=3,    # 12h = 3 × 4h봉
+        mr_time_exit_bars=3,
+        # VB (변동성 돌파) 파라미터 — 횡보장 진입
+        vb_enabled=True,
+        vb_k=0.3,
+        vb_min_range_pct=0.3,
         # 회귀 기울기
         slope_period=20,
         slope_threshold=0.05,
@@ -255,6 +259,39 @@ class CoinBacktestStrategy(bt.Strategy):
             return 'short'
         return None
 
+    def _check_vb_entry(self):
+        """변동성 돌파 진입 — 횡보장 전용. prev_range × VB_K 트리거 터치 시 신호."""
+        if len(self.data) < 2:
+            return None
+
+        prev_high  = self.data.high[-1]
+        prev_low   = self.data.low[-1]
+        prev_close = self.data.close[-1]
+        prev_range = prev_high - prev_low
+
+        if prev_close <= 0 or prev_range <= 0:
+            return None
+        if (prev_range / prev_close * 100) < self.p.vb_min_range_pct:
+            return None
+
+        cur_open = self.data.open[0]
+        cur_high = self.data.high[0]
+        cur_low  = self.data.low[0]
+
+        long_trig  = cur_open + self.p.vb_k * prev_range
+        short_trig = cur_open - self.p.vb_k * prev_range
+
+        long_ok  = cur_high >= long_trig  and long_trig  > cur_open
+        short_ok = cur_low  <= short_trig and short_trig < cur_open
+
+        if long_ok and short_ok:
+            return None
+        if long_ok:
+            return 'long'
+        if short_ok:
+            return 'short'
+        return None
+
     def _check_mr_entry(self):
         period = self.p.mr_bb_period
         if len(self.data) < period:
@@ -330,12 +367,24 @@ class CoinBacktestStrategy(bt.Strategy):
                 signal = self._check_trend_entry()
                 if signal:
                     self._enter(signal, 'trend_following')
-            elif self.p.mr_enabled:
-                signal = self._check_mr_entry()
-                if signal:
-                    self._enter(signal, 'mean_reversion')
+            else:
+                if self.p.vb_enabled:
+                    signal = self._check_vb_entry()
+                    if signal:
+                        self._enter(signal, 'vb')
+                elif self.p.mr_enabled:
+                    signal = self._check_mr_entry()
+                    if signal:
+                        self._enter(signal, 'mean_reversion')
         else:
             self.bars_in_trade += 1
+
+            # ── VB 모드 청산 — 진입 다음 봉에서 무조건 청산 ────────
+            if self.trade_mode == 'vb':
+                if self.bars_in_trade >= 1:
+                    self.close()
+                    self._reset()
+                return
 
             # 캔들 고가/저가 기반 최고·최저 수익률
             incandle_best, incandle_worst = self._incandle_rors()
