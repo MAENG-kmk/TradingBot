@@ -33,7 +33,8 @@ class DomesticFuturesRunner:
             total, available = self.strategy.get_balance()
 
             for symbol in candidates:
-                self._try_enter(symbol, total, available)
+                spent = self._try_enter(symbol, total, available)
+                available -= spent
 
         except Exception as e:
             msg = f"[국내선물] runner 오류: {e}"
@@ -50,23 +51,23 @@ class DomesticFuturesRunner:
             except Exception as e:
                 print(f"  ❌ [국내선물] 청산 오류 {pos.get('symbol')}: {e}")
 
-    def _try_enter(self, symbol: str, total: float, available: float):
+    def _try_enter(self, symbol: str, total: float, available: float) -> float:
         budget = total * self.POSITION_FRAC
         if available < budget:
-            return
+            return 0
 
         sig, target_ror, mode, meta = self.strategy.check_entry_signal(symbol)
         if sig is None:
-            return
+            return 0
 
         price = self.strategy._get_current_price(symbol)
         if price <= 0:
-            return
+            return 0
 
         qty = self.strategy.calc_quantity(budget, price)
         if qty <= 0:
             print(f"  [국내선물] {symbol} 예산 부족 (budget={budget:,.0f}원, price={price:.1f})")
-            return
+            return 0
 
         order_side = "BUY" if sig == "long" else "SELL"
         success    = self.strategy.place_order(symbol, order_side, qty)
@@ -83,8 +84,10 @@ class DomesticFuturesRunner:
                 asyncio.run(send_message(msg))
             except Exception:
                 pass
+            return budget
         else:
             print(f"  ❌ [국내선물] {symbol} 주문 실패")
+            return 0
 
     def _is_market_open(self, now: datetime | None = None) -> bool:
         """
