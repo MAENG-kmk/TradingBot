@@ -9,6 +9,10 @@
 """
 from binance.client import Client
 from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET, COLLECTION
+from kis.client import KISClient
+from domestic_futures.runner import DomesticFuturesRunner
+from overseas_futures.runner import OverseasFuturesRunner
+from SecretVariables import KIS_APP_KEY, KIS_APP_SECRET
 
 client = Client(api_key=BINANCE_API_KEY,
                 api_secret=BINANCE_API_SECRET)
@@ -25,6 +29,10 @@ import time
 # 초기화
 balance, available = getBalance(client)
 addVersionAndDate(COLLECTION, balance)
+
+kis_client      = KISClient(KIS_APP_KEY, KIS_APP_SECRET)
+domestic_runner = DomesticFuturesRunner(kis_client)
+overseas_runner = OverseasFuturesRunner(kis_client)
 
 # 코인별 전략 인스턴스
 strategies = [cls(client) for cls in STRATEGY_CLASSES]
@@ -44,6 +52,9 @@ def run_trading_bot():
 
             for strategy in strategies:
               strategy.run(positions, total_balance, available_balance)
+
+            domestic_runner.run()
+            overseas_runner.run()
 
             updateHeartbeat()
             time.sleep(60)
