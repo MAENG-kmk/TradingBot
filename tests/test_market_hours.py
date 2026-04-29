@@ -32,3 +32,19 @@ def test_domestic_closed_weekend():
     r = DomesticFuturesRunner.__new__(DomesticFuturesRunner)
     dt = datetime(2026, 4, 25, 10, 0, 0)  # 토요일
     assert r._is_market_open(now=dt) is False
+
+
+def test_overseas_open_weekday():
+    """CME 평일 12시 KST → 장중"""
+    from overseas_futures.runner import OverseasFuturesRunner
+    r = OverseasFuturesRunner.__new__(OverseasFuturesRunner)
+    dt = datetime(2026, 4, 27, 12, 0, 0)
+    assert r._is_market_open(now=dt) is True
+
+
+def test_overseas_closed_saturday_morning():
+    """토요일 08시 KST (CME 마감 후) → 장 마감"""
+    from overseas_futures.runner import OverseasFuturesRunner
+    r = OverseasFuturesRunner.__new__(OverseasFuturesRunner)
+    dt = datetime(2026, 4, 25, 8, 0, 0)  # 토요일 08시 (hm=800 >= 600)
+    assert r._is_market_open(now=dt) is False
