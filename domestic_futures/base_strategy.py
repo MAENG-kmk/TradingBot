@@ -43,8 +43,6 @@ class BaseDomesticFuturesStrategy:
     TIME_EXIT_ROR_1      = 1.0
     TIME_EXIT_SECONDS_2  = 172800
     TIME_EXIT_ROR_2      = 2.0
-    VOLATILITY_SPIKE     = 3.0
-
     VB_K             = 0.3
     VB_MIN_RANGE_PCT = 0.3
     MR_SLOPE_THRESHOLD = 0.05
@@ -327,6 +325,7 @@ class BaseDomesticFuturesStrategy:
                     candle_close_ts = (enter_time // candle_sec + 1) * candle_sec
                 self._init_state(0, mode="vb",
                                  vb_meta={"candle_close_ts": candle_close_ts})
+                print(f"  [복구] {symbol} VB 모드 재시작 복구 (청산예정: {candle_close_ts})")
             else:
                 self._init_state(0)
 
@@ -338,7 +337,10 @@ class BaseDomesticFuturesStrategy:
             now             = time.time()
             vb_timeout = now >= candle_close_ts or (entry_time and now - entry_time > 8 * 3600)
             if vb_timeout:
-                reason = f"VB다음봉청산(ROR:{ror:.1f}%)"
+                if entry_time and now - entry_time > 8 * 3600:
+                    reason = f"VB안전장치강제청산(8H초과, ROR:{ror:.1f}%)"
+                else:
+                    reason = f"VB다음봉청산(ROR:{ror:.1f}%)"
                 self._close_position(position, reason)
             else:
                 remaining_min = (candle_close_ts - now) / 60
