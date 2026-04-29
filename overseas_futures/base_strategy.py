@@ -13,6 +13,7 @@ from MongoDB_python.client import (
     addDataToMongoDB, saveEntryDetails,
     getEntryDetails, deleteEntryDetails,
 )
+from SecretVariables import KIS_ACCOUNT_NO
 
 
 # 해외선물 계약 승수 (USD 기준)
@@ -70,8 +71,8 @@ class BaseOverseasFuturesStrategy:
     _TR_BALANCE    = "CTOS5011R"       # 잔고조회
 
     def __init__(self, kis):
-        self.kis    = kis
-        self._state = None
+        self.kis     = kis
+        self._states: dict[str, dict] = {}
 
     # ================================================================
     #  KIS API — 해외선물 전용
@@ -129,7 +130,7 @@ class BaseOverseasFuturesStrategy:
             data = self.kis.get(
                 "/uapi/overseas-futureoption/v1/trading/inquire-balance",
                 self._TR_BALANCE,
-                {"CANO": "", "ACNT_PRDT_CD": "03", "OVRS_EXCG_CD": "CME"},
+                {"CANO": KIS_ACCOUNT_NO, "ACNT_PRDT_CD": "03", "OVRS_EXCG_CD": "CME"},
             )
             output    = data.get("output", {})
             total     = float(output.get("tot_asst_evlu_amt", 0))
@@ -145,7 +146,7 @@ class BaseOverseasFuturesStrategy:
             data = self.kis.get(
                 "/uapi/overseas-futureoption/v1/trading/inquire-balance",
                 self._TR_BALANCE,
-                {"CANO": "", "ACNT_PRDT_CD": "03", "OVRS_EXCG_CD": "CME"},
+                {"CANO": KIS_ACCOUNT_NO, "ACNT_PRDT_CD": "03", "OVRS_EXCG_CD": "CME"},
             )
             positions = []
             for item in data.get("output1", []):
@@ -176,7 +177,7 @@ class BaseOverseasFuturesStrategy:
         try:
             tr_id = self._TR_ORDER_BUY if side == "BUY" else self._TR_ORDER_SELL
             body  = {
-                "CANO":            "",
+                "CANO":            KIS_ACCOUNT_NO,
                 "ACNT_PRDT_CD":    "03",
                 "OVRS_EXCG_CD":    "CME",
                 "PDNO":            symbol,
@@ -286,7 +287,7 @@ class BaseOverseasFuturesStrategy:
     def manage_exit(self, position: dict):
         symbol = position["symbol"]
         ror    = position["ror"]
-        if self._state is None:
+        if symbol not in self._states:
             entry_doc      = getEntryDetails(symbol)
             recovered_mode = entry_doc.get("mode", "trend_following") if entry_doc else "trend_following"
             if recovered_mode == "vb":
@@ -294,17 +295,18 @@ class BaseOverseasFuturesStrategy:
                 if not candle_close_ts:
                     enter_time      = entry_doc.get("enter_time", time.time())
                     candle_close_ts = (enter_time // (4 * 3600) + 1) * (4 * 3600)
-                self._init_state(0, mode="vb",
+                self._init_state(symbol, 0, mode="vb",
                                  vb_meta={"candle_close_ts": candle_close_ts})
                 print(f"  [복구] {symbol} VB 모드 재시작 복구 (청산예정: {candle_close_ts})")
             else:
-                self._init_state(0)
+                self._init_state(symbol, 0)
 
-        mode = self._state.get("mode", "trend_following")
+        state = self._states[symbol]
+        mode  = state.get("mode", "trend_following")
         if mode == "vb":
             now             = time.time()
-            candle_close_ts = self._state.get("candle_close_ts", 0)
-            entry_time      = self._state.get("entry_time", 0)
+            candle_close_ts = state.get("candle_close_ts", 0)
+            entry_time      = state.get("entry_time", 0)
             if now >= candle_close_ts or (entry_time and now - entry_time > 8 * 3600):
                 if entry_time and now - entry_time > 8 * 3600:
                     reason = f"VB안전장치강제청산(8H초과, ROR:{ror:.1f}%)"
@@ -315,17 +317,18 @@ class BaseOverseasFuturesStrategy:
                 print(f"  유지: {symbol} | VB | ROR:{ror:.1f}% | 청산까지:{(candle_close_ts-now)/60:.0f}분")
             return
 
-        self._update_trailing(ror)
+        self._update_trailing(symbol, ror)
+        state = self._states[symbol]
         should_close, reason, is_hard_stop = False, "", False
-        if ror < self._state["stop_loss"]:
+        if ror < state["stop_loss"]:
             should_close = True
-            if self._state["trailing_active"]:
-                reason = f"트레일링스탑(최고:{self._state['highest_ror']:.1f}%→{ror:.1f}%)"
+            if state["trailing_active"]:
+                reason = f"트레일링스탑(최고:{state['highest_ror']:.1f}%→{ror:.1f}%)"
             else:
                 reason = f"손절({ror:.1f}%)"
                 is_hard_stop = True
         if not should_close:
-            should_close, reason = self._check_time()
+            should_close, reason = self._check_time(symbol)
         if should_close:
             if not is_hard_stop and self._should_hold(position["side"], symbol):
                 print(f"  보류: {symbol} | {reason} → 동일방향 시그널 존재")
@@ -333,7 +336,7 @@ class BaseOverseasFuturesStrategy:
                 self._close_position(position, reason)
         else:
             phase_names = {1: "초기", 2: "본전확보", 3: "트레일링", 4: "타이트"}
-            print(f"  유지: {symbol} | ROR:{ror:.1f}% | 손절:{self._state['stop_loss']:.1f}% | {phase_names.get(self._state['phase'],'?')}")
+            print(f"  유지: {symbol} | ROR:{ror:.1f}% | 손절:{state['stop_loss']:.1f}% | {phase_names.get(state['phase'],'?')}")
 
     def _close_position(self, position: dict, reason: str):
         symbol     = position["symbol"]
@@ -355,7 +358,7 @@ class BaseOverseasFuturesStrategy:
                 asyncio.run(send_message(msg))
             except Exception:
                 pass
-            self._state = None
+            self._states.pop(symbol, None)
         else:
             msg = f"❌ [해외선물] {symbol} 청산 주문 실패 — 수동 확인 필요"
             print(f"  {msg}")
@@ -364,14 +367,14 @@ class BaseOverseasFuturesStrategy:
             except Exception:
                 pass
 
-    def _init_state(self, target_ror, mode="trend_following", vb_meta=None):
+    def _init_state(self, symbol: str, target_ror, mode="trend_following", vb_meta=None):
         if mode == "vb":
             if vb_meta and vb_meta.get("candle_close_ts"):
                 candle_close_ts = vb_meta["candle_close_ts"]
             else:
                 now = time.time()
                 candle_close_ts = (now // (4 * 3600) + 1) * (4 * 3600)
-            self._state = {
+            self._states[symbol] = {
                 "target_ror": 0, "stop_loss": 0,
                 "entry_time": time.time(),
                 "candle_close_ts": candle_close_ts,
@@ -381,14 +384,14 @@ class BaseOverseasFuturesStrategy:
             return
         target = target_ror if target_ror > 5 else self.DEFAULT_TARGET_ROR
         stop   = -0.33 * target if target_ror > 5 else self.DEFAULT_STOP_LOSS
-        self._state = {
+        self._states[symbol] = {
             "target_ror": target, "stop_loss": stop,
             "entry_time": time.time(), "highest_ror": 0,
             "trailing_active": False, "phase": 1, "mode": "trend_following",
         }
 
-    def _update_trailing(self, ror: float):
-        s = self._state
+    def _update_trailing(self, symbol: str, ror: float):
+        s = self._states[symbol]
         if ror > s["highest_ror"]:
             s["highest_ror"] = ror
         highest = s["highest_ror"]
@@ -406,9 +409,9 @@ class BaseOverseasFuturesStrategy:
             s["trailing_active"] = True
             s["stop_loss"] = max(s["stop_loss"], highest * self.TIGHT_TRAILING_RATIO)
 
-    def _check_time(self):
-        elapsed = time.time() - self._state["entry_time"]
-        ror     = self._state["highest_ror"]
+    def _check_time(self, symbol: str):
+        elapsed = time.time() - self._states[symbol]["entry_time"]
+        ror     = self._states[symbol]["highest_ror"]
         if elapsed > self.TIME_EXIT_SECONDS_1 and ror < self.TIME_EXIT_ROR_1:
             return True, f"시간초과(24h, ROR<{self.TIME_EXIT_ROR_1}%)"
         if elapsed > self.TIME_EXIT_SECONDS_2 and ror < self.TIME_EXIT_ROR_2:

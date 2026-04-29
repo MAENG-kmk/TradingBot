@@ -60,10 +60,10 @@ def test_trailing_phase1_no_change():
     s.BREAKEVEN_STOP      = 0.5
     s.TRAILING_RATIO      = 0.6
     s.TIGHT_TRAILING_RATIO = 0.75
-    s._state = make_state()
-    s._update_trailing(2.0)
-    assert s._state['phase'] == 1
-    assert s._state['stop_loss'] == -2.5
+    s._states = {"TEST": make_state()}
+    s._update_trailing("TEST", 2.0)
+    assert s._states['TEST']['phase'] == 1
+    assert s._states['TEST']['stop_loss'] == -2.5
 
 
 def test_trailing_phase2_breakeven():
@@ -75,10 +75,10 @@ def test_trailing_phase2_breakeven():
     s.BREAKEVEN_STOP      = 0.5
     s.TRAILING_RATIO      = 0.6
     s.TIGHT_TRAILING_RATIO = 0.75
-    s._state = make_state()
-    s._update_trailing(4.0)
-    assert s._state['phase'] == 2
-    assert s._state['stop_loss'] >= 0.5
+    s._states = {"TEST": make_state()}
+    s._update_trailing("TEST", 4.0)
+    assert s._states['TEST']['phase'] == 2
+    assert s._states['TEST']['stop_loss'] >= 0.5
 
 
 def test_trailing_phase3_trailing():
@@ -90,11 +90,11 @@ def test_trailing_phase3_trailing():
     s.BREAKEVEN_STOP      = 0.5
     s.TRAILING_RATIO      = 0.6
     s.TIGHT_TRAILING_RATIO = 0.75
-    s._state = make_state()
-    s._update_trailing(8.0)
-    assert s._state['phase'] == 3
-    assert s._state['trailing_active'] is True
-    assert s._state['stop_loss'] >= 8.0 * 0.6
+    s._states = {"TEST": make_state()}
+    s._update_trailing("TEST", 8.0)
+    assert s._states['TEST']['phase'] == 3
+    assert s._states['TEST']['trailing_active'] is True
+    assert s._states['TEST']['stop_loss'] >= 8.0 * 0.6
 
 
 def test_trailing_phase4_tight():
@@ -106,7 +106,7 @@ def test_trailing_phase4_tight():
     s.BREAKEVEN_STOP      = 0.5
     s.TRAILING_RATIO      = 0.6
     s.TIGHT_TRAILING_RATIO = 0.75
-    s._state = make_state(target=10.0)
-    s._update_trailing(12.0)
-    assert s._state['phase'] == 4
-    assert s._state['stop_loss'] >= 12.0 * 0.75
+    s._states = {"TEST": make_state(target=10.0)}
+    s._update_trailing("TEST", 12.0)
+    assert s._states['TEST']['phase'] == 4
+    assert s._states['TEST']['stop_loss'] >= 12.0 * 0.75

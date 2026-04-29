@@ -8,11 +8,10 @@
   python main.py
 """
 from binance.client import Client
-from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET, COLLECTION
+from SecretVariables import BINANCE_API_KEY, BINANCE_API_SECRET, COLLECTION, KIS_APP_KEY, KIS_APP_SECRET
 from kis.client import KISClient
 from domestic_futures.runner import DomesticFuturesRunner
 from overseas_futures.runner import OverseasFuturesRunner
-from SecretVariables import KIS_APP_KEY, KIS_APP_SECRET
 
 client = Client(api_key=BINANCE_API_KEY,
                 api_secret=BINANCE_API_SECRET)

@@ -79,8 +79,8 @@ class OverseasFuturesRunner:
 
         if success:
             vb_meta = meta if mode == "vb" else None
-            self.strategy._init_state(target_ror, mode=mode, vb_meta=vb_meta)
-            candle_close_ts = self.strategy._state.get("candle_close_ts") if mode == "vb" else None
+            self.strategy._init_state(symbol, target_ror, mode=mode, vb_meta=vb_meta)
+            candle_close_ts = self.strategy._states[symbol].get("candle_close_ts") if mode == "vb" else None
             saveEntryDetails(symbol, mode, sig, price, candle_close_ts)
             tag = "📈VB" if mode == "vb" else "✅TR"
             msg = f"{tag} [해외선물] {symbol} {sig.upper()} 진입 | qty:{qty} | target:{target_ror:.1f}%"
