@@ -1,5 +1,6 @@
 # kis/client.py
 import requests
+import threading
 from datetime import datetime, timedelta
 
 
@@ -11,6 +12,7 @@ class KISClient:
         self._app_secret = app_secret
         self._token      = None
         self._token_exp  = None
+        self._lock       = threading.Lock()
 
     # ── 토큰 관리 ────────────────────────────────────────────────
 
@@ -29,10 +31,11 @@ class KISClient:
         self._token_exp = datetime.now() + timedelta(seconds=expires_in)
 
     def _ensure_token(self):
-        if (self._token is None or
-                self._token_exp is None or
-                datetime.now() >= self._token_exp - timedelta(minutes=5)):
-            self._issue_token()
+        with self._lock:
+            if (self._token is None or
+                    self._token_exp is None or
+                    datetime.now() >= self._token_exp - timedelta(minutes=5)):
+                self._issue_token()
 
     # ── REST 래퍼 ────────────────────────────────────────────────
 

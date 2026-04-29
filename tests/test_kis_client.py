@@ -3,8 +3,6 @@ import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-import sys, os
-sys.path.insert(0, os.path.abspath("."))
 from kis.client import KISClient
 
 
@@ -72,3 +70,23 @@ def test_token_not_refreshed_when_valid():
 
         client.get("/path", "TR", {})
         mock_issue.assert_not_called()
+
+
+def test_token_refresh_within_5min_window():
+    """만료 5분 이내인 토큰은 선제적으로 갱신되어야 한다"""
+    client = KISClient(FAKE_KEY, FAKE_SECRET)
+    client._token     = "soon_expired_token"
+    client._token_exp = datetime.now() + timedelta(minutes=3)  # within 5-min window
+
+    with patch.object(client, "_issue_token") as mock_issue, \
+         patch("kis.client.requests.get") as mock_get:
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {}
+        mock_resp.raise_for_status = MagicMock()
+        mock_get.return_value = mock_resp
+        mock_issue.side_effect = lambda: (
+            setattr(client, '_token', 'refreshed_token') or
+            setattr(client, '_token_exp', datetime.now() + timedelta(hours=24))
+        )
+        client.get("/path", "TR", {})
+        mock_issue.assert_called_once()
