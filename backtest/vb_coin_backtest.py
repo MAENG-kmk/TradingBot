@@ -140,9 +140,12 @@ def run_backtest(coin: str, quiet: bool = False) -> dict | None:
     long_cnt  = (df_t["side"] == "long").sum()
     short_cnt = (df_t["side"] == "short").sum()
 
-    returns = pd.Series(eq).pct_change().dropna()
-    sharpe  = (returns.mean() / returns.std() * np.sqrt(2190)
-               if returns.std() > 0 else 0.0)
+    # Sharpe: 일별 수익률 기준 (4H봉 기준 시 거래 없는 봉이 0%로 잡혀 std 과소평가됨)
+    eq_series = pd.Series(eq, index=df.index[1:1 + len(eq)])
+    daily_eq  = eq_series.resample("1D").last().dropna()
+    daily_ret = daily_eq.pct_change().dropna()
+    sharpe    = (daily_ret.mean() / daily_ret.std() * np.sqrt(365)
+                 if daily_ret.std() > 0 else 0.0)
 
     running_max = np.maximum.accumulate(eq)
     dd  = (eq - running_max) / running_max * 100
