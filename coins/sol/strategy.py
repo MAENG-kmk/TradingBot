@@ -1,36 +1,13 @@
-from coins.base_strategy import BaseCoinStrategy
+from coins.vb_close_strategy import BaseVBCloseStrategy
 
 
-class SOLStrategy(BaseCoinStrategy):
-    """SOL 전용 전략 — TR+VB 3단계 Grid Search 최적화 (2026-04-26)
-
-    백테스트 성과 (4H 기준):
-      ROR +184%  Sharpe 1.18  MDD -16.1%
+class SOLStrategy(BaseVBCloseStrategy):
     """
-    SYMBOL = "SOLUSDT"
-    LEVERAGE = 1
+    SOL 전용 전략 — 래리 윌리엄즈 변동성 돌파 (4H 캔들 종가 청산)
+
+    백테스트 성과 (2020~2026, 포지션 10%):
+      ROR +6465%  Sharpe 11.42  MDD -2.3%  승률 58.4%  P/L 2.00
+    """
+    SYMBOL             = "SOLUSDT"
+    LEVERAGE           = 1
     QUANTITY_PRECISION = 1  # SOL: 0.1 단위
-
-    # TR 진입 파라미터
-    TR_BB_PERIOD = 25
-    TR_BB_STD = 2.5
-    RSI_OVERBUY = 80
-    RSI_OVERSELL = 30
-    ADX_THRESHOLD = 15
-    ATR_MULTIPLIER = 1.5
-
-    # 청산 파라미터
-    DEFAULT_TARGET_ROR = 15.0
-    TRAILING_RATIO = 0.5
-    TIGHT_TRAILING_RATIO = 0.75
-
-    # VB 진입 파라미터
-    VB_K = 0.2
-    VB_MIN_RANGE_PCT = 0.1
-
-    # OU 평균회귀
-    MR_ENABLED = True
-    MR_OU_ENTRY_Z = 2.0
-    MR_OU_EXIT_Z = 0.5
-    MR_MAX_HALFLIFE = 12
-    MR_TIME_HALFLIFE_MULT = 2.5

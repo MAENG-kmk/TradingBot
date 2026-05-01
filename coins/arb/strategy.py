@@ -1,25 +1,13 @@
-from coins.base_strategy import BaseCoinStrategy
+from coins.vb_close_strategy import BaseVBCloseStrategy
 
 
-class ARBStrategy(BaseCoinStrategy):
-    """ARB 전용 전략 — XGB+VB Grid Search 최적화 (2026-04-17)"""
-    SYMBOL = "ARBUSDT"
-    LEVERAGE = 1
+class ARBStrategy(BaseVBCloseStrategy):
+    """
+    ARB 전용 전략 — 래리 윌리엄즈 변동성 돌파 (4H 캔들 종가 청산)
+
+    백테스트 성과 (2023~2026, 포지션 10%):
+      ROR +675%  Sharpe 11.17  MDD -1.1%  승률 57.4%  P/L 2.11
+    """
+    SYMBOL             = "ARBUSDT"
+    LEVERAGE           = 1
     QUANTITY_PRECISION = 0  # ARB: 정수 단위
-
-    # 진입 파라미터
-    TR_BB_PERIOD = 20
-    TR_BB_STD = 1.5
-    RSI_OVERBUY = 80
-    RSI_OVERSELL = 20
-    ADX_THRESHOLD = 10
-    ATR_MULTIPLIER = 1.5
-
-    # 청산 파라미터
-    DEFAULT_TARGET_ROR = 7.0
-    TRAILING_RATIO = 0.6
-    TIGHT_TRAILING_RATIO = 0.65
-
-    # VB 파라미터
-    VB_K = 0.2
-    VB_MIN_RANGE_PCT = 0.2
