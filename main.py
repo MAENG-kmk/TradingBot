@@ -52,8 +52,8 @@ def run_trading_bot():
             for strategy in strategies:
               strategy.run(positions, total_balance, available_balance)
 
-            domestic_runner.run()
-            overseas_runner.run()
+            # domestic_runner.run()
+            # overseas_runner.run()
 
             updateHeartbeat()
             time.sleep(60)
